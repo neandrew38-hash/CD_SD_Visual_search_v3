@@ -52,26 +52,6 @@
 <h2>Site</h2>
 <div class="row" id="sites"></div>
 
-<h2>Vehicle Status</h2>
-<div class="row" id="status"></div>
-
-<h2>Trailer Type</h2>
-<div class="row" id="trailer"></div>
-
-<h2>Min # of Vehicles</h2>
-<div class="row" id="minv"></div>
-<h2>Max # of Vehicles</h2>
-<div class="row" id="maxv"></div>
-
-<h2>Min Total Pay</h2>
-<input class="field" id="pay" type="number" inputmode="numeric" placeholder="0" value="0">
-
-<h2>Ready to Ship Within # days</h2>
-<div class="row" id="ready"></div>
-
-<h2>Vehicle Type <span class="clear" id="vtClear">Clear</span></h2>
-<div class="row" id="vtypes"></div>
-
 <h2>Origin</h2>
 <div class="searchwrap">
   <div class="addrow"><input class="field" id="fromCity" placeholder="Start typing a city..." autocomplete="off"><input class="field" id="fromR" type="number" value="50" style="max-width:64px" title="miles"></div>
@@ -89,6 +69,26 @@
 <div id="toList"></div>
 <div class="states-label">Or pick a whole state:</div>
 <div class="states" id="toStates"></div>
+
+<h2>Min Total Pay</h2>
+<input class="field" id="pay" type="number" inputmode="numeric" placeholder="0" value="0">
+
+<h2>Vehicle Status</h2>
+<div class="row" id="status"></div>
+
+<h2>Trailer Type</h2>
+<div class="row" id="trailer"></div>
+
+<h2>Min # of Vehicles</h2>
+<div class="row" id="minv"></div>
+<h2>Max # of Vehicles</h2>
+<div class="row" id="maxv"></div>
+
+<h2>Ready to Ship Within # days</h2>
+<div class="row" id="ready"></div>
+
+<h2>Vehicle Type <span class="clear" id="vtClear">Clear</span></h2>
+<div class="row" id="vtypes"></div>
 
 <div class="save">
   <button onclick="save()">💾 Save</button>
@@ -185,60 +185,96 @@ function addCity(k, place){
   renderList(k);
 }
 
-// ---------- city + zip autocomplete ----------
-// Uses OpenStreetMap's free Nominatim geocoder (no key needed) so results and ZIPs stay accurate
-// and current, instead of shipping a huge static city/zip list in this file.
-// NOTE: if this page is opened from claude.ai (as an "artifact"), Anthropic's hosting only allows
-// network calls to a short list of script/font CDNs, so this live lookup is blocked there and the
-// page falls back to plain typed "City, ST" entry automatically. To get live suggestions with ZIP,
-// host this .html file yourself (GitHub Pages, Netlify, or just open the file locally) - then it
-// works exactly like the reference screenshots.
-let debTimer=null, abortCtrl=null;
+// ---------- city + state autocomplete ----------
+// Loads a bundled US cities+states dataset once (from a CDN mirror of a public GitHub list, ~6,000
+// cities) and searches it locally in the browser. This replaces the earlier live Nominatim geocoder,
+// which was unreliable inside Telegram's in-app browser (blocked/rate-limited requests caused
+// "Nothing found" even for well-formed queries like "Los Angeles, CA"). Local search has no such
+// problem: it works instantly, offline after the first load, and the same everywhere.
+const CITY_DB_URL = "https://cdn.jsdelivr.net/gh/ibm-developer-skills-network/graphy_server/UScities.json";
+const CITY_CACHE_KEY = "cd_city_db_v1";
+let CITY_DB = null;       // [{c:"Los Angeles", stc:"CA"}, ...] once loaded
+let cityDbPromise = null;
+
+function loadCityDb(){
+  if (cityDbPromise) return cityDbPromise;
+  cityDbPromise = (async () => {
+    // 1) try a cached copy from a previous visit - instant, no network needed
+    try {
+      const cached = localStorage.getItem(CITY_CACHE_KEY);
+      if (cached) { CITY_DB = JSON.parse(cached); return CITY_DB; }
+    } catch(e){}
+    // 2) otherwise fetch it once and cache it
+    try {
+      const res = await fetch(CITY_DB_URL);
+      if (!res.ok) throw new Error("http " + res.status);
+      const raw = await res.json();
+      const seen = new Set(); const out = [];
+      for (const r of raw) {
+        const stAbbr = STATE_NAME_TO_ABBR[String(r.state||"").toLowerCase()];
+        if (!r.city || !stAbbr) continue;
+        const key = r.city + "|" + stAbbr;
+        if (seen.has(key)) continue; seen.add(key);
+        out.push({ c: r.city, stc: stAbbr });
+      }
+      CITY_DB = out;
+      try { localStorage.setItem(CITY_CACHE_KEY, JSON.stringify(out)); } catch(e){}
+      return CITY_DB;
+    } catch(e){
+      CITY_DB = [];   // network unavailable - searches below just return nothing, manual entry still works
+      return CITY_DB;
+    }
+  })();
+  return cityDbPromise;
+}
+loadCityDb();   // start loading right away so it is usually ready by the time the user starts typing
+
+let debTimer=null;
 function onCityInput(k){
   const el = document.getElementById(k+"City");
   clearTimeout(debTimer);
   const q = el.value.trim();
   if(q.length<2){ hideSuggest(k); return; }
-  debTimer = setTimeout(()=>runSearch(k,q), 350);
+  debTimer = setTimeout(()=>runSearch(k,q), 150);
 }
 
 async function runSearch(k,q){
   const box = document.getElementById(k+"Suggest");
   box.style.display="block"; box.innerHTML = `<div class="hint">Searching...</div>`;
-  if(abortCtrl) abortCtrl.abort();
-  abortCtrl = new AbortController();
-  try{
-    const url = "https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&countrycodes=us&limit=8&q="+encodeURIComponent(q);
-    const res = await fetch(url, {signal:abortCtrl.signal, headers:{"Accept":"application/json"}});
-    if(!res.ok) throw new Error("http "+res.status);
-    const data = await res.json();
-    const seen = new Set(); const opts=[];
-    for(const d of data){
-      const a = d.address||{};
-      const city = a.city||a.town||a.village||a.hamlet||a.municipality;
-      const stAbbr = STATE_NAME_TO_ABBR[String(a.state||"").toLowerCase()];
-      if(!city || !stAbbr) continue;
-      const zip = a.postcode ? String(a.postcode).slice(0,5) : "";
-      const key = city+"|"+stAbbr+"|"+zip;
-      if(seen.has(key)) continue; seen.add(key);
-      opts.push({c:city, stc:stAbbr, zip});
-    }
-    if(!opts.length){ box.innerHTML = `<div class="hint">Nothing found. Try typing "City, ST" manually and press Enter.</div>`; return; }
-    box.innerHTML="";
-    opts.forEach(o=>{
-      const row=document.createElement("div"); row.className="opt";
-      row.innerHTML = `<span class="c">${o.c}, ${o.stc}</span>${o.zip?`<span class="z">${o.zip}</span>`:""}`;
-      row.onclick=()=>{
-        const rEl = document.getElementById(k+"R");
-        addCity(k, {c:o.c, stc:o.stc, zip:o.zip, r:Number(rEl.value)||50});
-      };
-      box.appendChild(row);
-    });
-  }catch(e){
-    if(e.name==="AbortError") return;
-    // blocked (CSP on claude.ai) or offline - fall back silently to manual entry
-    box.innerHTML = `<div class="hint">City suggestions aren't available right now. Type "City, ST" and press Enter.</div>`;
+  const db = await loadCityDb();
+  if (!db.length) {
+    box.innerHTML = `<div class="hint">City list is unavailable right now (no connection). Type "City, ST" and press Enter.</div>`;
+    return;
   }
+  // Accept "city", "city, st" or "city, state name" - split on the last comma if present.
+  const m = q.match(/^(.+?),\s*([A-Za-z .]+)$/);
+  const namePart = (m ? m[1] : q).trim().toLowerCase();
+  const statePart = m ? m[2].trim().toLowerCase() : "";
+  const stFilter = statePart
+    ? (statePart.length === 2 ? statePart.toUpperCase() : STATE_NAME_TO_ABBR[statePart])
+    : null;
+  if (statePart && !stFilter) { box.innerHTML = `<div class="hint">Unknown state "${statePart}". Try "City, ST".</div>`; return; }
+
+  const starts = [], contains = [];
+  for (const p of db) {
+    if (stFilter && p.stc !== stFilter) continue;
+    const nameLc = p.c.toLowerCase();
+    if (nameLc.startsWith(namePart)) starts.push(p);
+    else if (nameLc.includes(namePart)) contains.push(p);
+    if (starts.length >= 30) break;
+  }
+  const opts = starts.concat(contains).slice(0, 8);
+  if(!opts.length){ box.innerHTML = `<div class="hint">Nothing found. Try typing "City, ST" manually and press Enter.</div>`; return; }
+  box.innerHTML="";
+  opts.forEach(o=>{
+    const row=document.createElement("div"); row.className="opt";
+    row.innerHTML = `<span class="c">${o.c}, ${o.stc}</span>`;
+    row.onclick=()=>{
+      const rEl = document.getElementById(k+"R");
+      addCity(k, {c:o.c, stc:o.stc, zip:"", r:Number(rEl.value)||50});
+    };
+    box.appendChild(row);
+  });
 }
 
 function hideSuggest(k){ document.getElementById(k+"Suggest").style.display="none"; }
@@ -280,7 +316,8 @@ try{ if(tg){ tg.ready(); tg.expand(); } }catch(e){}
 (function(){
   const sub = document.getElementById("subText");
   if(tg && tg.initData) sub.textContent = "Set your filters and tap \"Save\" — the search starts right away, no copying needed.";
-  else sub.textContent = "Set your filters and tap \"Save\". This page was not opened as a Telegram Mini App, so the message will just be copied — paste it into the chat with the bot.";
+  else if(tg) sub.textContent = "⚠️ Opened inside Telegram, but without Mini App data (initData is empty). Close this and open it again via the \"🖥 Search builder\" button below the message field - not via any other link or button.";
+  else sub.textContent = "⚠️ Telegram's Mini App script did not load (no internet, or opened outside Telegram). Set your filters and tap \"Save\" - the message will be copied instead; paste it into the chat with the bot.";
 })();
 
 function buildPayload(){
@@ -309,10 +346,12 @@ async function save(){
       toast("Sent! Search is starting...");
       setTimeout(()=>{ try{ tg.close(); }catch(e){} }, 400);
       return;
-    }catch(e){ /* fall through to clipboard below */ }
+    }catch(e){
+      toast("Auto-send failed (" + (e && e.message ? e.message : "unknown error") + "). Copying instead.");
+    }
   }
   // Reached only when the page was opened NOT as a real Telegram Mini App (e.g. a plain browser tab,
-  // or Telegram's in-app link preview instead of a proper web_app button) - sendData is unavailable there.
+  // or Telegram's in-app link preview instead of a proper web_app button), or sendData itself failed.
   const msg = "CDBOT1:"+payload;
   try{ await navigator.clipboard.writeText(msg); toast("Copied! Paste this message into the chat with the bot."); }
   catch(e){ prompt("Copy and paste into the chat with the bot:", msg); }
