@@ -87,7 +87,7 @@
 <h2>Ready to Ship Within # days</h2>
 <div class="row" id="ready"></div>
 
-<h2>Vehicle Type <span class="clear" id="vtClear">Clear</span></h2>
+<h2>Vehicle Type <span class="clear" id="vtClear">Clear all filters</span></h2>
 <div class="row" id="vtypes"></div>
 
 <div class="save">
@@ -131,7 +131,16 @@ function render(){
   group("vtypes", VEH_TYPES.map(v=>[v,v]), ()=>state.vt, v=>{
     const i=state.vt.indexOf(v); if(i>=0) state.vt.splice(i,1); else state.vt.push(v);
   });
-  document.getElementById("vtClear").onclick=()=>{ state.vt=[]; render(); };
+  document.getElementById("vtClear").onclick=()=>{
+    state.status="any"; state.trailer="any"; state.minVeh=1; state.maxVeh=0; state.ready=0;
+    state.vt=[]; state.from=[]; state.to=[];
+    document.getElementById("pay").value="0";
+    document.getElementById("fromCity").value=""; document.getElementById("toCity").value="";
+    document.getElementById("fromR").value="50"; document.getElementById("toR").value="50";
+    hideSuggest("from"); hideSuggest("to");
+    render();
+    toast("All filters cleared");
+  };
 
   ["from","to"].forEach(k=>{
     // state grid: painted once here and afterwards only re-highlighted in place (paintGrid), never
