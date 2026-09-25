@@ -388,6 +388,16 @@ try{ if(tg){ tg.ready(); tg.expand(); } }catch(e){}
   if(tg && tg.initData) sub.textContent = "Set your filters and tap \"Save\" — the search starts right away, no copying needed.";
   else if(tg) sub.textContent = "⚠️ Opened inside Telegram, but without Mini App data (initData is empty). Close this and open it again via the \"🖥 Search builder\" button below the message field - not via any other link or button.";
   else sub.textContent = "⚠️ Telegram's Mini App script did not load (no internet, or opened outside Telegram). Set your filters and tap \"Save\" - the message will be copied instead; paste it into the chat with the bot.";
+
+  // TEMPORARY diagnostic - shows exactly what Telegram put on the URL when it opened this page, so we
+  // can tell whether Telegram sent nothing at all vs. sent something the SDK failed to parse. Safe to
+  // show: it is only visible to you, in your own Mini App, never sent anywhere.
+  const h = location.hash || "";
+  const dbg = document.createElement("div");
+  dbg.style.cssText = "font-size:10px;color:#999;text-align:center;margin-top:4px;word-break:break-all;padding:0 8px";
+  dbg.textContent = "hash(" + h.length + "): " + (h ? h.slice(0, 60) : "EMPTY") +
+    " · platform: " + (tg && tg.platform || "?") + " · version: " + (tg && tg.version || "?");
+  sub.after(dbg);
 })();
 
 function buildPayload(){
