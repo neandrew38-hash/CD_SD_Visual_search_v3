@@ -101,6 +101,24 @@
   .userSearches .srow{background:#fff;margin-top:6px}
   .userSearches .srow:first-child{margin-top:0}
   .noSearches{font-size:12px;color:#999;padding:4px 2px}
+  .fieldGrid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .fieldGrid2 h2{margin:18px 0 6px}
+  select.field{-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M0 0l5 6 5-6z' fill='%23888'/></svg>");background-repeat:no-repeat;background-position:right 12px center;padding-right:28px}
+  .eyeBtn{flex:0 0 auto;font-size:16px;background:none;border:0;color:#999;cursor:pointer;padding:4px}
+  .modalOverlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+  .modalBox{background:var(--card);border-radius:12px;max-width:400px;width:100%;max-height:80vh;overflow-y:auto;padding:14px}
+  .modalHead{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+  .modalHead .t{font-weight:700;font-size:14px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .modalClose{flex:0 0 auto;font-size:20px;background:none;border:0;color:#999;cursor:pointer;line-height:1;padding:0 0 0 8px}
+  .filterGrid{display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px}
+  .filterGrid .fk{color:#888}
+  .filterGrid .fv{font-weight:600;text-align:right;overflow:hidden;text-overflow:ellipsis}
+  .filterGrid .full{grid-column:1 / -1}
+  .placesBox{font-size:12px;background:#fafafa;border-radius:8px;padding:8px;margin-top:4px;max-height:90px;overflow-y:auto}
+  .modalNav{display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding-top:10px;border-top:1px solid #eee}
+  .modalNav button{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer}
+  .modalNav button:disabled{opacity:.35;cursor:default}
+  .modalNav .pos{font-size:11px;color:#888}
 </style>
 </head>
 <body>
@@ -160,16 +178,15 @@
 <h2>Min Total Pay</h2>
 <input class="field" id="pay" type="number" inputmode="numeric" placeholder="0" value="0">
 
-<h2>Vehicle Status</h2>
-<div class="row" id="status"></div>
+<div class="fieldGrid2">
+  <div><h2>Vehicle Status</h2><div class="row" id="status"></div></div>
+  <div><h2>Trailer Type</h2><div class="row" id="trailer"></div></div>
+</div>
 
-<h2>Trailer Type</h2>
-<div class="row" id="trailer"></div>
-
-<h2>Min # of Vehicles</h2>
-<div class="row" id="minv"></div>
-<h2>Max # of Vehicles</h2>
-<div class="row" id="maxv"></div>
+<div class="fieldGrid2">
+  <div><h2>Min # of Vehicles</h2><select class="field" id="minVehSel"></select></div>
+  <div><h2>Max # of Vehicles</h2><select class="field" id="maxVehSel"></select></div>
+</div>
 
 <div class="inlineSliderRow">
   <span class="inlineLbl">Ready to ship</span>
@@ -279,6 +296,24 @@ function renderReadySlider(){
   };
 }
 
+// Min/Max # of Vehicles: native <select> dropdowns - on mobile these open as the built-in scrolling
+// wheel/carousel picker (exactly the "тицяєш і відкривається скролінг" behavior asked for), instead of a
+// wide row of pill buttons.
+function renderVehicleSelects(){
+  const minSel = document.getElementById("minVehSel");
+  const maxSel = document.getElementById("maxVehSel");
+  minSel.innerHTML = [1,2,3,4,5,6,7,8,9].map(n=>`<option value="${n}">${n}</option>`).join("");
+  maxSel.innerHTML = [["0","Any"],[1,1],[2,2],[3,3],[4,4],[5,5],[6,6],[7,7],[8,8],[9,9]]
+    .map(([v,l])=>`<option value="${v}">${l}</option>`).join("");
+  minSel.value = String(state.minVeh || 1);
+  maxSel.value = String(state.maxVeh || 0);
+  minSel.onchange = ()=>{
+    state.minVeh = Number(minSel.value) || 1;
+    if(state.maxVeh && state.maxVeh < state.minVeh){ state.maxVeh = state.minVeh; maxSel.value = String(state.maxVeh); }
+  };
+  maxSel.onchange = ()=>{ state.maxVeh = Number(maxSel.value) || 0; };
+}
+
 function render(){
   group("sites", [["Central Dispatch","cd"],["Super Dispatch","sd"]], ()=>state.sites, v=>{
     const i=state.sites.indexOf(v);
@@ -287,8 +322,7 @@ function render(){
   });
   group("status", [["Any","any"],["Operable","op"],["Inoperable","inop"]], ()=>state.status, v=>state.status=v);
   group("trailer", [["Any","any"],["Open","open"],["Enclosed","enc"]], ()=>state.trailer, v=>state.trailer=v);
-  group("minv", [1,2,3,4,5,6,7,8].map(n=>[String(n),n]), ()=>state.minVeh, v=>{ state.minVeh=v; if(state.maxVeh && state.maxVeh<v) state.maxVeh=v; render(); });
-  group("maxv", [["Any",0],1,2,3,4,5,6,7,8].map(x=>Array.isArray(x)?x:[String(x),x]), ()=>state.maxVeh, v=>state.maxVeh=v);
+  renderVehicleSelects();
   renderReadySlider();
   group("vtypes", VEH_TYPES.map(v=>[v,v]), ()=>state.vt, v=>{
     const i=state.vt.indexOf(v); if(i>=0) state.vt.splice(i,1); else state.vt.push(v);
@@ -753,13 +787,19 @@ function renderMySearches(list){
 
 // One search row, reused inside each user's nested list below - same look/behavior as "My Searches",
 // admin is simply allowed to toggle/delete ANY search here (the Worker's role check already permits this).
-function adminSearchRow(s){
+// `siblings` is the user's full search list (sorted the same way it's rendered) so the 👁 filter viewer
+// can page Prev/Next through that person's other searches without closing and reopening.
+function adminSearchRow(s, siblings){
   const row = document.createElement("div"); row.className = "srow";
   const info = document.createElement("div"); info.className = "info";
   info.innerHTML = `<div class="nm">${tabIcon(s)} ${escapeHtml(s.name||s.id)}</div>` +
     `<div class="meta">${(s.sites||[]).map(x=>x.toUpperCase()).join(" + ")}` +
     (s.cards ? ` · ${s.cards} loads` : "") + (!s.active ? " · stopped" : "") + `</div>`;
   row.appendChild(info);
+
+  const eye = document.createElement("button"); eye.className = "eyeBtn"; eye.title = "View filters"; eye.textContent = "👁";
+  eye.onclick = (e)=>{ e.stopPropagation(); openFilterModal(siblings || [s], (siblings||[s]).indexOf(s)); };
+  row.appendChild(eye);
 
   const sw = document.createElement("label"); sw.className = "swtch";
   const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = !!s.active;
@@ -783,6 +823,72 @@ function adminSearchRow(s){
   };
   row.appendChild(del);
   return row;
+}
+
+// ---- Admin: compact, pageable filter viewer for a saved search ----
+// Decodes the same base64url payload the builder itself produces (see buildPayload/b64urlDecode) and
+// shows it read-only, with Prev/Next to flip through the rest of that user's searches without closing
+// the modal - this is the "листалося" (pageable) behavior asked for.
+const ADMIN_STATUS_LABELS = { any: "Any", op: "Operable", inop: "Inoperable" };
+const ADMIN_TRAILER_LABELS = { any: "Any", open: "Open", enc: "Enclosed" };
+function formatPlaces(list){
+  if(!Array.isArray(list) || !list.length) return "<span class=\"muted\" style=\"padding:0\">None set</span>";
+  return list.map(p=>{
+    if(p.st) return `Whole state: <b>${escapeHtml(p.st)}</b>`;
+    return `📍 ${escapeHtml(p.c||"?")}, ${escapeHtml(p.stc||"")}${p.zip?" "+escapeHtml(p.zip):""} · ±${p.r||50}mi`;
+  }).join("<br>");
+}
+function closeFilterModal(){
+  const el = document.getElementById("filterModalOverlay");
+  if(el) el.remove();
+}
+function openFilterModal(list, idx){
+  closeFilterModal();
+  if(!list || !list.length) return;
+  if(idx < 0) idx = 0;
+  const s = list[idx];
+  let payload = {};
+  try{ payload = b64urlDecode(s.payload); }catch(e){}
+
+  const overlay = document.createElement("div");
+  overlay.className = "modalOverlay"; overlay.id = "filterModalOverlay";
+  overlay.addEventListener("click", (e)=>{ if(e.target === overlay) closeFilterModal(); });
+
+  const box = document.createElement("div"); box.className = "modalBox";
+  const head = document.createElement("div"); head.className = "modalHead";
+  head.innerHTML = `<div class="t">👁 ${escapeHtml(s.name || s.id)}</div>`;
+  const closeBtn = document.createElement("button"); closeBtn.className = "modalClose"; closeBtn.textContent = "✕";
+  closeBtn.onclick = closeFilterModal;
+  head.appendChild(closeBtn);
+  box.appendChild(head);
+
+  const sitesTxt = (Array.isArray(payload.s) && payload.s.length ? payload.s : ["cd"]).map(x=>x.toUpperCase()).join(" + ");
+  const vtTxt = (Array.isArray(payload.vt) && payload.vt.length) ? payload.vt.join(", ") : "Any";
+  const grid = document.createElement("div"); grid.className = "filterGrid";
+  grid.innerHTML =
+    `<div class="fk">Site</div><div class="fv">${escapeHtml(sitesTxt)}</div>` +
+    `<div class="fk">Vehicle Status</div><div class="fv">${ADMIN_STATUS_LABELS[payload.vs] || "Any"}</div>` +
+    `<div class="fk">Trailer Type</div><div class="fv">${ADMIN_TRAILER_LABELS[payload.tr] || "Any"}</div>` +
+    `<div class="fk">Min Vehicles</div><div class="fv">${Number(payload.mn)||1}</div>` +
+    `<div class="fk">Max Vehicles</div><div class="fv">${Number(payload.mx)||0 ? Number(payload.mx) : "Any"}</div>` +
+    `<div class="fk">Ready to ship</div><div class="fv">${Number(payload.rd)||0 ? Number(payload.rd)+"d" : "All"}</div>` +
+    `<div class="fk">Min Total Pay</div><div class="fv">$${Number(payload.p)||0}</div>` +
+    `<div class="fk full" style="margin-top:4px">Vehicle Type</div><div class="fv full" style="text-align:left;font-weight:400">${escapeHtml(vtTxt)}</div>` +
+    `<div class="full" style="margin-top:6px"><div class="fk">Origin</div><div class="placesBox">${formatPlaces(payload.f)}</div></div>` +
+    `<div class="full" style="margin-top:6px"><div class="fk">Destination</div><div class="placesBox">${formatPlaces(payload.to)}</div></div>`;
+  box.appendChild(grid);
+
+  const nav = document.createElement("div"); nav.className = "modalNav";
+  const prevBtn = document.createElement("button"); prevBtn.textContent = "‹ Prev"; prevBtn.disabled = idx <= 0;
+  prevBtn.onclick = ()=> openFilterModal(list, idx - 1);
+  const pos = document.createElement("span"); pos.className = "pos"; pos.textContent = `${idx+1} / ${list.length}`;
+  const nextBtn = document.createElement("button"); nextBtn.textContent = "Next ›"; nextBtn.disabled = idx >= list.length - 1;
+  nextBtn.onclick = ()=> openFilterModal(list, idx + 1);
+  nav.appendChild(prevBtn); nav.appendChild(pos); nav.appendChild(nextBtn);
+  box.appendChild(nav);
+
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
 }
 
 // Users, each with their own searches nested underneath (tap a user to expand/collapse). Replaces the
@@ -809,7 +915,10 @@ function renderAdminUsersSearches(users, searches){
     if(toggleEl) header.appendChild(toggleEl);
     const body = document.createElement("div"); body.className = "userSearches" + (userCardOpen[id] ? " open" : "");
     if(!list.length){ body.innerHTML = '<div class="noSearches">No searches yet.</div>'; }
-    else list.slice().sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0)).forEach(s=> body.appendChild(adminSearchRow(s)));
+    else {
+      const sorted = list.slice().sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
+      sorted.forEach(s=> body.appendChild(adminSearchRow(s, sorted)));
+    }
     header.addEventListener("click", (e)=>{
       if(toggleEl && toggleEl.contains(e.target)) return;   // don't toggle open/closed when tapping the switch itself
       userCardOpen[id] = !userCardOpen[id];
@@ -918,7 +1027,7 @@ async function refreshBackendState(){
       : "No connection to the bot. Try closing and reopening the Mini App.";
   }
   if(isAdmin){
-    renderAdminUsersSearches(st.users, st.searches);
+    renderAdminUsersSearches(st.users, st.allSearches);
     if(!reloadSecDirty){
       const minS = (st.settings && st.settings.reloadMinSec) || 8;
       const maxS = (st.settings && st.settings.reloadMaxSec) || 12;
