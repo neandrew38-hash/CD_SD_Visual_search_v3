@@ -6,51 +6,60 @@
 <title>CD Search Builder</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-  :root{--blue:#005BA8;--bg:#fff;--fg:#000;--line:#ccc;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+  :root{--accent:#E8720C;--accent-dark:#C25E08;--accent-tint:#FDEEE1;--bg:#EEEEF1;--card:#fff;--fg:#1C1C1E;--line:#D8D8DD;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
   *{box-sizing:border-box}
   html,body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,Segoe UI,Roboto,sans-serif}
   body{padding:10px 12px 100px;max-width:520px;margin:0 auto}
   h1{font-size:20px;text-align:center;margin:6px 0 2px}
   .sub{font-size:12px;color:#666;text-align:center;margin-bottom:10px}
-  h2{font-size:15px;margin:18px 0 8px}
+  h2{font-size:15px;margin:18px 0 8px;color:#444}
   .row{display:flex;flex-wrap:wrap;gap:6px}
-  .pill{border:2px solid var(--line);border-radius:8px;padding:8px 10px;font-weight:600;font-size:14px;background:#fff;cursor:pointer;user-select:none;flex:1 1 auto;text-align:center;min-width:44px}
+  .pill{border:2px solid var(--line);border-radius:8px;padding:8px 10px;font-weight:600;font-size:14px;background:var(--card);cursor:pointer;user-select:none;flex:1 1 auto;text-align:center;min-width:44px}
   .pill.sm{flex:0 0 auto;min-width:38px;padding:6px 4px;font-size:13px}
-  .pill.on{background:var(--blue);color:#fff;border-color:var(--blue)}
-  .field{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font-size:15px;background:#fff;color:#000}
+  .pill.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .field{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font-size:15px;background:var(--card);color:var(--fg)}
+  .field:focus{outline:none;border-color:var(--accent)}
   textarea.field{min-height:150px;font-family:inherit;resize:vertical}
-  .place-row{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:8px;padding:8px;margin-top:6px}
+  .place-row{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:8px;padding:8px;margin-top:6px;background:var(--card)}
   .place-row .name{flex:1;font-weight:600;font-size:14px}
   .place-row .zip{font-weight:400;color:#666;font-size:12px}
   .place-row input{width:60px;padding:6px;border:1px solid var(--line);border-radius:6px;text-align:center}
-  .place-row button{background:var(--blue);color:#fff;border:0;border-radius:6px;width:28px;height:28px;font-size:16px;line-height:1;flex:0 0 auto}
+  .place-row button{background:var(--accent);color:#fff;border:0;border-radius:6px;width:28px;height:28px;font-size:16px;line-height:1;flex:0 0 auto}
   .searchwrap{position:relative}
   .addrow{display:flex;gap:6px;margin-top:6px}
   .addrow input{flex:1}
-  .suggest{position:absolute;left:0;right:0;top:100%;background:#fff;border:1px solid var(--line);
+  .suggest{position:absolute;left:0;right:0;top:100%;background:var(--card);border:1px solid var(--line);
     border-top:0;border-radius:0 0 8px 8px;max-height:240px;overflow-y:auto;z-index:5;box-shadow:0 6px 14px rgba(0,0,0,.12);display:none}
   .suggest .opt{padding:10px;border-bottom:1px solid #eee;font-size:14px;cursor:pointer}
   .suggest .opt:last-child{border-bottom:0}
   .suggest .opt .c{font-weight:600}
   .suggest .opt .z{color:#666;font-size:12px;margin-left:4px}
-  .suggest .opt:active{background:#eef4fb}
+  .suggest .opt:active{background:var(--accent-tint)}
   .suggest .hint{padding:8px 10px;font-size:12px;color:#888}
   .states-label{font-size:12px;color:#666;margin:10px 0 4px}
   .states{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
   .states .pill{padding:6px 0;font-size:11px}
   .clear-wrap{text-align:center;margin:12px 0 4px}
-  .clear{display:inline-block;font-size:13px;border:1px solid var(--line);border-radius:8px;padding:8px 16px;background:#fff;cursor:pointer}
-  .save{position:fixed;left:0;right:0;bottom:0;padding:10px calc(12px + env(safe-area-inset-bottom,0px)) calc(12px + env(safe-area-inset-bottom,0px));background:#fff;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:6px;max-width:520px;margin:0 auto}
-  .save button{width:100%;padding:14px;font-size:17px;font-weight:700;border:0;border-radius:10px;background:var(--blue);color:#fff}
+  .clear{display:inline-block;font-size:13px;border:1px solid var(--line);border-radius:8px;padding:8px 16px;background:var(--card);cursor:pointer}
+  .swapWrap{display:flex;justify-content:center;margin:10px 0}
+  .swapBtn{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--accent);font-size:18px;font-weight:700;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+  .swapBtn:active{background:var(--accent-tint)}
+  .sliderWrap{padding:6px 4px 2px}
+  .sliderLabel{text-align:center;font-weight:700;font-size:15px;margin-bottom:8px;color:var(--accent)}
+  input.rangeSlider{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:4px;background:var(--line);outline:none}
+  input.rangeSlider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:24px;height:24px;border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+  input.rangeSlider::-moz-range-thumb{width:24px;height:24px;border:0;border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+  .save{position:fixed;left:0;right:0;bottom:0;padding:10px calc(12px + env(safe-area-inset-bottom,0px)) calc(12px + env(safe-area-inset-bottom,0px));background:var(--card);border-top:1px solid var(--line);display:flex;flex-direction:column;gap:6px;max-width:520px;margin:0 auto}
+  .save button{width:100%;padding:14px;font-size:17px;font-weight:700;border:0;border-radius:10px;background:var(--accent);color:#fff}
   .save .alt{background:#eee;color:#333;font-size:13px;padding:9px;font-weight:600}
   .save button:disabled{opacity:.5}
-  .toast{position:fixed;left:12px;right:12px;top:12px;background:#005BA8;color:#fff;padding:10px 14px;border-radius:8px;font-size:14px;text-align:center;display:none;z-index:10}
-  .tabbar{position:sticky;top:0;background:#fff;display:flex;gap:0;border-bottom:1px solid var(--line);z-index:6;margin:0 -12px 8px;padding-top:2px}
+  .toast{position:fixed;left:12px;right:12px;top:12px;background:var(--accent);color:#fff;padding:10px 14px;border-radius:8px;font-size:14px;text-align:center;display:none;z-index:10}
+  .tabbar{position:sticky;top:0;background:var(--card);display:flex;gap:0;border-bottom:1px solid var(--line);z-index:6;margin:0 -12px 8px;padding-top:2px}
   .tabbtn{flex:1;text-align:center;padding:10px 4px;font-size:13px;font-weight:700;color:#888;cursor:pointer;border-bottom:3px solid transparent}
-  .tabbtn.on{color:var(--blue);border-bottom-color:var(--blue)}
+  .tabbtn.on{color:var(--accent);border-bottom-color:var(--accent)}
   .tabpane{display:none}
   .tabpane.on{display:block}
-  .srow{display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-top:8px}
+  .srow{display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-top:8px;background:var(--card)}
   .srow .info{flex:1;min-width:0}
   .srow .nm{font-weight:700;font-size:14px}
   .srow .meta{font-size:12px;color:#666;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -58,17 +67,17 @@
   .swtch input{opacity:0;width:0;height:0}
   .slider{position:absolute;inset:0;background:#ccc;border-radius:26px;cursor:pointer;transition:.2s}
   .slider:before{content:"";position:absolute;height:20px;width:20px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
-  .swtch input:checked + .slider{background:var(--blue)}
+  .swtch input:checked + .slider{background:var(--accent)}
   .swtch input:checked + .slider:before{transform:translateX(20px)}
   .trash{flex:0 0 auto;font-size:18px;background:none;border:0;color:#999;cursor:pointer;padding:4px}
   .muted{color:#888;font-size:13px;text-align:center;padding:20px 0}
   .warn{color:#a33;font-size:12px;text-align:center;padding:10px 0}
-  .card{border:1px solid var(--line);border-radius:10px;padding:14px;margin-top:8px}
+  .card{border:1px solid var(--line);border-radius:10px;padding:14px;margin-top:8px;background:var(--card)}
   .card .desc{color:#666;font-size:13px;line-height:1.4;margin-bottom:14px}
   .intervalRow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
   .intervalRow input[type=number]{width:64px;padding:8px;border:1px solid var(--line);border-radius:8px;font-size:15px;text-align:center}
   .intervalRow .lbl{font-size:13px;color:#333;font-weight:600}
-  .saveBtn{padding:9px 16px;font-weight:700;border:0;border-radius:8px;background:var(--blue);color:#fff;font-size:14px}
+  .saveBtn{padding:9px 16px;font-weight:700;border:0;border-radius:8px;background:var(--accent);color:#fff;font-size:14px}
   .saveBtn:disabled{opacity:.5}
   .saveNote{font-size:12px;margin-top:8px;min-height:14px}
   .saveNote.ok{color:#1a7a3c}
@@ -77,6 +86,18 @@
   .badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;margin-top:3px}
   .badge.active{background:#e5f6ec;color:#1a7a3c}
   .badge.blocked{background:#fbe9e9;color:#a33}
+  .toggleRow{display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid #eee;margin-top:12px;padding-top:12px}
+  .tiny{font-size:11px;color:#888;margin-top:2px}
+  .userCard{border:1px solid var(--line);border-radius:10px;margin-top:8px;overflow:hidden}
+  .userHeader{display:flex;align-items:center;gap:8px;padding:10px 12px;cursor:pointer}
+  .userHeader .chev{font-size:11px;color:#999;flex:0 0 auto;transition:transform .15s}
+  .userHeader .chev.open{transform:rotate(90deg)}
+  .userHeader .info{flex:1;min-width:0}
+  .userSearches{display:none;border-top:1px solid #eee;padding:8px 10px;background:#fafafa}
+  .userSearches.open{display:block}
+  .userSearches .srow{background:#fff;margin-top:6px}
+  .userSearches .srow:first-child{margin-top:0}
+  .noSearches{font-size:12px;color:#999;padding:4px 2px}
 </style>
 </head>
 <body>
@@ -97,7 +118,7 @@
 <div id="mySearchesView">
   <h2 style="display:flex;align-items:center;justify-content:space-between;margin-top:8px">
     My Searches
-    <span id="newSearchBtn" style="font-size:13px;color:var(--blue);cursor:pointer;font-weight:700">➕ New</span>
+    <span id="newSearchBtn" style="font-size:13px;color:var(--accent);cursor:pointer;font-weight:700">➕ New</span>
   </h2>
   <div id="mySearches"><div class="muted">Loading...</div></div>
   <div id="mySearchesNote" class="warn" style="display:none"></div>
@@ -105,7 +126,10 @@
 
 <!-- builder view: shown for "+ New" or tapping/editing an existing search -->
 <div id="builderView" style="display:none">
-<div style="margin:4px 0 2px"><span id="backToListBtn" style="font-size:13px;color:var(--blue);cursor:pointer;font-weight:700">‹ My Searches</span></div>
+<div style="margin:4px 0 2px"><span id="backToListBtn" style="font-size:13px;color:var(--accent);cursor:pointer;font-weight:700">‹ My Searches</span></div>
+
+<h2>Search name</h2>
+<input class="field" id="searchName" placeholder="e.g. Mid-FL, CA to TX..." maxlength="40">
 
 <h2>Site</h2>
 <div class="row" id="sites"></div>
@@ -118,6 +142,8 @@
 <div id="fromList"></div>
 <div class="states-label">Or pick a whole state:</div>
 <div class="states" id="fromStates"></div>
+
+<div class="swapWrap"><button id="swapBtn" class="swapBtn" title="Swap Origin and Destination">⇅</button></div>
 
 <h2>Destination</h2>
 <div class="searchwrap">
@@ -143,7 +169,10 @@
 <div class="row" id="maxv"></div>
 
 <h2>Ready to Ship Within # days</h2>
-<div class="row" id="ready"></div>
+<div class="sliderWrap">
+  <div class="sliderLabel" id="readyLabel">All</div>
+  <input type="range" id="readySlider" class="rangeSlider" min="0" max="11" step="1" value="0">
+</div>
 
 <h2>Vehicle Type</h2>
 <div class="row" id="vtypes"></div>
@@ -163,7 +192,7 @@
   <textarea class="field" id="tplText" placeholder="Loading..."></textarea>
   <div id="tplNote" class="warn" style="display:none"></div>
   <div style="display:flex;gap:8px;margin-top:10px">
-    <button id="tplSaveBtn" onclick="saveTpl()" style="flex:1;padding:12px;font-weight:700;border:0;border-radius:10px;background:var(--blue);color:#fff">💾 Save for me</button>
+    <button id="tplSaveBtn" onclick="saveTpl()" style="flex:1;padding:12px;font-weight:700;border:0;border-radius:10px;background:var(--accent);color:#fff">💾 Save for me</button>
     <button onclick="resetTpl()" style="flex:0 0 auto;padding:12px 14px;font-weight:700;border:1px solid var(--line);border-radius:10px;background:#fff">↺ Reset</button>
   </div>
   <div id="tplBackendWarn" class="warn" style="display:none">Backend not connected (WORKER_URL is empty in this file) - this tab is view-only, saving from here won't work.</div>
@@ -173,26 +202,28 @@
 <!-- ======================= TAB 3: ADMIN (rendered only if initData.user.id == ADMIN_TG_ID on the backend) ======================= -->
 <div class="tabpane" id="tab-admin">
   <h1>🛠 Admin Panel</h1>
-  <h2>⏱ Page refresh interval</h2>
+  <h2>⏱ Refresh & stealth</h2>
   <div class="card">
-    <div class="desc">How often the Windows program reloads each search's page to look for new loads. Each reload picks a random wait time in this range (not the same number every time), so it doesn't look like a metronome. Lower = faster alerts but more load on the site; higher = slower alerts but gentler.</div>
     <div class="intervalRow">
       <span class="lbl">From</span>
       <input type="number" id="reloadMinInput" min="5" max="300" step="1" />
       <span class="lbl">to</span>
       <input type="number" id="reloadMaxInput" min="5" max="300" step="1" />
-      <span class="lbl" style="font-weight:400;color:#666">seconds</span>
+      <span class="lbl" style="font-weight:400;color:#666">sec</span>
       <button id="reloadSecSaveBtn" class="saveBtn" style="margin-left:auto">💾 Save</button>
+    </div>
+    <div class="toggleRow">
+      <div>
+        <div class="lbl">🖱 Randomize page activity</div>
+        <div class="tiny">Small random mouse moves/scrolls between reloads, to look less like a script.</div>
+      </div>
+      <label class="swtch"><input type="checkbox" id="humanizeToggle"><span class="slider"></span></label>
     </div>
     <div id="reloadSecNote" class="saveNote"></div>
   </div>
 
-  <h2>🔎 Saved Searches</h2>
-  <div id="adminTabs"><div class="muted">Loading...</div></div>
-
-  <h2>👥 Users</h2>
-  <div class="desc" style="margin:0 0 4px">Anyone who has ever messaged the bot shows up here. The switch controls whether they can use the bot at all - green "Active" means they can build and run their own searches; red "Blocked" means the bot ignores them.</div>
-  <div id="adminUsers"></div>
+  <h2>👥 Team & Searches</h2>
+  <div id="adminUsersSearches"><div class="muted">Loading...</div></div>
   <div id="adminBackendWarn" class="warn" style="display:none">Backend not connected (WORKER_URL is empty in this file) - this tab cannot work without it. See the instructions at the top of worker.js.</div>
 </div>
 
@@ -223,6 +254,24 @@ function group(id, opts, single, onSet){
   });
 }
 
+// "Ready to Ship Within" used to be a wall of pill buttons (All/Today/2/3/.../14) - now a single volume-
+// style slider. READY's values aren't evenly spaced (0,1,2..7,8,9,10,14), so the slider moves over the
+// INDEX into READY (0..READY.length-1, always contiguous) and we map that index to the real day-count.
+function renderReadySlider(){
+  const slider = document.getElementById("readySlider");
+  const label = document.getElementById("readyLabel");
+  slider.max = String(READY.length - 1);
+  let idx = READY.findIndex(([,v])=>v===state.ready);
+  if(idx < 0) idx = 0;
+  slider.value = String(idx);
+  label.textContent = READY[idx][0] === "All" ? "All" : READY[idx][0] === "Today" ? "Today" : READY[idx][0] + " days";
+  slider.oninput = ()=>{
+    const i = Number(slider.value);
+    state.ready = READY[i][1];
+    label.textContent = READY[i][0] === "All" ? "All" : READY[i][0] === "Today" ? "Today" : READY[i][0] + " days";
+  };
+}
+
 function render(){
   group("sites", [["Central Dispatch","cd"],["Super Dispatch","sd"]], ()=>state.sites, v=>{
     const i=state.sites.indexOf(v);
@@ -233,7 +282,7 @@ function render(){
   group("trailer", [["Any","any"],["Open","open"],["Enclosed","enc"]], ()=>state.trailer, v=>state.trailer=v);
   group("minv", [1,2,3,4,5,6,7,8].map(n=>[String(n),n]), ()=>state.minVeh, v=>{ state.minVeh=v; if(state.maxVeh && state.maxVeh<v) state.maxVeh=v; render(); });
   group("maxv", [["Any",0],1,2,3,4,5,6,7,8].map(x=>Array.isArray(x)?x:[String(x),x]), ()=>state.maxVeh, v=>state.maxVeh=v);
-  group("ready", READY, ()=>state.ready, v=>state.ready=v);
+  renderReadySlider();
   group("vtypes", VEH_TYPES.map(v=>[v,v]), ()=>state.vt, v=>{
     const i=state.vt.indexOf(v); if(i>=0) state.vt.splice(i,1); else state.vt.push(v);
   });
@@ -441,6 +490,7 @@ function newSearch(){
   state.sites=["cd"]; state.status="any"; state.trailer="any"; state.minVeh=1; state.maxVeh=0; state.ready=0;
   state.vt=[]; state.from=[]; state.to=[];
   document.getElementById("pay").value="0";
+  document.getElementById("searchName").value="";
   render();
   editingId = null;
   showBuilder();
@@ -458,6 +508,7 @@ function editSearch(s){
     state.from = Array.isArray(payload.f) ? payload.f.slice() : [];
     state.to = Array.isArray(payload.to) ? payload.to.slice() : [];
     document.getElementById("pay").value = payload.p || 0;
+    document.getElementById("searchName").value = s.name || "";
     render();
     editingId = s.id;
     showBuilder();
@@ -465,6 +516,14 @@ function editSearch(s){
 }
 document.getElementById("newSearchBtn").addEventListener("click", newSearch);
 document.getElementById("backToListBtn").addEventListener("click", showList);
+document.getElementById("swapBtn").addEventListener("click", ()=>{
+  const tmp = state.from; state.from = state.to; state.to = tmp;
+  const rTmp = document.getElementById("fromR").value;
+  document.getElementById("fromR").value = document.getElementById("toR").value;
+  document.getElementById("toR").value = rTmp;
+  render();
+  toast("Origin ⇄ Destination swapped");
+});
 
 // Real Telegram Mini App integration: when this page is opened from the bot's own reply-keyboard
 // "🖥 Search builder" button, Telegram injects window.Telegram.WebApp and tg.initData is non-empty.
@@ -519,6 +578,8 @@ async function save(){
   if(WORKER_URL && tg && tg.initData){
     const body = { type: "save-search", payload };
     if(editingId) body.id = editingId;
+    const nm = document.getElementById("searchName").value.trim();
+    if(nm) body.name = nm;
     const r = await apiAction(body);
     if(r && r.ok){
       toast(editingId ? "Saved! Updating your search..." : "Saved! Starting your search...");
@@ -683,60 +744,125 @@ function renderMySearches(list){
   });
 }
 
-function renderAdminTabs(list){
-  const wrap = document.getElementById("adminTabs");
-  if(!list || !list.length){ wrap.innerHTML = '<div class="muted">No open search yet.</div>'; return; }
-  wrap.innerHTML = "";
-  list.forEach(t=>{
-    const row = document.createElement("div"); row.className = "srow";
-    const info = document.createElement("div"); info.className = "info";
-    info.innerHTML = `<div class="nm">${tabIcon(t)} ${escapeHtml(t.name||t.id)}</div>` +
-      `<div class="meta">${(t.site||"").toUpperCase()} · ${t.owner ? escapeHtml(t.owner.name) : "no owner"}` +
-      (t.cards ? ` · ${t.cards} loads` : "") + `</div>`;
-    row.appendChild(info);
+// One search row, reused inside each user's nested list below - same look/behavior as "My Searches",
+// admin is simply allowed to toggle/delete ANY search here (the Worker's role check already permits this).
+function adminSearchRow(s){
+  const row = document.createElement("div"); row.className = "srow";
+  const info = document.createElement("div"); info.className = "info";
+  info.innerHTML = `<div class="nm">${tabIcon(s)} ${escapeHtml(s.name||s.id)}</div>` +
+    `<div class="meta">${(s.sites||[]).map(x=>x.toUpperCase()).join(" + ")}` +
+    (s.cards ? ` · ${s.cards} loads` : "") + (!s.active ? " · stopped" : "") + `</div>`;
+  row.appendChild(info);
 
-    const sw = document.createElement("label"); sw.className = "swtch";
-    const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = !!t.running;
-    cb.disabled = !t.online;
-    cb.onchange = async ()=>{
-      cb.disabled = true;
-      await apiAction({ type: "toggle-tab", id: t.id, act: cb.checked ? "start" : "stop" });
-      cb.disabled = false;
-      toast(cb.checked ? "Start sent" : "Stop sent");
-    };
+  const sw = document.createElement("label"); sw.className = "swtch";
+  const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = !!s.active;
+  cb.onchange = async ()=>{
+    cb.disabled = true;
+    const want = cb.checked;
+    await apiAction({ type: "toggle-search", id: s.id, active: want });
+    cb.disabled = false;
+    toast(want ? "Starting..." : "Stopping...");
+  };
+  const sl = document.createElement("span"); sl.className = "slider";
+  sw.appendChild(cb); sw.appendChild(sl);
+  row.appendChild(sw);
+
+  const del = document.createElement("button"); del.className = "trash"; del.textContent = "🗑";
+  del.onclick = async ()=>{
+    if(!confirm(`Delete "${s.name||s.id}"?`)) return;
+    await apiAction({ type: "delete-search", id: s.id });
+    toast("Deleted");
+    refreshBackendState();
+  };
+  row.appendChild(del);
+  return row;
+}
+
+// Users, each with their own searches nested underneath (tap a user to expand/collapse). Replaces the
+// old separate "Saved Searches" (flat, showing "no owner" for everything) + "Users" sections.
+const userCardOpen = {};   // user id -> bool, remembered across re-renders/polls
+function renderAdminUsersSearches(users, searches){
+  const wrap = document.getElementById("adminUsersSearches");
+  const userList = Object.values(users||{}).sort((a,b)=>(b.since||0)-(a.since||0));
+  const allSearches = Object.values(searches||{});
+  wrap.innerHTML = "";
+  if(!userList.length && !allSearches.length){ wrap.innerHTML = '<div class="muted">Nobody but you has messaged the bot yet.</div>'; return; }
+
+  const byOwner = {};
+  allSearches.forEach(s=>{ (byOwner[String(s.ownerId)] = byOwner[String(s.ownerId)] || []).push(s); });
+
+  function buildCard(id, headerHtml, list, badgeHtml, toggleEl){
+    const card = document.createElement("div"); card.className = "userCard";
+    const header = document.createElement("div"); header.className = "userHeader";
+    const chev = document.createElement("span"); chev.className = "chev" + (userCardOpen[id] ? " open" : ""); chev.textContent = "▶";
+    header.appendChild(chev);
+    const info = document.createElement("div"); info.className = "info";
+    info.innerHTML = headerHtml + (badgeHtml ? `<div class="badgeWrap">${badgeHtml}</div>` : "");
+    header.appendChild(info);
+    if(toggleEl) header.appendChild(toggleEl);
+    const body = document.createElement("div"); body.className = "userSearches" + (userCardOpen[id] ? " open" : "");
+    if(!list.length){ body.innerHTML = '<div class="noSearches">No searches yet.</div>'; }
+    else list.slice().sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0)).forEach(s=> body.appendChild(adminSearchRow(s)));
+    header.addEventListener("click", (e)=>{
+      if(toggleEl && toggleEl.contains(e.target)) return;   // don't toggle open/closed when tapping the switch itself
+      userCardOpen[id] = !userCardOpen[id];
+      chev.classList.toggle("open", userCardOpen[id]);
+      body.classList.toggle("open", userCardOpen[id]);
+    });
+    card.appendChild(header); card.appendChild(body);
+    return card;
+  }
+
+  userList.forEach(u=>{
+    const badge = () => `<span class="badge ${u.active?"active":"blocked"}">${u.active?"✅ Active":"⛔ Blocked"}</span>`;
+    const list = byOwner[String(u.id)] || [];
+    const sw = document.createElement("label"); sw.className = "swtch"; sw.title = u.active ? "Tap to block" : "Tap to unblock";
+    const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = !!u.active;
     const sl = document.createElement("span"); sl.className = "slider";
     sw.appendChild(cb); sw.appendChild(sl);
-    row.appendChild(sw);
-
-    const del = document.createElement("button"); del.className = "trash"; del.textContent = "🗑";
-    del.onclick = async ()=>{
-      if(!confirm(`Delete "${t.name||t.id}"?`)) return;
-      await apiAction({ type: "delete-tab", id: t.id });
-      toast("Deleted");
-      refreshBackendState();
+    const headerHtml = `<div class="nm">${escapeHtml(u.name)}${u.username?" (@"+escapeHtml(u.username)+")":""}</div>` +
+      `<div class="meta">ID ${escapeHtml(u.id)} · ${list.length} search${list.length===1?"":"es"}</div>`;
+    const card = buildCard(u.id, headerHtml, list, badge(), sw);
+    cb.onchange = async ()=>{
+      cb.disabled = true;
+      const willBeActive = cb.checked;
+      await apiAction({ type: "toggle-user", id: u.id });
+      cb.disabled = false;
+      u.active = willBeActive;
+      card.querySelector(".badgeWrap").innerHTML = badge();
+      sw.title = u.active ? "Tap to block" : "Tap to unblock";
+      toast(willBeActive ? "✅ Unblocked - can use the bot again" : "⛔ Blocked - bot will ignore this person");
     };
-    row.appendChild(del);
-
-    wrap.appendChild(row);
+    delete byOwner[String(u.id)];
+    wrap.appendChild(card);
   });
+
+  // whatever's left in byOwner belongs to nobody currently in the Users list (e.g. an old search from
+  // before this bot-commands system existed) - still show it, grouped together, instead of hiding it.
+  const orphaned = Object.values(byOwner).flat();
+  if(orphaned.length){
+    wrap.appendChild(buildCard("_orphaned", `<div class="nm">❓ Unassigned</div><div class="meta">${orphaned.length} search${orphaned.length===1?"":"es"} with no matching user</div>`, orphaned, ""));
+  }
 }
 
 let reloadSecDirty = false;
 (function initReloadSecUi(){
   const minInput = document.getElementById("reloadMinInput");
   const maxInput = document.getElementById("reloadMaxInput");
+  const humanizeToggle = document.getElementById("humanizeToggle");
   const btn = document.getElementById("reloadSecSaveBtn");
   const note = document.getElementById("reloadSecNote");
   if(!minInput || !maxInput || !btn) return;
   minInput.addEventListener("input", ()=>{ reloadSecDirty = true; });
   maxInput.addEventListener("input", ()=>{ reloadSecDirty = true; });
+  humanizeToggle.addEventListener("change", ()=>{ reloadSecDirty = true; });
   btn.onclick = async ()=>{
     let min = Math.max(5, Math.min(300, Number(minInput.value) || 8));
     let max = Math.max(5, Math.min(300, Number(maxInput.value) || 12));
     if(max < min) [min, max] = [max, min];
     minInput.value = min; maxInput.value = max;
     btn.disabled = true;
-    const r = await apiAction({ type: "set-reload-interval", minSeconds: min, maxSeconds: max });
+    const r = await apiAction({ type: "set-reload-interval", minSeconds: min, maxSeconds: max, humanize: humanizeToggle.checked });
     btn.disabled = false;
     if(r && r.ok){
       reloadSecDirty = false;
@@ -749,39 +875,6 @@ let reloadSecDirty = false;
     }
   };
 })();
-
-function renderAdminUsers(users){
-  const wrap = document.getElementById("adminUsers");
-  const list = Object.values(users||{}).sort((a,b)=>(b.since||0)-(a.since||0));
-  if(!list.length){ wrap.innerHTML = '<div class="muted">Nobody but you has messaged the bot yet.</div>'; return; }
-  wrap.innerHTML = "";
-  list.forEach(u=>{
-    const row = document.createElement("div"); row.className = "srow";
-    const info = document.createElement("div"); info.className = "info";
-    const badge = () => `<span class="badge ${u.active?"active":"blocked"}">${u.active?"✅ Active":"⛔ Blocked"}</span>`;
-    info.innerHTML = `<div class="nm">${escapeHtml(u.name)}${u.username?" (@"+escapeHtml(u.username)+")":""}</div>` +
-      `<div class="meta">ID ${escapeHtml(u.id)}</div><div class="badgeWrap">${badge()}</div>`;
-    row.appendChild(info);
-
-    const sw = document.createElement("label"); sw.className = "swtch"; sw.title = u.active ? "Tap to block" : "Tap to unblock";
-    const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = !!u.active;
-    cb.onchange = async ()=>{
-      cb.disabled = true;
-      const willBeActive = cb.checked;
-      await apiAction({ type: "toggle-user", id: u.id });
-      cb.disabled = false;
-      u.active = willBeActive;
-      info.querySelector(".badgeWrap").innerHTML = badge();
-      sw.title = u.active ? "Tap to block" : "Tap to unblock";
-      toast(willBeActive ? "✅ Unblocked - can use the bot again" : "⛔ Blocked - bot will ignore this person");
-    };
-    const sl = document.createElement("span"); sl.className = "slider";
-    sw.appendChild(cb); sw.appendChild(sl);
-    row.appendChild(sw);
-
-    wrap.appendChild(row);
-  });
-}
 
 function escapeHtml(s){
   return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
@@ -818,13 +911,13 @@ async function refreshBackendState(){
       : "No connection to the bot. Try closing and reopening the Mini App.";
   }
   if(isAdmin){
-    renderAdminTabs(st.tabs);
-    renderAdminUsers(st.users);
+    renderAdminUsersSearches(st.users, st.searches);
     if(!reloadSecDirty){
       const minS = (st.settings && st.settings.reloadMinSec) || 8;
       const maxS = (st.settings && st.settings.reloadMaxSec) || 12;
       document.getElementById("reloadMinInput").value = minS;
       document.getElementById("reloadMaxInput").value = maxS;
+      document.getElementById("humanizeToggle").checked = (st.settings && st.settings.humanize) !== false;
     }
   }
 
