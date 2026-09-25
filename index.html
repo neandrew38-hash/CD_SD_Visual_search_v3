@@ -395,7 +395,9 @@ try{ if(tg){ tg.ready(); tg.expand(); } }catch(e){}
   const h = location.hash || "";
   const dbg = document.createElement("div");
   dbg.style.cssText = "font-size:10px;color:#999;text-align:center;margin-top:4px;word-break:break-all;padding:0 8px";
-  dbg.textContent = "hash(" + h.length + "): " + (h ? h.slice(0, 60) : "EMPTY") +
+  const hasData = /(^|[#&])tgWebAppData=/.test(h);
+  const dataLen = hasData ? decodeURIComponent(h.split('tgWebAppData=')[1].split('&')[0]).length : 0;
+  dbg.textContent = "hash len=" + h.length + " · tgWebAppData present: " + (hasData ? ("YES (" + dataLen + " chars)") : "NO") +
     " · platform: " + (tg && tg.platform || "?") + " · version: " + (tg && tg.version || "?");
   sub.after(dbg);
 })();
