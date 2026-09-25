@@ -127,17 +127,18 @@
 </div>
 </div>
 
-<!-- ======================= TAB 2: SMS ШАБЛОН ======================= -->
+<!-- ======================= TAB 2: SMS ШАБЛОН (особистий, свій у кожного) ======================= -->
 <div class="tabpane" id="tab-sms">
   <h1>✉️ SMS шаблон</h1>
-  <div class="sub">Спільний для всіх пошуків шаблон, який копіюється в буфер обміну при новому вантажі. Доступні мітки: <code>{vehicle} {origin} {dest} {price} {company} {loadId}</code></div>
+  <div class="sub">Це твій ОСОБИСТИЙ шаблон — застосовується тільки до пошуків, які запустив ти. Якщо не зберігав свій — використовується загальний за замовчуванням. Доступні мітки: <code>{vehicle} {origin} {dest} {price} {company} {loadId}</code></div>
   <textarea class="field" id="tplText" placeholder="Завантаження..."></textarea>
-  <div id="tplNote" class="warn" style="display:none">Змінити шаблон може тільки адмін. Тут показано поточний варіант (лише перегляд).</div>
+  <div id="tplNote" class="warn" style="display:none"></div>
   <div style="display:flex;gap:8px;margin-top:10px">
-    <button id="tplSaveBtn" onclick="saveTpl()" style="flex:1;padding:12px;font-weight:700;border:0;border-radius:10px;background:var(--blue);color:#fff">💾 Зберегти</button>
+    <button id="tplSaveBtn" onclick="saveTpl()" style="flex:1;padding:12px;font-weight:700;border:0;border-radius:10px;background:var(--blue);color:#fff">💾 Зберегти собі</button>
     <button onclick="resetTpl()" style="flex:0 0 auto;padding:12px 14px;font-weight:700;border:1px solid var(--line);border-radius:10px;background:#fff">↺ Скинути</button>
   </div>
-  <div id="tplBackendWarn" class="warn" style="display:none">Бекенд не підключено (WORKER_URL порожній у цьому файлі) — вкладка працює тільки "на подивитись", зберегти звідси не можна. Зміни шаблону поки роби через кнопку ✉️ SMS template у самому Telegram-боті.</div>
+  <div id="tplBackendWarn" class="warn" style="display:none">Бекенд не підключено (WORKER_URL порожній у цьому файлі) — вкладка працює тільки "на подивитись", зберегти звідси не можна.</div>
+  <div id="tplDebug" class="muted" style="font-size:11px;margin-top:16px"></div>
 </div>
 
 <!-- ======================= TAB 3: АДМІН (тільки якщо initData.user.id == ADMIN_TG_ID на бекенді) ======================= -->
@@ -450,9 +451,10 @@ async function apiState(){
     const r = await fetch(WORKER_URL.replace(/\/$/,"")+"/api/state", {
       headers: { "x-telegram-init-data": (tg && tg.initData) || "" },
     });
-    if(!r.ok) return { error: true, status: r.status };
-    return await r.json();
-  }catch(e){ return null; }
+    const data = await r.json().catch(()=>null);
+    if(!r.ok) return { role: (data&&data.role)||null, error: (data&&data.error) || ("http_"+r.status) };
+    return data;
+  }catch(e){ return { role:null, error: "network: "+(e&&e.message||e) }; }
 }
 
 async function apiAction(body){
@@ -562,17 +564,27 @@ async function refreshBackendState(){
     return;
   }
   const st = await apiState();
+  const dbg = `role: ${(st&&st.role)||"—"}${st&&st.error?" · error: "+st.error:""}`;
+  const dbgEl = document.getElementById("tplDebug"); if(dbgEl) dbgEl.textContent = dbg;
+
   const adminBtn = document.getElementById("adminTabBtn");
   const isAdmin = !!(st && st.role === "admin");
+  const canUseTpl = !!(st && (st.role === "admin" || st.role === "member"));
   adminBtn.style.display = isAdmin ? "" : "none";
   if(!isAdmin && document.querySelector('.tabbtn[data-tab="admin"]').classList.contains("on")) switchTab("search");
 
   const tplNote = document.getElementById("tplNote");
   const tplBtn = document.getElementById("tplSaveBtn");
-  if(st){
-    tplNote.style.display = isAdmin ? "none" : "block";
-    tplBtn.disabled = !isAdmin;
-    if(!tplDirty) document.getElementById("tplText").value = st.tpl || DEFAULT_TPL_PREVIEW;
+  if(canUseTpl){
+    tplNote.style.display = "none";
+    tplBtn.disabled = false;
+    if(!tplDirty) document.getElementById("tplText").value = (st.myTpl || st.tpl || DEFAULT_TPL_PREVIEW);
+  } else {
+    tplBtn.disabled = true;
+    tplNote.style.display = "block";
+    tplNote.textContent = st && st.role === "unregistered"
+      ? "Спершу напиши боту будь-що в приватному чаті (наприклад /start), потім відкрий Mini App ще раз."
+      : "Немає зв'язку з ботом. Спробуй закрити і відкрити Mini App ще раз.";
   }
   if(isAdmin){
     renderAdminTabs(st.tabs);
