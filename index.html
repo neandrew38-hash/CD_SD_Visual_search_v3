@@ -493,7 +493,12 @@ async function save(){
     if(r && r.ok){
       toast(editingId ? "Saved! Updating your search..." : "Saved! Starting your search...");
       showList();
+      // a brand-new search needs a moment to reach the userscript and get pushed back up - poll a
+      // few times in quick succession right after Save instead of waiting for the regular 2s interval
       refreshBackendState();
+      setTimeout(refreshBackendState, 1200);
+      setTimeout(refreshBackendState, 2500);
+      setTimeout(refreshBackendState, 4500);
       return;
     }
     toast("Could not save" + (r && r.error ? " ("+r.error+")" : "") + ". Trying the old way instead.");
@@ -575,6 +580,33 @@ function resetTpl(){
 
 function tabIcon(t){ return !t.online ? "🔴" : t.running ? "🟢" : "🟡"; }
 
+// ---- optimistic local overrides ----
+// The real chain (Mini App -> Worker queue -> userscript picks it up -> userscript pushes new state ->
+// Mini App polls it back) takes a few seconds no matter how often we poll. Without this, tapping a
+// toggle/delete would visually "snap back" to the old server value on the very next poll (which still
+// shows the pre-change state), then jump again once the backend actually catches up - looking broken.
+// Instead we remember what the person JUST did and keep showing that until the server confirms it (or
+// OVERRIDE_TTL passes as a safety net), so the UI reacts instantly and never flickers backwards.
+let lastSearches = {};
+const searchOverrides = {};   // id -> { active?:bool, deleted?:true, ts }
+const OVERRIDE_TTL = 15000;
+
+function applyOverrides(list){
+  const now = Date.now();
+  Object.keys(searchOverrides).forEach(id=>{ if(now - searchOverrides[id].ts > OVERRIDE_TTL) delete searchOverrides[id]; });
+  return list.map(s=>{
+    const o = searchOverrides[s.id];
+    if(!o) return s;
+    if(o.deleted) return null;
+    if('active' in o){
+      if(o.active === s.active) { delete searchOverrides[s.id]; return s; }   // server caught up - override no longer needed
+      return { ...s, active: o.active, online:false, running:false };
+    }
+    return s;
+  }).filter(Boolean);
+}
+function rerenderMySearches(){ renderMySearches(applyOverrides(Object.values(lastSearches))); }
+
 function renderMySearches(list){
   const wrap = document.getElementById("mySearches");
   if(!list || !list.length){ wrap.innerHTML = '<div class="muted">No saved searches yet. Tap "➕ New" above to create one.</div>'; return; }
@@ -592,11 +624,12 @@ function renderMySearches(list){
     const sw = document.createElement("label"); sw.className = "swtch";
     const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = !!s.active;
     cb.onchange = async ()=>{
-      cb.disabled = true;
-      await apiAction({ type: "toggle-search", id: s.id, active: cb.checked });
-      cb.disabled = false;
-      toast(cb.checked ? "Starting..." : "Stopped");
-      refreshBackendState();
+      const want = cb.checked;
+      searchOverrides[s.id] = { active: want, ts: Date.now() };
+      rerenderMySearches();   // instant feedback, no waiting for the round trip
+      toast(want ? "Starting..." : "Stopping...");
+      const r = await apiAction({ type: "toggle-search", id: s.id, active: want });
+      if(!r || !r.ok){ delete searchOverrides[s.id]; toast("Could not update"); rerenderMySearches(); }
     };
     const sl = document.createElement("span"); sl.className = "slider";
     sw.appendChild(cb); sw.appendChild(sl);
@@ -609,9 +642,10 @@ function renderMySearches(list){
     const del = document.createElement("button"); del.className = "trash"; del.textContent = "🗑";
     del.onclick = async ()=>{
       if(!confirm(`Delete "${s.name||s.id}"?`)) return;
-      await apiAction({ type: "delete-search", id: s.id });
-      toast("Deleted");
-      refreshBackendState();
+      searchOverrides[s.id] = { deleted: true, ts: Date.now() };
+      rerenderMySearches();   // instant: it disappears right away instead of waiting for the round trip
+      const r = await apiAction({ type: "delete-search", id: s.id });
+      if(!r || !r.ok){ delete searchOverrides[s.id]; toast("Could not delete"); rerenderMySearches(); }
     };
     row.appendChild(del);
 
@@ -727,10 +761,11 @@ async function refreshBackendState(){
   // "My Searches" (Search tab default view) - only touched while the list itself is showing, so it
   // never yanks someone out of the builder mid-edit; the builder's own view keeps working regardless.
   const mySearchesNote = document.getElementById("mySearchesNote");
+  lastSearches = st.searches || {};
   if(document.getElementById("mySearchesView").style.display !== "none"){
     if(canUseTpl){
       mySearchesNote.style.display = "none";
-      renderMySearches(Object.values(st.searches || {}));
+      rerenderMySearches();
     } else {
       document.getElementById("mySearches").innerHTML = "";
       mySearchesNote.style.display = "block";
@@ -742,7 +777,9 @@ async function refreshBackendState(){
 }
 
 refreshBackendState();
-setInterval(refreshBackendState, 4000);
+// 2s, not 4s: the round trip (Mini App -> Worker -> userscript -> Worker -> Mini App) already takes a
+// couple of seconds on its own, polling faster here just means we notice sooner once it's actually ready.
+setInterval(refreshBackendState, 2000);
 </script>
 </body>
 </html>
