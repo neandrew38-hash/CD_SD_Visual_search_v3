@@ -160,9 +160,12 @@
 <div class="tabpane" id="tab-admin">
   <h1>🛠 Admin Panel</h1>
   <h2>Page refresh interval</h2>
-  <div class="muted" style="margin-bottom:8px">How often the Windows program reloads each search's page to look for new loads. Lower = faster alerts but more load on the site; higher = slower alerts but gentler.</div>
-  <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
-    <input type="number" id="reloadSecInput" min="5" max="120" step="1" style="width:80px" />
+  <div class="muted" style="margin-bottom:8px">How often the Windows program reloads each search's page to look for new loads. Each reload picks a random wait time in this range (not a fixed number every time) so it doesn't look like a metronome. Lower = faster alerts but more load on the site; higher = slower alerts but gentler.</div>
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+    <span class="muted">from</span>
+    <input type="number" id="reloadMinInput" min="5" max="300" step="1" style="width:70px" />
+    <span class="muted">to</span>
+    <input type="number" id="reloadMaxInput" min="5" max="300" step="1" style="width:70px" />
     <span class="muted">seconds</span>
     <button id="reloadSecSaveBtn" style="padding:8px 14px;font-weight:700;border:0;border-radius:10px;background:var(--blue);color:#fff">Save</button>
     <span id="reloadSecNote" class="muted"></span>
@@ -701,16 +704,20 @@ function renderAdminTabs(list){
 
 let reloadSecDirty = false;
 (function initReloadSecUi(){
-  const input = document.getElementById("reloadSecInput");
+  const minInput = document.getElementById("reloadMinInput");
+  const maxInput = document.getElementById("reloadMaxInput");
   const btn = document.getElementById("reloadSecSaveBtn");
   const note = document.getElementById("reloadSecNote");
-  if(!input || !btn) return;
-  input.addEventListener("input", ()=>{ reloadSecDirty = true; });
+  if(!minInput || !maxInput || !btn) return;
+  minInput.addEventListener("input", ()=>{ reloadSecDirty = true; });
+  maxInput.addEventListener("input", ()=>{ reloadSecDirty = true; });
   btn.onclick = async ()=>{
-    const seconds = Math.max(5, Math.min(120, Number(input.value) || 10));
-    input.value = seconds;
+    let min = Math.max(5, Math.min(300, Number(minInput.value) || 8));
+    let max = Math.max(5, Math.min(300, Number(maxInput.value) || 12));
+    if(max < min) [min, max] = [max, min];
+    minInput.value = min; maxInput.value = max;
     btn.disabled = true;
-    const r = await apiAction({ type: "set-reload-interval", seconds });
+    const r = await apiAction({ type: "set-reload-interval", minSeconds: min, maxSeconds: max });
     btn.disabled = false;
     if(r && r.ok){
       reloadSecDirty = false;
@@ -789,8 +796,10 @@ async function refreshBackendState(){
     renderAdminTabs(st.tabs);
     renderAdminUsers(st.users);
     if(!reloadSecDirty){
-      const secs = (st.settings && st.settings.reloadSec) || 10;
-      document.getElementById("reloadSecInput").value = secs;
+      const minS = (st.settings && st.settings.reloadMinSec) || 8;
+      const maxS = (st.settings && st.settings.reloadMaxSec) || 12;
+      document.getElementById("reloadMinInput").value = minS;
+      document.getElementById("reloadMaxInput").value = maxS;
     }
   }
 
