@@ -18,6 +18,7 @@
   .pill.sm{flex:0 0 auto;min-width:38px;padding:6px 4px;font-size:13px}
   .pill.on{background:var(--blue);color:#fff;border-color:var(--blue)}
   .field{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font-size:15px;background:#fff;color:#000}
+  textarea.field{min-height:150px;font-family:inherit;resize:vertical}
   .place-row{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:8px;padding:8px;margin-top:6px}
   .place-row .name{flex:1;font-weight:600;font-size:14px}
   .place-row .zip{font-weight:400;color:#666;font-size:12px}
@@ -39,14 +40,42 @@
   .states .pill{padding:6px 0;font-size:11px}
   .clear-wrap{text-align:center;margin:12px 0 4px}
   .clear{display:inline-block;font-size:13px;border:1px solid var(--line);border-radius:8px;padding:8px 16px;background:#fff;cursor:pointer}
-  .save{position:fixed;left:0;right:0;bottom:0;padding:10px calc(12px + env(safe-area-inset-bottom,0px)) calc(12px + env(safe-area-inset-bottom,0px));background:#fff;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:6px}
+  .save{position:fixed;left:0;right:0;bottom:0;padding:10px calc(12px + env(safe-area-inset-bottom,0px)) calc(12px + env(safe-area-inset-bottom,0px));background:#fff;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:6px;max-width:520px;margin:0 auto}
   .save button{width:100%;padding:14px;font-size:17px;font-weight:700;border:0;border-radius:10px;background:var(--blue);color:#fff}
   .save .alt{background:#eee;color:#333;font-size:13px;padding:9px;font-weight:600}
+  .save button:disabled{opacity:.5}
   .toast{position:fixed;left:12px;right:12px;top:12px;background:#005BA8;color:#fff;padding:10px 14px;border-radius:8px;font-size:14px;text-align:center;display:none;z-index:10}
+  .tabbar{position:sticky;top:0;background:#fff;display:flex;gap:0;border-bottom:1px solid var(--line);z-index:6;margin:0 -12px 8px;padding-top:2px}
+  .tabbtn{flex:1;text-align:center;padding:10px 4px;font-size:13px;font-weight:700;color:#888;cursor:pointer;border-bottom:3px solid transparent}
+  .tabbtn.on{color:var(--blue);border-bottom-color:var(--blue)}
+  .tabpane{display:none}
+  .tabpane.on{display:block}
+  .srow{display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-top:8px}
+  .srow .info{flex:1;min-width:0}
+  .srow .nm{font-weight:700;font-size:14px}
+  .srow .meta{font-size:12px;color:#666;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .swtch{position:relative;width:46px;height:26px;flex:0 0 auto}
+  .swtch input{opacity:0;width:0;height:0}
+  .slider{position:absolute;inset:0;background:#ccc;border-radius:26px;cursor:pointer;transition:.2s}
+  .slider:before{content:"";position:absolute;height:20px;width:20px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+  .swtch input:checked + .slider{background:var(--blue)}
+  .swtch input:checked + .slider:before{transform:translateX(20px)}
+  .trash{flex:0 0 auto;font-size:18px;background:none;border:0;color:#999;cursor:pointer;padding:4px}
+  .muted{color:#888;font-size:13px;text-align:center;padding:20px 0}
+  .warn{color:#a33;font-size:12px;text-align:center;padding:10px 0}
 </style>
 </head>
 <body>
 <div class="toast" id="toast"></div>
+
+<div class="tabbar">
+  <div class="tabbtn on" data-tab="search">🔎 Пошук</div>
+  <div class="tabbtn" data-tab="sms">✉️ SMS шаблон</div>
+  <div class="tabbtn" id="adminTabBtn" data-tab="admin" style="display:none">🛠 Адмін</div>
+</div>
+
+<!-- ======================= TAB 1: ПОШУК (візуальний білдер, як і раніше) ======================= -->
+<div class="tabpane on" id="tab-search">
 <h1>🔎 Search Builder</h1>
 <div class="sub" id="subText">Set your filters and tap "Save" — the search will start right away.</div>
 
@@ -96,8 +125,37 @@
   <button onclick="save()">💾 Save</button>
   <button class="alt" onclick="copyOnly()">📋 Copy only</button>
 </div>
+</div>
+
+<!-- ======================= TAB 2: SMS ШАБЛОН ======================= -->
+<div class="tabpane" id="tab-sms">
+  <h1>✉️ SMS шаблон</h1>
+  <div class="sub">Спільний для всіх пошуків шаблон, який копіюється в буфер обміну при новому вантажі. Доступні мітки: <code>{vehicle} {origin} {dest} {price} {company} {loadId}</code></div>
+  <textarea class="field" id="tplText" placeholder="Завантаження..."></textarea>
+  <div id="tplNote" class="warn" style="display:none">Змінити шаблон може тільки адмін. Тут показано поточний варіант (лише перегляд).</div>
+  <div style="display:flex;gap:8px;margin-top:10px">
+    <button id="tplSaveBtn" onclick="saveTpl()" style="flex:1;padding:12px;font-weight:700;border:0;border-radius:10px;background:var(--blue);color:#fff">💾 Зберегти</button>
+    <button onclick="resetTpl()" style="flex:0 0 auto;padding:12px 14px;font-weight:700;border:1px solid var(--line);border-radius:10px;background:#fff">↺ Скинути</button>
+  </div>
+  <div id="tplBackendWarn" class="warn" style="display:none">Бекенд не підключено (WORKER_URL порожній у цьому файлі) — вкладка працює тільки "на подивитись", зберегти звідси не можна. Зміни шаблону поки роби через кнопку ✉️ SMS template у самому Telegram-боті.</div>
+</div>
+
+<!-- ======================= TAB 3: АДМІН (тільки якщо initData.user.id == ADMIN_TG_ID на бекенді) ======================= -->
+<div class="tabpane" id="tab-admin">
+  <h1>🛠 Адмін-панель</h1>
+  <h2>Збережені пошуки</h2>
+  <div id="adminTabs"><div class="muted">Завантаження...</div></div>
+  <h2>Користувачі</h2>
+  <div id="adminUsers"></div>
+  <div id="adminBackendWarn" class="warn" style="display:none">Бекенд не підключено (WORKER_URL порожній у цьому файлі) — ця вкладка не може працювати без нього. Дивись інструкцію на початку файлу worker.js.</div>
+</div>
 
 <script>
+// =====================================================================================
+// Заповни це ОДИН РАЗ після того, як розгорнеш Cloudflare Worker (інструкція у worker.js):
+const WORKER_URL = "https://cd-bot.neandrew38.workers.dev";
+// =====================================================================================
+
 const US = ["AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY"];
 const STATE_NAME_TO_ABBR = {"alabama":"AL","alaska":"AK","arizona":"AZ","arkansas":"AR","california":"CA","colorado":"CO","connecticut":"CT","delaware":"DE","florida":"FL","georgia":"GA","hawaii":"HI","idaho":"ID","illinois":"IL","indiana":"IN","iowa":"IA","kansas":"KS","kentucky":"KY","louisiana":"LA","maine":"ME","maryland":"MD","massachusetts":"MA","michigan":"MI","minnesota":"MN","mississippi":"MS","missouri":"MO","montana":"MT","nebraska":"NE","nevada":"NV","new hampshire":"NH","new jersey":"NJ","new mexico":"NM","new york":"NY","north carolina":"NC","north dakota":"ND","ohio":"OH","oklahoma":"OK","oregon":"OR","pennsylvania":"PA","rhode island":"RI","south carolina":"SC","south dakota":"SD","tennessee":"TN","texas":"TX","utah":"UT","vermont":"VT","virginia":"VA","washington":"WA","west virginia":"WV","wisconsin":"WI","wyoming":"WY","district of columbia":"DC"};
 const VEH_TYPES = ["ATV","Boat","Car","Heavy Equipment","Large Yacht","Motorcycle","Pickup","RV","SUV","Van"];
@@ -369,6 +427,161 @@ async function save(){
 }
 
 render();
+
+// =====================================================================================
+// ============================  ВКЛАДКИ + SMS + АДМІН  ================================
+// Все нижче спілкується з Cloudflare Worker-ом (WORKER_URL вгорі файлу). Якщо WORKER_URL
+// порожній - ці дві вкладки просто показують попередження і нічого не ламають на вкладці Пошук.
+// =====================================================================================
+
+const DEFAULT_TPL_PREVIEW =
+  "Hi, is your {vehicle} ({origin} -> {dest}) still available? Load ID {loadId}. " +
+  "We can pick up right away. Please call or text me back.";
+
+function switchTab(name){
+  document.querySelectorAll(".tabbtn").forEach(b=>b.classList.toggle("on", b.dataset.tab===name));
+  document.querySelectorAll(".tabpane").forEach(p=>p.classList.toggle("on", p.id==="tab-"+name));
+}
+document.querySelectorAll(".tabbtn").forEach(b=>b.addEventListener("click", ()=>switchTab(b.dataset.tab)));
+
+async function apiState(){
+  if(!WORKER_URL) return null;
+  try{
+    const r = await fetch(WORKER_URL.replace(/\/$/,"")+"/api/state", {
+      headers: { "x-telegram-init-data": (tg && tg.initData) || "" },
+    });
+    if(!r.ok) return { error: true, status: r.status };
+    return await r.json();
+  }catch(e){ return null; }
+}
+
+async function apiAction(body){
+  if(!WORKER_URL) return null;
+  try{
+    const r = await fetch(WORKER_URL.replace(/\/$/,"")+"/api/action", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-telegram-init-data": (tg && tg.initData) || "" },
+      body: JSON.stringify(body),
+    });
+    return await r.json();
+  }catch(e){ return null; }
+}
+
+let tplDirty = false;   // true while the admin is typing, so a background refresh does not overwrite it
+document.getElementById("tplText").addEventListener("input", ()=>{ tplDirty = true; });
+
+async function saveTpl(){
+  const value = document.getElementById("tplText").value;
+  const r = await apiAction({ type: "set-tpl", value });
+  if(r && r.ok){ tplDirty = false; toast("Збережено! Підхопиться скриптом за кілька секунд."); }
+  else toast("Не вдалося зберегти" + (r && r.error ? " ("+r.error+")" : ""));
+}
+function resetTpl(){
+  document.getElementById("tplText").value = DEFAULT_TPL_PREVIEW;
+  tplDirty = true;
+  toast("Тепер натисни \"Зберегти\", щоб застосувати");
+}
+
+function tabIcon(t){ return !t.online ? "🔴" : t.running ? "🟢" : "🟡"; }
+
+function renderAdminTabs(list){
+  const wrap = document.getElementById("adminTabs");
+  if(!list || !list.length){ wrap.innerHTML = '<div class="muted">Поки немає жодного відкритого пошуку.</div>'; return; }
+  wrap.innerHTML = "";
+  list.forEach(t=>{
+    const row = document.createElement("div"); row.className = "srow";
+    const info = document.createElement("div"); info.className = "info";
+    info.innerHTML = `<div class="nm">${tabIcon(t)} ${escapeHtml(t.name||t.id)}</div>` +
+      `<div class="meta">${(t.site||"").toUpperCase()} · ${t.owner ? escapeHtml(t.owner.name) : "без власника"}` +
+      (t.cards ? ` · ${t.cards} вантажів` : "") + `</div>`;
+    row.appendChild(info);
+
+    const sw = document.createElement("label"); sw.className = "swtch";
+    const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = !!t.running;
+    cb.disabled = !t.online;
+    cb.onchange = async ()=>{
+      cb.disabled = true;
+      await apiAction({ type: "toggle-tab", id: t.id, act: cb.checked ? "start" : "stop" });
+      cb.disabled = false;
+      toast(cb.checked ? "Старт надіслано" : "Стоп надіслано");
+    };
+    const sl = document.createElement("span"); sl.className = "slider";
+    sw.appendChild(cb); sw.appendChild(sl);
+    row.appendChild(sw);
+
+    const del = document.createElement("button"); del.className = "trash"; del.textContent = "🗑";
+    del.onclick = async ()=>{
+      if(!confirm(`Видалити "${t.name||t.id}"?`)) return;
+      await apiAction({ type: "delete-tab", id: t.id });
+      toast("Видалено");
+      refreshBackendState();
+    };
+    row.appendChild(del);
+
+    wrap.appendChild(row);
+  });
+}
+
+function renderAdminUsers(users){
+  const wrap = document.getElementById("adminUsers");
+  const list = Object.values(users||{}).sort((a,b)=>(b.since||0)-(a.since||0));
+  if(!list.length){ wrap.innerHTML = '<div class="muted">Ще ніхто, крім тебе, не писав боту.</div>'; return; }
+  wrap.innerHTML = "";
+  list.forEach(u=>{
+    const row = document.createElement("div"); row.className = "srow";
+    const info = document.createElement("div"); info.className = "info";
+    info.innerHTML = `<div class="nm">${escapeHtml(u.name)}${u.username?" (@"+escapeHtml(u.username)+")":""}</div>` +
+      `<div class="meta">ID ${escapeHtml(u.id)}</div>`;
+    row.appendChild(info);
+
+    const sw = document.createElement("label"); sw.className = "swtch";
+    const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = !!u.active;
+    cb.onchange = async ()=>{
+      cb.disabled = true;
+      await apiAction({ type: "toggle-user", id: u.id });
+      cb.disabled = false;
+      toast(cb.checked ? "Розблоковано" : "Заблоковано");
+    };
+    const sl = document.createElement("span"); sl.className = "slider";
+    sw.appendChild(cb); sw.appendChild(sl);
+    row.appendChild(sw);
+
+    wrap.appendChild(row);
+  });
+}
+
+function escapeHtml(s){
+  return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+async function refreshBackendState(){
+  if(!WORKER_URL){
+    document.getElementById("adminBackendWarn").style.display = "block";
+    document.getElementById("tplBackendWarn").style.display = "block";
+    document.getElementById("tplSaveBtn").disabled = true;
+    return;
+  }
+  const st = await apiState();
+  const adminBtn = document.getElementById("adminTabBtn");
+  const isAdmin = !!(st && st.role === "admin");
+  adminBtn.style.display = isAdmin ? "" : "none";
+  if(!isAdmin && document.querySelector('.tabbtn[data-tab="admin"]').classList.contains("on")) switchTab("search");
+
+  const tplNote = document.getElementById("tplNote");
+  const tplBtn = document.getElementById("tplSaveBtn");
+  if(st){
+    tplNote.style.display = isAdmin ? "none" : "block";
+    tplBtn.disabled = !isAdmin;
+    if(!tplDirty) document.getElementById("tplText").value = st.tpl || DEFAULT_TPL_PREVIEW;
+  }
+  if(isAdmin){
+    renderAdminTabs(st.tabs);
+    renderAdminUsers(st.users);
+  }
+}
+
+refreshBackendState();
+setInterval(refreshBackendState, 4000);
 </script>
 </body>
 </html>
