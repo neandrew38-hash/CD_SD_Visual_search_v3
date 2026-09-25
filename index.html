@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CD Search Builder</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root{--blue:#005BA8;--bg:#fff;--fg:#000;--line:#ccc;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,Segoe UI,Roboto,sans-serif}
+  body{padding:10px 12px 100px;max-width:520px;margin:0 auto}
+  h1{font-size:20px;text-align:center;margin:6px 0 2px}
+  .sub{font-size:12px;color:#666;text-align:center;margin-bottom:10px}
+  h2{font-size:15px;margin:18px 0 8px}
+  .row{display:flex;flex-wrap:wrap;gap:6px}
+  .pill{border:2px solid var(--line);border-radius:8px;padding:8px 10px;font-weight:600;font-size:14px;background:#fff;cursor:pointer;user-select:none;flex:1 1 auto;text-align:center;min-width:44px}
+  .pill.sm{flex:0 0 auto;min-width:38px;padding:6px 4px;font-size:13px}
+  .pill.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+  .field{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font-size:15px;background:#fff;color:#000}
+  .place-row{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:8px;padding:8px;margin-top:6px}
+  .place-row .name{flex:1;font-weight:600;font-size:14px}
+  .place-row .zip{font-weight:400;color:#666;font-size:12px}
+  .place-row input{width:60px;padding:6px;border:1px solid var(--line);border-radius:6px;text-align:center}
+  .place-row button{background:var(--blue);color:#fff;border:0;border-radius:6px;width:28px;height:28px;font-size:16px;line-height:1;flex:0 0 auto}
+  .searchwrap{position:relative}
+  .addrow{display:flex;gap:6px;margin-top:6px}
+  .addrow input{flex:1}
+  .suggest{position:absolute;left:0;right:0;top:100%;background:#fff;border:1px solid var(--line);
+    border-top:0;border-radius:0 0 8px 8px;max-height:240px;overflow-y:auto;z-index:5;box-shadow:0 6px 14px rgba(0,0,0,.12);display:none}
+  .suggest .opt{padding:10px;border-bottom:1px solid #eee;font-size:14px;cursor:pointer}
+  .suggest .opt:last-child{border-bottom:0}
+  .suggest .opt .c{font-weight:600}
+  .suggest .opt .z{color:#666;font-size:12px;margin-left:4px}
+  .suggest .opt:active{background:#eef4fb}
+  .suggest .hint{padding:8px 10px;font-size:12px;color:#888}
+  .states-label{font-size:12px;color:#666;margin:10px 0 4px}
+  .states{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+  .states .pill{padding:6px 0;font-size:11px}
+  .clear{float:right;font-size:12px;border:1px solid var(--line);border-radius:6px;padding:3px 8px;background:#fff}
+  .save{position:fixed;left:0;right:0;bottom:0;padding:10px calc(12px + env(safe-area-inset-bottom,0px)) calc(12px + env(safe-area-inset-bottom,0px));background:#fff;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:6px}
+  .save button{width:100%;padding:14px;font-size:17px;font-weight:700;border:0;border-radius:10px;background:var(--blue);color:#fff}
+  .save .alt{background:#eee;color:#333;font-size:13px;padding:9px;font-weight:600}
+  .toast{position:fixed;left:12px;right:12px;top:12px;background:#005BA8;color:#fff;padding:10px 14px;border-radius:8px;font-size:14px;text-align:center;display:none;z-index:10}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+<h1>🔎 Конструктор пошуку</h1>
+<div class="sub" id="subText">Налаштуй фільтри й натисни «Зберегти» — пошук почнеться одразу.</div>
+
+<h2>Сайт</h2>
+<div class="row" id="sites"></div>
+
+<h2>Vehicle Status</h2>
+<div class="row" id="status"></div>
+
+<h2>Trailer Type</h2>
+<div class="row" id="trailer"></div>
+
+<h2>Min # of Vehicles</h2>
+<div class="row" id="minv"></div>
+<h2>Max # of Vehicles</h2>
+<div class="row" id="maxv"></div>
+
+<h2>Min Total Pay</h2>
+<input class="field" id="pay" type="number" inputmode="numeric" placeholder="0" value="0">
+
+<h2>Ready to Ship Within # days</h2>
+<div class="row" id="ready"></div>
+
+<h2>Vehicle Type <span class="clear" id="vtClear">Clear</span></h2>
+<div class="row" id="vtypes"></div>
+
+<h2>Origin</h2>
+<div class="searchwrap">
+  <div class="addrow"><input class="field" id="fromCity" placeholder="Почни вводити місто..." autocomplete="off"><input class="field" id="fromR" type="number" value="50" style="max-width:64px" title="miles"></div>
+  <div class="suggest" id="fromSuggest"></div>
+</div>
+<div id="fromList"></div>
+<div class="states-label">Або одразу цілий штат:</div>
+<div class="states" id="fromStates"></div>
+
+<h2>Destination</h2>
+<div class="searchwrap">
+  <div class="addrow"><input class="field" id="toCity" placeholder="Почни вводити місто..." autocomplete="off"><input class="field" id="toR" type="number" value="50" style="max-width:64px" title="miles"></div>
+  <div class="suggest" id="toSuggest"></div>
+</div>
+<div id="toList"></div>
+<div class="states-label">Або одразу цілий штат:</div>
+<div class="states" id="toStates"></div>
+
+<div class="save">
+  <button onclick="save()">💾 Зберегти</button>
+  <button class="alt" onclick="copyOnly()">📋 Тільки скопіювати</button>
+</div>
+
+<script>
+const US = ["AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY"];
+const STATE_NAME_TO_ABBR = {"alabama":"AL","alaska":"AK","arizona":"AZ","arkansas":"AR","california":"CA","colorado":"CO","connecticut":"CT","delaware":"DE","florida":"FL","georgia":"GA","hawaii":"HI","idaho":"ID","illinois":"IL","indiana":"IN","iowa":"IA","kansas":"KS","kentucky":"KY","louisiana":"LA","maine":"ME","maryland":"MD","massachusetts":"MA","michigan":"MI","minnesota":"MN","mississippi":"MS","missouri":"MO","montana":"MT","nebraska":"NE","nevada":"NV","new hampshire":"NH","new jersey":"NJ","new mexico":"NM","new york":"NY","north carolina":"NC","north dakota":"ND","ohio":"OH","oklahoma":"OK","oregon":"OR","pennsylvania":"PA","rhode island":"RI","south carolina":"SC","south dakota":"SD","tennessee":"TN","texas":"TX","utah":"UT","vermont":"VT","virginia":"VA","washington":"WA","west virginia":"WV","wisconsin":"WI","wyoming":"WY","district of columbia":"DC"};
+const VEH_TYPES = ["ATV","Boat","Car","Heavy Equipment","Large Yacht","Motorcycle","Pickup","RV","SUV","Van"];
+const READY = [["All",0],["Today",1],["2",2],["3",3],["4",4],["5",5],["6",6],["7",7],["8",8],["9",9],["10",10],["14",14]];
+
+// state[k] holds BOTH cities (with zip, r) and whole-state picks (st only).
+// Whole-state picks are shown only as a highlighted square in the grid below (that is their only
+// visual trace) so tapping a state never grows the list above the grid and pushes it down the page.
+const state = { sites:["cd"], status:"any", trailer:"any", minVeh:1, maxVeh:0, ready:0, vt:[], from:[], to:[] };
+
+function group(id, opts, single, onSet){
+  const el = document.getElementById(id); el.innerHTML="";
+  opts.forEach(([label,val])=>{
+    const b=document.createElement("div"); b.className="pill sm"; b.textContent=label;
+    const cur = single();
+    if (Array.isArray(cur) ? cur.includes(val) : cur===val) b.classList.add("on");
+    b.onclick=()=>{ onSet(val); group(id,opts,single,onSet); };
+    el.appendChild(b);
+  });
+}
+
+function render(){
+  group("sites", [["Central Dispatch","cd"],["Super Dispatch","sd"]], ()=>state.sites, v=>{
+    const i=state.sites.indexOf(v);
+    if(i>=0) state.sites.splice(i,1); else state.sites.push(v);
+    if(!state.sites.length) state.sites.push(v);
+  });
+  group("status", [["Any","any"],["Operable","op"],["Inoperable","inop"]], ()=>state.status, v=>state.status=v);
+  group("trailer", [["Any","any"],["Open","open"],["Enclosed","enc"]], ()=>state.trailer, v=>state.trailer=v);
+  group("minv", [1,2,3,4,5,6,7,8].map(n=>[String(n),n]), ()=>state.minVeh, v=>{ state.minVeh=v; if(state.maxVeh && state.maxVeh<v) state.maxVeh=v; render(); });
+  group("maxv", [["Any",0],1,2,3,4,5,6,7,8].map(x=>Array.isArray(x)?x:[String(x),x]), ()=>state.maxVeh, v=>state.maxVeh=v);
+  group("ready", READY, ()=>state.ready, v=>state.ready=v);
+  group("vtypes", VEH_TYPES.map(v=>[v,v]), ()=>state.vt, v=>{
+    const i=state.vt.indexOf(v); if(i>=0) state.vt.splice(i,1); else state.vt.push(v);
+  });
+  document.getElementById("vtClear").onclick=()=>{ state.vt=[]; render(); };
+
+  ["from","to"].forEach(k=>{
+    // state grid: painted once here and afterwards only re-highlighted in place (paintGrid), never
+    // rebuilt by picking a city, so its position on screen never jumps around.
+    const stEl = document.getElementById(k+"States"); stEl.innerHTML="";
+    US.forEach(code=>{
+      const on = state[k].some(p=>p.st===code);
+      const b=document.createElement("div"); b.className="pill"+(on?" on":""); b.textContent=code;
+      b.onclick=()=>{
+        const i=state[k].findIndex(p=>p.st===code);
+        if(i>=0) state[k].splice(i,1); else state[k].push({st:code});
+        paintGrid(k);   // whole-state toggles never touch the list above, just repaint the grid itself
+      };
+      stEl.appendChild(b);
+    });
+    // city list: only actual searched cities show here as removable chips
+    renderList(k);
+  });
+}
+
+function paintGrid(k){
+  const stEl = document.getElementById(k+"States");
+  [...stEl.children].forEach(b=>{
+    const on = state[k].some(p=>p.st===b.textContent);
+    b.classList.toggle("on", on);
+  });
+}
+
+function renderList(k){
+  const list = document.getElementById(k+"List"); list.innerHTML="";
+  state[k].forEach((p,i)=>{
+    if(p.st) return;   // whole states live only in the grid, not here
+    const row=document.createElement("div"); row.className="place-row";
+    const name=document.createElement("div"); name.className="name";
+    name.innerHTML = "📍 "+p.c+", "+p.stc + (p.zip ? ` <span class="zip">${p.zip}</span>` : "");
+    row.appendChild(name);
+    const r=document.createElement("input"); r.type="number"; r.value=p.r||50;
+    r.oninput=()=>{ p.r=Number(r.value)||50; };
+    row.appendChild(r);
+    const rm=document.createElement("button"); rm.textContent="−";
+    rm.onclick=()=>{ state[k].splice(i,1); renderList(k); };
+    row.appendChild(rm);
+    list.appendChild(row);
+  });
+}
+
+function addCity(k, place){
+  state[k].push(place);
+  document.getElementById(k+"City").value = "";
+  hideSuggest(k);
+  renderList(k);
+}
+
+// ---------- city + zip autocomplete ----------
+// Uses OpenStreetMap's free Nominatim geocoder (no key needed) so results and ZIPs stay accurate
+// and current, instead of shipping a huge static city/zip list in this file.
+// NOTE: if this page is opened from claude.ai (as an "artifact"), Anthropic's hosting only allows
+// network calls to a short list of script/font CDNs, so this live lookup is blocked there and the
+// page falls back to plain typed "City, ST" entry automatically. To get live suggestions with ZIP,
+// host this .html file yourself (GitHub Pages, Netlify, or just open the file locally) - then it
+// works exactly like the reference screenshots.
+let debTimer=null, abortCtrl=null;
+function onCityInput(k){
+  const el = document.getElementById(k+"City");
+  clearTimeout(debTimer);
+  const q = el.value.trim();
+  if(q.length<2){ hideSuggest(k); return; }
+  debTimer = setTimeout(()=>runSearch(k,q), 350);
+}
+
+async function runSearch(k,q){
+  const box = document.getElementById(k+"Suggest");
+  box.style.display="block"; box.innerHTML = `<div class="hint">Шукаю...</div>`;
+  if(abortCtrl) abortCtrl.abort();
+  abortCtrl = new AbortController();
+  try{
+    const url = "https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&countrycodes=us&limit=8&q="+encodeURIComponent(q);
+    const res = await fetch(url, {signal:abortCtrl.signal, headers:{"Accept":"application/json"}});
+    if(!res.ok) throw new Error("http "+res.status);
+    const data = await res.json();
+    const seen = new Set(); const opts=[];
+    for(const d of data){
+      const a = d.address||{};
+      const city = a.city||a.town||a.village||a.hamlet||a.municipality;
+      const stAbbr = STATE_NAME_TO_ABBR[String(a.state||"").toLowerCase()];
+      if(!city || !stAbbr) continue;
+      const zip = a.postcode ? String(a.postcode).slice(0,5) : "";
+      const key = city+"|"+stAbbr+"|"+zip;
+      if(seen.has(key)) continue; seen.add(key);
+      opts.push({c:city, stc:stAbbr, zip});
+    }
+    if(!opts.length){ box.innerHTML = `<div class="hint">Нічого не знайдено. Спробуй "Місто, ШТ" вручну і натисни Enter.</div>`; return; }
+    box.innerHTML="";
+    opts.forEach(o=>{
+      const row=document.createElement("div"); row.className="opt";
+      row.innerHTML = `<span class="c">${o.c}, ${o.stc}</span>${o.zip?`<span class="z">${o.zip}</span>`:""}`;
+      row.onclick=()=>{
+        const rEl = document.getElementById(k+"R");
+        addCity(k, {c:o.c, stc:o.stc, zip:o.zip, r:Number(rEl.value)||50});
+      };
+      box.appendChild(row);
+    });
+  }catch(e){
+    if(e.name==="AbortError") return;
+    // blocked (CSP on claude.ai) or offline - fall back silently to manual entry
+    box.innerHTML = `<div class="hint">Підказки міст тут недоступні (обмеження хостингу). Введи "Місто, ШТ" і натисни Enter.</div>`;
+  }
+}
+
+function hideSuggest(k){ document.getElementById(k+"Suggest").style.display="none"; }
+
+function manualAdd(k){
+  const cityEl=document.getElementById(k+"City"), rEl=document.getElementById(k+"R");
+  const raw=cityEl.value.trim(); if(!raw) return;
+  const m = raw.match(/^(.+?),\s*([A-Za-z]{2})$/);
+  if(!m){ toast("Формат: Місто, ШТ (наприклад Temecula, CA)"); return; }
+  addCity(k, { c: m[1].trim(), stc: m[2].toUpperCase(), zip:"", r: Number(rEl.value)||50 });
+}
+
+["from","to"].forEach(k=>{
+  const cityEl = document.getElementById(k+"City");
+  cityEl.addEventListener("input", ()=>onCityInput(k));
+  cityEl.addEventListener("keydown", e=>{ if(e.key==="Enter"){ e.preventDefault(); manualAdd(k); } });
+  cityEl.addEventListener("blur", ()=>setTimeout(()=>hideSuggest(k),150));
+});
+
+function toast(msg){
+  const t=document.getElementById("toast"); t.textContent=msg; t.style.display="block";
+  clearTimeout(toast._h); toast._h=setTimeout(()=>t.style.display="none", 2600);
+}
+
+function b64urlEncode(obj){
+  const json = JSON.stringify(obj);
+  const b64 = btoa(unescape(encodeURIComponent(json)));
+  return b64.replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+}
+
+// Real Telegram Mini App integration: when this page is opened from the bot's own reply-keyboard
+// "🖥 Search builder" button, Telegram injects window.Telegram.WebApp and tg.initData is non-empty.
+// In that case tg.sendData() hands the payload straight back to the bot - no copy, no paste, no extra
+// tap on Send, no username to configure. (This only works when the page is opened that specific way -
+// see the note below the buttons.) Opened any other way (plain browser, testing), it falls back to
+// copying the message so it can still be pasted into the chat by hand.
+const tg = (window.Telegram && window.Telegram.WebApp) || null;
+try{ if(tg){ tg.ready(); tg.expand(); } }catch(e){}
+(function(){
+  const sub = document.getElementById("subText");
+  if(tg && tg.initData) sub.textContent = "Налаштуй фільтри й натисни «Зберегти» — пошук стартує одразу, без копіювання.";
+  else sub.textContent = "Налаштуй фільтри й натисни «Зберегти». Ця сторінка відкрита не як Telegram Mini App, тож повідомлення просто скопіюється — встав його в чат з ботом.";
+})();
+
+function buildPayload(){
+  const payload = {
+    s: state.sites, f: state.from, to: state.to,
+    p: Number(document.getElementById("pay").value)||0,
+    tr: state.trailer, vs: state.status, rd: state.ready,
+    mn: state.minVeh, mx: state.maxVeh, vt: state.vt,
+  };
+  return b64urlEncode(payload);
+}
+
+async function copyOnly(){
+  if(!state.from.length || !state.to.length){ toast("Додай хоча б одне місце Origin і Destination"); return; }
+  const msg = "CDBOT1:"+buildPayload();
+  try{ await navigator.clipboard.writeText(msg); toast("Скопійовано! Встав це повідомлення в чат з ботом."); }
+  catch(e){ prompt("Скопіюй і встав у чат з ботом:", msg); }
+}
+
+async function save(){
+  if(!state.from.length || !state.to.length){ toast("Додай хоча б одне місце Origin і Destination"); return; }
+  const payload = buildPayload();
+  if(tg && tg.initData){
+    try{
+      tg.sendData(payload);
+      toast("Надіслано! Пошук стартує...");
+      setTimeout(()=>{ try{ tg.close(); }catch(e){} }, 400);
+      return;
+    }catch(e){ /* fall through to clipboard below */ }
+  }
+  const msg = "CDBOT1:"+payload;
+  try{ await navigator.clipboard.writeText(msg); toast("Скопійовано! Встав це повідомлення в чат з ботом."); }
+  catch(e){ prompt("Скопіюй і встав у чат з ботом:", msg); }
+}
+
+render();
+</script>
+</body>
+</html>
