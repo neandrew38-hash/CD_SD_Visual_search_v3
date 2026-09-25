@@ -74,10 +74,24 @@
   <div class="tabbtn" id="adminTabBtn" data-tab="admin" style="display:none">🛠 Admin</div>
 </div>
 
-<!-- ======================= TAB 1: SEARCH (visual builder, unchanged) ======================= -->
+<!-- ======================= TAB 1: SEARCH (My Searches list + visual builder) ======================= -->
 <div class="tabpane on" id="tab-search">
 <h1>🔎 Search Builder</h1>
 <div class="sub" id="subText">Set your filters and tap "Save" — the search will start right away.</div>
+
+<!-- default view: the list of this person's own saved searches -->
+<div id="mySearchesView">
+  <h2 style="display:flex;align-items:center;justify-content:space-between;margin-top:8px">
+    My Searches
+    <span id="newSearchBtn" style="font-size:13px;color:var(--blue);cursor:pointer;font-weight:700">➕ New</span>
+  </h2>
+  <div id="mySearches"><div class="muted">Loading...</div></div>
+  <div id="mySearchesNote" class="warn" style="display:none"></div>
+</div>
+
+<!-- builder view: shown for "+ New" or tapping/editing an existing search -->
+<div id="builderView" style="display:none">
+<div style="margin:4px 0 2px"><span id="backToListBtn" style="font-size:13px;color:var(--blue);cursor:pointer;font-weight:700">‹ My Searches</span></div>
 
 <h2>Site</h2>
 <div class="row" id="sites"></div>
@@ -125,7 +139,8 @@
   <button onclick="save()">💾 Save</button>
   <button class="alt" onclick="copyOnly()">📋 Copy only</button>
 </div>
-</div>
+</div><!-- /builderView -->
+</div><!-- /tab-search -->
 
 <!-- ======================= TAB 2: SMS TEMPLATE (personal, one per user) ======================= -->
 <div class="tabpane" id="tab-sms">
@@ -374,6 +389,52 @@ function b64urlEncode(obj){
   const b64 = btoa(unescape(encodeURIComponent(json)));
   return b64.replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
 }
+function b64urlDecode(s){
+  let b64 = String(s||"").replace(/-/g,"+").replace(/_/g,"/");
+  while (b64.length % 4) b64 += "=";
+  return JSON.parse(decodeURIComponent(escape(atob(b64))));
+}
+
+// ---- My Searches: list / builder view switching ----
+let editingId = null;   // id of the saved search currently open in the builder, or null while creating a new one
+
+function showList(){
+  editingId = null;
+  document.getElementById("mySearchesView").style.display = "";
+  document.getElementById("builderView").style.display = "none";
+}
+function showBuilder(){
+  document.getElementById("mySearchesView").style.display = "none";
+  document.getElementById("builderView").style.display = "";
+}
+function newSearch(){
+  state.sites=["cd"]; state.status="any"; state.trailer="any"; state.minVeh=1; state.maxVeh=0; state.ready=0;
+  state.vt=[]; state.from=[]; state.to=[];
+  document.getElementById("pay").value="0";
+  render();
+  editingId = null;
+  showBuilder();
+}
+function editSearch(s){
+  try{
+    const payload = b64urlDecode(s.payload);
+    state.sites = Array.isArray(payload.s) && payload.s.length ? payload.s.slice() : ["cd"];
+    state.status = ["op","inop"].includes(payload.vs) ? payload.vs : "any";
+    state.trailer = ["open","enc"].includes(payload.tr) ? payload.tr : "any";
+    state.minVeh = Number(payload.mn)||1;
+    state.maxVeh = Number(payload.mx)||0;
+    state.ready = Number(payload.rd)||0;
+    state.vt = Array.isArray(payload.vt) ? payload.vt.slice() : [];
+    state.from = Array.isArray(payload.f) ? payload.f.slice() : [];
+    state.to = Array.isArray(payload.to) ? payload.to.slice() : [];
+    document.getElementById("pay").value = payload.p || 0;
+    render();
+    editingId = s.id;
+    showBuilder();
+  }catch(e){ toast("Could not load this search for editing"); }
+}
+document.getElementById("newSearchBtn").addEventListener("click", newSearch);
+document.getElementById("backToListBtn").addEventListener("click", showList);
 
 // Real Telegram Mini App integration: when this page is opened from the bot's own reply-keyboard
 // "🖥 Search builder" button, Telegram injects window.Telegram.WebApp and tg.initData is non-empty.
@@ -422,6 +483,22 @@ async function copyOnly(){
 async function save(){
   if(!state.from.length || !state.to.length){ toast("Add at least one Origin and Destination place"); return; }
   const payload = buildPayload();
+
+  // Preferred path: go through the Worker so this stays a SAVED, editable search in "My Searches"
+  // (create when editingId is empty, update in place when it isn't) instead of a one-shot message.
+  if(WORKER_URL && tg && tg.initData){
+    const body = { type: "save-search", payload };
+    if(editingId) body.id = editingId;
+    const r = await apiAction(body);
+    if(r && r.ok){
+      toast(editingId ? "Saved! Updating your search..." : "Saved! Starting your search...");
+      showList();
+      refreshBackendState();
+      return;
+    }
+    toast("Could not save" + (r && r.error ? " ("+r.error+")" : "") + ". Trying the old way instead.");
+  }
+
   if(tg && tg.initData){
     try{
       tg.sendData(payload);
@@ -433,7 +510,7 @@ async function save(){
     }
   }
   // Reached only when the page was opened NOT as a real Telegram Mini App (e.g. a plain browser tab,
-  // or Telegram's in-app link preview instead of a proper web_app button), or sendData itself failed.
+  // or Telegram's in-app link preview instead of a proper web_app button), or the Worker/sendData both failed.
   const msg = "CDBOT1:"+payload;
   try{ await navigator.clipboard.writeText(msg); toast("Copied! Paste this message into the chat with the bot."); }
   catch(e){ prompt("Copy and paste into the chat with the bot:", msg); }
@@ -497,6 +574,50 @@ function resetTpl(){
 }
 
 function tabIcon(t){ return !t.online ? "🔴" : t.running ? "🟢" : "🟡"; }
+
+function renderMySearches(list){
+  const wrap = document.getElementById("mySearches");
+  if(!list || !list.length){ wrap.innerHTML = '<div class="muted">No saved searches yet. Tap "➕ New" above to create one.</div>'; return; }
+  wrap.innerHTML = "";
+  list.slice().sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0)).forEach(s=>{
+    const row = document.createElement("div"); row.className = "srow";
+
+    const info = document.createElement("div"); info.className = "info"; info.style.cursor = "pointer";
+    info.innerHTML = `<div class="nm">${tabIcon(s)} ${escapeHtml(s.name||s.id)}</div>` +
+      `<div class="meta">${(s.sites||[]).map(x=>x.toUpperCase()).join(" + ")}` +
+      (s.cards ? ` · ${s.cards} loads` : "") + (!s.active ? " · stopped" : "") + `</div>`;
+    info.onclick = ()=> editSearch(s);
+    row.appendChild(info);
+
+    const sw = document.createElement("label"); sw.className = "swtch";
+    const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = !!s.active;
+    cb.onchange = async ()=>{
+      cb.disabled = true;
+      await apiAction({ type: "toggle-search", id: s.id, active: cb.checked });
+      cb.disabled = false;
+      toast(cb.checked ? "Starting..." : "Stopped");
+      refreshBackendState();
+    };
+    const sl = document.createElement("span"); sl.className = "slider";
+    sw.appendChild(cb); sw.appendChild(sl);
+    row.appendChild(sw);
+
+    const edit = document.createElement("button"); edit.className = "trash"; edit.style.color = "#666"; edit.textContent = "✏️";
+    edit.onclick = ()=> editSearch(s);
+    row.appendChild(edit);
+
+    const del = document.createElement("button"); del.className = "trash"; del.textContent = "🗑";
+    del.onclick = async ()=>{
+      if(!confirm(`Delete "${s.name||s.id}"?`)) return;
+      await apiAction({ type: "delete-search", id: s.id });
+      toast("Deleted");
+      refreshBackendState();
+    };
+    row.appendChild(del);
+
+    wrap.appendChild(row);
+  });
+}
 
 function renderAdminTabs(list){
   const wrap = document.getElementById("adminTabs");
@@ -601,6 +722,22 @@ async function refreshBackendState(){
   if(isAdmin){
     renderAdminTabs(st.tabs);
     renderAdminUsers(st.users);
+  }
+
+  // "My Searches" (Search tab default view) - only touched while the list itself is showing, so it
+  // never yanks someone out of the builder mid-edit; the builder's own view keeps working regardless.
+  const mySearchesNote = document.getElementById("mySearchesNote");
+  if(document.getElementById("mySearchesView").style.display !== "none"){
+    if(canUseTpl){
+      mySearchesNote.style.display = "none";
+      renderMySearches(Object.values(st.searches || {}));
+    } else {
+      document.getElementById("mySearches").innerHTML = "";
+      mySearchesNote.style.display = "block";
+      mySearchesNote.textContent = st && st.role === "unregistered"
+        ? "Message the bot anything first (e.g. /start) in a private chat, then reopen the Mini App."
+        : "No connection to the bot. Try closing and reopening the Mini App.";
+    }
   }
 }
 
