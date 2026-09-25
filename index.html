@@ -119,6 +119,9 @@
   .modalNav button{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer}
   .modalNav button:disabled{opacity:.35;cursor:default}
   .modalNav .pos{font-size:11px;color:#888}
+  .helpCard{padding:12px 14px}
+  .helpRow{font-size:13px;line-height:1.5;padding:7px 0;border-top:1px solid #eee}
+  .helpRow:first-child{border-top:0;padding-top:0}
 </style>
 </head>
 <body>
@@ -127,6 +130,7 @@
 <div class="tabbar">
   <div class="tabbtn on" data-tab="search">🔎 Search</div>
   <div class="tabbtn" data-tab="sms">✉️ SMS Template</div>
+  <div class="tabbtn" data-tab="help">❓ Help</div>
   <div class="tabbtn" id="adminTabBtn" data-tab="admin" style="display:none">🛠 Admin</div>
 </div>
 
@@ -175,6 +179,21 @@
 <div class="states-label">Or pick a whole state:</div>
 <div class="states" id="toStates"></div>
 
+<div class="card" style="margin-top:14px">
+  <div class="toggleRow" style="border-top:none;margin-top:0;padding-top:0">
+    <div>
+      <div class="lbl">🛣 Search along route</div>
+      <div class="tiny">Loads whose route passes between Origin and Destination. Needs exactly one city in each (not a whole state).</div>
+    </div>
+    <label class="swtch"><input type="checkbox" id="routeToggle"><span class="slider"></span></label>
+  </div>
+  <div class="intervalRow" id="routeMilesRow" style="display:none;margin-top:10px">
+    <span class="lbl">Distance off route</span>
+    <input type="number" id="routeMilesInput" min="5" max="500" step="5" style="width:70px">
+    <span class="lbl" style="font-weight:400;color:#666">mi</span>
+  </div>
+</div>
+
 <h2>Min Total Pay</h2>
 <input class="field" id="pay" type="number" inputmode="numeric" placeholder="0" value="0">
 
@@ -219,6 +238,31 @@
   <div id="tplDebug" class="muted" style="font-size:11px;margin-top:16px"></div>
 </div>
 
+<!-- ======================= TAB 3: HELP (static instructions, same for everyone) ======================= -->
+<div class="tabpane" id="tab-help">
+  <h1>❓ Help</h1>
+
+  <h2>🔎 Building a search</h2>
+  <div class="card helpCard">
+    <div class="helpRow"><b>Origin / Destination</b> — type a city and set its radius (mi), or tap a state on the grid for the whole state. Use ⇅ to swap them.</div>
+    <div class="helpRow"><b>Min Total Pay</b> — only show loads paying at least this amount.</div>
+    <div class="helpRow"><b>Vehicle Status</b> — Operable, Inoperable, or Any.</div>
+    <div class="helpRow"><b>Trailer Type</b> — Open, Enclosed, or Any.</div>
+    <div class="helpRow"><b>Min / Max # of Vehicles</b> — tap to pick how many vehicles per load.</div>
+    <div class="helpRow"><b>Ready to ship</b> — slide to only show loads ready within that many days.</div>
+    <div class="helpRow"><b>Vehicle Type</b> — filter by ATV, Car, SUV, etc.</div>
+    <div class="helpRow"><b>Search along route</b> — needs exactly one Origin city and one Destination city. Finds loads whose route passes near that path, within the distance (mi) you set.</div>
+    <div class="helpRow"><b>Save</b> — starts the search right away; it keeps running and alerts you about new loads.</div>
+  </div>
+
+  <h2>🔔 Alerts</h2>
+  <div class="card helpCard">
+    <div class="helpRow">Every new matching load is sent to you as soon as it appears.</div>
+    <div class="helpRow">Tap the <b>Order ID</b> — opens that order's page.</div>
+    <div class="helpRow">Tap the <b>vehicle</b> — opens that vehicle's specs.</div>
+  </div>
+</div>
+
 <!-- ======================= TAB 3: ADMIN (rendered only if initData.user.id == ADMIN_TG_ID on the backend) ======================= -->
 <div class="tabpane" id="tab-admin">
   <h1>🛠 Admin Panel</h1>
@@ -261,7 +305,18 @@ const READY = [["All",0],["Today",1],["2",2],["3",3],["4",4],["5",5],["6",6],["7
 // state[k] holds BOTH cities (with zip, r) and whole-state picks (st only).
 // Whole-state picks are shown only as a highlighted square in the grid below (that is their only
 // visual trace) so tapping a state never grows the list above the grid and pushes it down the page.
-const state = { sites:["cd"], status:"any", trailer:"any", minVeh:1, maxVeh:0, ready:0, vt:[], from:[], to:[] };
+const state = { sites:["cd"], status:"any", trailer:"any", minVeh:1, maxVeh:0, ready:0, vt:[], from:[], to:[], route:false, routeMiles:75 };
+
+function renderRouteUi(){
+  const toggle = document.getElementById("routeToggle");
+  const row = document.getElementById("routeMilesRow");
+  const input = document.getElementById("routeMilesInput");
+  toggle.checked = !!state.route;
+  input.value = state.routeMiles || 75;
+  row.style.display = state.route ? "" : "none";
+  toggle.onchange = ()=>{ state.route = toggle.checked; row.style.display = state.route ? "" : "none"; };
+  input.oninput = ()=>{ state.routeMiles = Math.max(5, Math.min(500, Number(input.value)||75)); };
+}
 
 function group(id, opts, single, onSet){
   const el = document.getElementById(id); el.innerHTML="";
@@ -324,6 +379,7 @@ function render(){
   group("trailer", [["Any","any"],["Open","open"],["Enclosed","enc"]], ()=>state.trailer, v=>state.trailer=v);
   renderVehicleSelects();
   renderReadySlider();
+  renderRouteUi();
   group("vtypes", VEH_TYPES.map(v=>[v,v]), ()=>state.vt, v=>{
     const i=state.vt.indexOf(v); if(i>=0) state.vt.splice(i,1); else state.vt.push(v);
   });
@@ -529,7 +585,7 @@ function showBuilder(){
 }
 function newSearch(){
   state.sites=["cd"]; state.status="any"; state.trailer="any"; state.minVeh=1; state.maxVeh=0; state.ready=0;
-  state.vt=[]; state.from=[]; state.to=[];
+  state.vt=[]; state.from=[]; state.to=[]; state.route=false; state.routeMiles=75;
   document.getElementById("pay").value="0";
   document.getElementById("searchName").value="";
   render();
@@ -548,6 +604,8 @@ function editSearch(s){
     state.vt = Array.isArray(payload.vt) ? payload.vt.slice() : [];
     state.from = Array.isArray(payload.f) ? payload.f.slice() : [];
     state.to = Array.isArray(payload.to) ? payload.to.slice() : [];
+    state.route = !!payload.rt;
+    state.routeMiles = Math.max(5, Math.min(500, Number(payload.cw)||75));
     document.getElementById("pay").value = payload.p || 0;
     document.getElementById("searchName").value = s.name || "";
     render();
@@ -579,19 +637,11 @@ try{ if(tg){ tg.ready(); tg.expand(); } }catch(e){}
   if(tg && tg.initData) sub.textContent = "Set your filters and tap \"Save\" — the search starts right away, no copying needed.";
   else if(tg) sub.textContent = "⚠️ Opened inside Telegram, but without Mini App data (initData is empty). Close this and open it again via the \"🖥 Search builder\" button below the message field - not via any other link or button.";
   else sub.textContent = "⚠️ Telegram's Mini App script did not load (no internet, or opened outside Telegram). Set your filters and tap \"Save\" - the message will be copied instead; paste it into the chat with the bot.";
-
-  // TEMPORARY diagnostic - shows exactly what Telegram put on the URL when it opened this page, so we
-  // can tell whether Telegram sent nothing at all vs. sent something the SDK failed to parse. Safe to
-  // show: it is only visible to you, in your own Mini App, never sent anywhere.
-  const h = location.hash || "";
-  const dbg = document.createElement("div");
-  dbg.style.cssText = "font-size:10px;color:#999;text-align:center;margin-top:4px;word-break:break-all;padding:0 8px";
-  const hasData = /(^|[#&])tgWebAppData=/.test(h);
-  const dataLen = hasData ? decodeURIComponent(h.split('tgWebAppData=')[1].split('&')[0]).length : 0;
-  dbg.textContent = "hash len=" + h.length + " · tgWebAppData present: " + (hasData ? ("YES (" + dataLen + " chars)") : "NO") +
-    " · platform: " + (tg && tg.platform || "?") + " · version: " + (tg && tg.version || "?");
-  sub.after(dbg);
 })();
+
+function isRouteEligible(){
+  return state.from.length===1 && !state.from[0].st && state.to.length===1 && !state.to[0].st;
+}
 
 function buildPayload(){
   const payload = {
@@ -600,6 +650,7 @@ function buildPayload(){
     tr: state.trailer, vs: state.status, rd: state.ready,
     mn: state.minVeh, mx: state.maxVeh, vt: state.vt,
   };
+  if(state.route && isRouteEligible()){ payload.rt = 1; payload.cw = state.routeMiles || 75; }
   return b64urlEncode(payload);
 }
 
@@ -612,6 +663,7 @@ async function copyOnly(){
 
 async function save(){
   if(!state.from.length || !state.to.length){ toast("Add at least one Origin and Destination place"); return; }
+  if(state.route && !isRouteEligible()){ toast("Search along route needs exactly one Origin city and one Destination city (not a whole state)"); return; }
   const payload = buildPayload();
 
   // Preferred path: go through the Worker so this stays a SAVED, editable search in "My Searches"
@@ -873,6 +925,7 @@ function openFilterModal(list, idx){
     `<div class="fk">Max Vehicles</div><div class="fv">${Number(payload.mx)||0 ? Number(payload.mx) : "Any"}</div>` +
     `<div class="fk">Ready to ship</div><div class="fv">${Number(payload.rd)||0 ? Number(payload.rd)+"d" : "All"}</div>` +
     `<div class="fk">Min Total Pay</div><div class="fv">$${Number(payload.p)||0}</div>` +
+    (payload.rt ? `<div class="fk">Search along route</div><div class="fv">✅ ${Math.max(5,Math.min(500,Number(payload.cw)||75))}mi off route</div>` : "") +
     `<div class="fk full" style="margin-top:4px">Vehicle Type</div><div class="fv full" style="text-align:left;font-weight:400">${escapeHtml(vtTxt)}</div>` +
     `<div class="full" style="margin-top:6px"><div class="fk">Origin</div><div class="placesBox">${formatPlaces(payload.f)}</div></div>` +
     `<div class="full" style="margin-top:6px"><div class="fk">Destination</div><div class="placesBox">${formatPlaces(payload.to)}</div></div>`;
