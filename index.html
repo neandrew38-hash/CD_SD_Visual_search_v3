@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -46,10 +46,10 @@
 </head>
 <body>
 <div class="toast" id="toast"></div>
-<h1>🔎 Конструктор пошуку</h1>
-<div class="sub" id="subText">Налаштуй фільтри й натисни «Зберегти» — пошук почнеться одразу.</div>
+<h1>🔎 Search Builder</h1>
+<div class="sub" id="subText">Set your filters and tap "Save" — the search will start right away.</div>
 
-<h2>Сайт</h2>
+<h2>Site</h2>
 <div class="row" id="sites"></div>
 
 <h2>Vehicle Status</h2>
@@ -74,25 +74,25 @@
 
 <h2>Origin</h2>
 <div class="searchwrap">
-  <div class="addrow"><input class="field" id="fromCity" placeholder="Почни вводити місто..." autocomplete="off"><input class="field" id="fromR" type="number" value="50" style="max-width:64px" title="miles"></div>
+  <div class="addrow"><input class="field" id="fromCity" placeholder="Start typing a city..." autocomplete="off"><input class="field" id="fromR" type="number" value="50" style="max-width:64px" title="miles"></div>
   <div class="suggest" id="fromSuggest"></div>
 </div>
 <div id="fromList"></div>
-<div class="states-label">Або одразу цілий штат:</div>
+<div class="states-label">Or pick a whole state:</div>
 <div class="states" id="fromStates"></div>
 
 <h2>Destination</h2>
 <div class="searchwrap">
-  <div class="addrow"><input class="field" id="toCity" placeholder="Почни вводити місто..." autocomplete="off"><input class="field" id="toR" type="number" value="50" style="max-width:64px" title="miles"></div>
+  <div class="addrow"><input class="field" id="toCity" placeholder="Start typing a city..." autocomplete="off"><input class="field" id="toR" type="number" value="50" style="max-width:64px" title="miles"></div>
   <div class="suggest" id="toSuggest"></div>
 </div>
 <div id="toList"></div>
-<div class="states-label">Або одразу цілий штат:</div>
+<div class="states-label">Or pick a whole state:</div>
 <div class="states" id="toStates"></div>
 
 <div class="save">
-  <button onclick="save()">💾 Зберегти</button>
-  <button class="alt" onclick="copyOnly()">📋 Тільки скопіювати</button>
+  <button onclick="save()">💾 Save</button>
+  <button class="alt" onclick="copyOnly()">📋 Copy only</button>
 </div>
 
 <script>
@@ -204,7 +204,7 @@ function onCityInput(k){
 
 async function runSearch(k,q){
   const box = document.getElementById(k+"Suggest");
-  box.style.display="block"; box.innerHTML = `<div class="hint">Шукаю...</div>`;
+  box.style.display="block"; box.innerHTML = `<div class="hint">Searching...</div>`;
   if(abortCtrl) abortCtrl.abort();
   abortCtrl = new AbortController();
   try{
@@ -223,7 +223,7 @@ async function runSearch(k,q){
       if(seen.has(key)) continue; seen.add(key);
       opts.push({c:city, stc:stAbbr, zip});
     }
-    if(!opts.length){ box.innerHTML = `<div class="hint">Нічого не знайдено. Спробуй "Місто, ШТ" вручну і натисни Enter.</div>`; return; }
+    if(!opts.length){ box.innerHTML = `<div class="hint">Nothing found. Try typing "City, ST" manually and press Enter.</div>`; return; }
     box.innerHTML="";
     opts.forEach(o=>{
       const row=document.createElement("div"); row.className="opt";
@@ -237,7 +237,7 @@ async function runSearch(k,q){
   }catch(e){
     if(e.name==="AbortError") return;
     // blocked (CSP on claude.ai) or offline - fall back silently to manual entry
-    box.innerHTML = `<div class="hint">Підказки міст тут недоступні (обмеження хостингу). Введи "Місто, ШТ" і натисни Enter.</div>`;
+    box.innerHTML = `<div class="hint">City suggestions aren't available right now. Type "City, ST" and press Enter.</div>`;
   }
 }
 
@@ -247,7 +247,7 @@ function manualAdd(k){
   const cityEl=document.getElementById(k+"City"), rEl=document.getElementById(k+"R");
   const raw=cityEl.value.trim(); if(!raw) return;
   const m = raw.match(/^(.+?),\s*([A-Za-z]{2})$/);
-  if(!m){ toast("Формат: Місто, ШТ (наприклад Temecula, CA)"); return; }
+  if(!m){ toast("Format: City, ST (e.g. Temecula, CA)"); return; }
   addCity(k, { c: m[1].trim(), stc: m[2].toUpperCase(), zip:"", r: Number(rEl.value)||50 });
 }
 
@@ -279,8 +279,8 @@ const tg = (window.Telegram && window.Telegram.WebApp) || null;
 try{ if(tg){ tg.ready(); tg.expand(); } }catch(e){}
 (function(){
   const sub = document.getElementById("subText");
-  if(tg && tg.initData) sub.textContent = "Налаштуй фільтри й натисни «Зберегти» — пошук стартує одразу, без копіювання.";
-  else sub.textContent = "Налаштуй фільтри й натисни «Зберегти». Ця сторінка відкрита не як Telegram Mini App, тож повідомлення просто скопіюється — встав його в чат з ботом.";
+  if(tg && tg.initData) sub.textContent = "Set your filters and tap \"Save\" — the search starts right away, no copying needed.";
+  else sub.textContent = "Set your filters and tap \"Save\". This page was not opened as a Telegram Mini App, so the message will just be copied — paste it into the chat with the bot.";
 })();
 
 function buildPayload(){
@@ -294,26 +294,28 @@ function buildPayload(){
 }
 
 async function copyOnly(){
-  if(!state.from.length || !state.to.length){ toast("Додай хоча б одне місце Origin і Destination"); return; }
+  if(!state.from.length || !state.to.length){ toast("Add at least one Origin and Destination place"); return; }
   const msg = "CDBOT1:"+buildPayload();
-  try{ await navigator.clipboard.writeText(msg); toast("Скопійовано! Встав це повідомлення в чат з ботом."); }
-  catch(e){ prompt("Скопіюй і встав у чат з ботом:", msg); }
+  try{ await navigator.clipboard.writeText(msg); toast("Copied! Paste this message into the chat with the bot."); }
+  catch(e){ prompt("Copy and paste into the chat with the bot:", msg); }
 }
 
 async function save(){
-  if(!state.from.length || !state.to.length){ toast("Додай хоча б одне місце Origin і Destination"); return; }
+  if(!state.from.length || !state.to.length){ toast("Add at least one Origin and Destination place"); return; }
   const payload = buildPayload();
   if(tg && tg.initData){
     try{
       tg.sendData(payload);
-      toast("Надіслано! Пошук стартує...");
+      toast("Sent! Search is starting...");
       setTimeout(()=>{ try{ tg.close(); }catch(e){} }, 400);
       return;
     }catch(e){ /* fall through to clipboard below */ }
   }
+  // Reached only when the page was opened NOT as a real Telegram Mini App (e.g. a plain browser tab,
+  // or Telegram's in-app link preview instead of a proper web_app button) - sendData is unavailable there.
   const msg = "CDBOT1:"+payload;
-  try{ await navigator.clipboard.writeText(msg); toast("Скопійовано! Встав це повідомлення в чат з ботом."); }
-  catch(e){ prompt("Скопіюй і встав у чат з ботом:", msg); }
+  try{ await navigator.clipboard.writeText(msg); toast("Copied! Paste this message into the chat with the bot."); }
+  catch(e){ prompt("Copy and paste into the chat with the bot:", msg); }
 }
 
 render();
