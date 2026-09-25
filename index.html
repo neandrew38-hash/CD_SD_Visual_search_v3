@@ -159,6 +159,14 @@
 <!-- ======================= TAB 3: ADMIN (rendered only if initData.user.id == ADMIN_TG_ID on the backend) ======================= -->
 <div class="tabpane" id="tab-admin">
   <h1>🛠 Admin Panel</h1>
+  <h2>Page refresh interval</h2>
+  <div class="muted" style="margin-bottom:8px">How often the Windows program reloads each search's page to look for new loads. Lower = faster alerts but more load on the site; higher = slower alerts but gentler.</div>
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+    <input type="number" id="reloadSecInput" min="5" max="120" step="1" style="width:80px" />
+    <span class="muted">seconds</span>
+    <button id="reloadSecSaveBtn" style="padding:8px 14px;font-weight:700;border:0;border-radius:10px;background:var(--blue);color:#fff">Save</button>
+    <span id="reloadSecNote" class="muted"></span>
+  </div>
   <h2>Saved Searches</h2>
   <div id="adminTabs"><div class="muted">Loading...</div></div>
   <h2>Users</h2>
@@ -691,6 +699,30 @@ function renderAdminTabs(list){
   });
 }
 
+let reloadSecDirty = false;
+(function initReloadSecUi(){
+  const input = document.getElementById("reloadSecInput");
+  const btn = document.getElementById("reloadSecSaveBtn");
+  const note = document.getElementById("reloadSecNote");
+  if(!input || !btn) return;
+  input.addEventListener("input", ()=>{ reloadSecDirty = true; });
+  btn.onclick = async ()=>{
+    const seconds = Math.max(5, Math.min(120, Number(input.value) || 10));
+    input.value = seconds;
+    btn.disabled = true;
+    const r = await apiAction({ type: "set-reload-interval", seconds });
+    btn.disabled = false;
+    if(r && r.ok){
+      reloadSecDirty = false;
+      note.textContent = "Saved.";
+      toast("Saved - the desktop program will pick this up within a few seconds.");
+      setTimeout(()=>{ note.textContent = ""; }, 3000);
+    } else {
+      note.textContent = "Could not save.";
+    }
+  };
+})();
+
 function renderAdminUsers(users){
   const wrap = document.getElementById("adminUsers");
   const list = Object.values(users||{}).sort((a,b)=>(b.since||0)-(a.since||0));
@@ -756,6 +788,10 @@ async function refreshBackendState(){
   if(isAdmin){
     renderAdminTabs(st.tabs);
     renderAdminUsers(st.users);
+    if(!reloadSecDirty){
+      const secs = (st.settings && st.settings.reloadSec) || 10;
+      document.getElementById("reloadSecInput").value = secs;
+    }
   }
 
   // "My Searches" (Search tab default view) - only touched while the list itself is showing, so it
