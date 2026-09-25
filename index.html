@@ -63,6 +63,20 @@
   .trash{flex:0 0 auto;font-size:18px;background:none;border:0;color:#999;cursor:pointer;padding:4px}
   .muted{color:#888;font-size:13px;text-align:center;padding:20px 0}
   .warn{color:#a33;font-size:12px;text-align:center;padding:10px 0}
+  .card{border:1px solid var(--line);border-radius:10px;padding:14px;margin-top:8px}
+  .card .desc{color:#666;font-size:13px;line-height:1.4;margin-bottom:14px}
+  .intervalRow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .intervalRow input[type=number]{width:64px;padding:8px;border:1px solid var(--line);border-radius:8px;font-size:15px;text-align:center}
+  .intervalRow .lbl{font-size:13px;color:#333;font-weight:600}
+  .saveBtn{padding:9px 16px;font-weight:700;border:0;border-radius:8px;background:var(--blue);color:#fff;font-size:14px}
+  .saveBtn:disabled{opacity:.5}
+  .saveNote{font-size:12px;margin-top:8px;min-height:14px}
+  .saveNote.ok{color:#1a7a3c}
+  .saveNote.err{color:#a33}
+  .badgeWrap{margin-top:4px}
+  .badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;margin-top:3px}
+  .badge.active{background:#e5f6ec;color:#1a7a3c}
+  .badge.blocked{background:#fbe9e9;color:#a33}
 </style>
 </head>
 <body>
@@ -159,20 +173,25 @@
 <!-- ======================= TAB 3: ADMIN (rendered only if initData.user.id == ADMIN_TG_ID on the backend) ======================= -->
 <div class="tabpane" id="tab-admin">
   <h1>🛠 Admin Panel</h1>
-  <h2>Page refresh interval</h2>
-  <div class="muted" style="margin-bottom:8px">How often the Windows program reloads each search's page to look for new loads. Each reload picks a random wait time in this range (not a fixed number every time) so it doesn't look like a metronome. Lower = faster alerts but more load on the site; higher = slower alerts but gentler.</div>
-  <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">
-    <span class="muted">from</span>
-    <input type="number" id="reloadMinInput" min="5" max="300" step="1" style="width:70px" />
-    <span class="muted">to</span>
-    <input type="number" id="reloadMaxInput" min="5" max="300" step="1" style="width:70px" />
-    <span class="muted">seconds</span>
-    <button id="reloadSecSaveBtn" style="padding:8px 14px;font-weight:700;border:0;border-radius:10px;background:var(--blue);color:#fff">Save</button>
-    <span id="reloadSecNote" class="muted"></span>
+  <h2>⏱ Page refresh interval</h2>
+  <div class="card">
+    <div class="desc">How often the Windows program reloads each search's page to look for new loads. Each reload picks a random wait time in this range (not the same number every time), so it doesn't look like a metronome. Lower = faster alerts but more load on the site; higher = slower alerts but gentler.</div>
+    <div class="intervalRow">
+      <span class="lbl">From</span>
+      <input type="number" id="reloadMinInput" min="5" max="300" step="1" />
+      <span class="lbl">to</span>
+      <input type="number" id="reloadMaxInput" min="5" max="300" step="1" />
+      <span class="lbl" style="font-weight:400;color:#666">seconds</span>
+      <button id="reloadSecSaveBtn" class="saveBtn" style="margin-left:auto">💾 Save</button>
+    </div>
+    <div id="reloadSecNote" class="saveNote"></div>
   </div>
-  <h2>Saved Searches</h2>
+
+  <h2>🔎 Saved Searches</h2>
   <div id="adminTabs"><div class="muted">Loading...</div></div>
-  <h2>Users</h2>
+
+  <h2>👥 Users</h2>
+  <div class="desc" style="margin:0 0 4px">Anyone who has ever messaged the bot shows up here. The switch controls whether they can use the bot at all - green "Active" means they can build and run their own searches; red "Blocked" means the bot ignores them.</div>
   <div id="adminUsers"></div>
   <div id="adminBackendWarn" class="warn" style="display:none">Backend not connected (WORKER_URL is empty in this file) - this tab cannot work without it. See the instructions at the top of worker.js.</div>
 </div>
@@ -721,10 +740,11 @@ let reloadSecDirty = false;
     btn.disabled = false;
     if(r && r.ok){
       reloadSecDirty = false;
-      note.textContent = "Saved.";
-      toast("Saved - the desktop program will pick this up within a few seconds.");
-      setTimeout(()=>{ note.textContent = ""; }, 3000);
+      note.className = "saveNote ok";
+      note.textContent = "✅ Saved - the desktop program will pick this up within a few seconds.";
+      setTimeout(()=>{ note.textContent = ""; note.className = "saveNote"; }, 4000);
     } else {
+      note.className = "saveNote err";
       note.textContent = "Could not save.";
     }
   };
@@ -738,17 +758,22 @@ function renderAdminUsers(users){
   list.forEach(u=>{
     const row = document.createElement("div"); row.className = "srow";
     const info = document.createElement("div"); info.className = "info";
+    const badge = () => `<span class="badge ${u.active?"active":"blocked"}">${u.active?"✅ Active":"⛔ Blocked"}</span>`;
     info.innerHTML = `<div class="nm">${escapeHtml(u.name)}${u.username?" (@"+escapeHtml(u.username)+")":""}</div>` +
-      `<div class="meta">ID ${escapeHtml(u.id)}</div>`;
+      `<div class="meta">ID ${escapeHtml(u.id)}</div><div class="badgeWrap">${badge()}</div>`;
     row.appendChild(info);
 
-    const sw = document.createElement("label"); sw.className = "swtch";
+    const sw = document.createElement("label"); sw.className = "swtch"; sw.title = u.active ? "Tap to block" : "Tap to unblock";
     const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = !!u.active;
     cb.onchange = async ()=>{
       cb.disabled = true;
+      const willBeActive = cb.checked;
       await apiAction({ type: "toggle-user", id: u.id });
       cb.disabled = false;
-      toast(cb.checked ? "Unblocked" : "Blocked");
+      u.active = willBeActive;
+      info.querySelector(".badgeWrap").innerHTML = badge();
+      sw.title = u.active ? "Tap to block" : "Tap to unblock";
+      toast(willBeActive ? "✅ Unblocked - can use the bot again" : "⛔ Blocked - bot will ignore this person");
     };
     const sl = document.createElement("span"); sl.className = "slider";
     sw.appendChild(cb); sw.appendChild(sl);
