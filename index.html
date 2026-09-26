@@ -25,9 +25,30 @@
       --shadow:rgba(0,0,0,.5);--glow:rgba(255,138,61,.45);
     }
   }
+  /* Manual override from the theme toggle button (top-right) - wins over the system-follow default
+     above regardless of source order, because an attribute selector on :root is more specific than a
+     plain :root (even inside @media). Set by the small script right after <body>. */
+  :root[data-theme="light"]{
+    --accent:#E8720C;--accent-dark:#C25E08;--accent-tint:#FDEEE1;
+    --bg:#EFEEF2;--card:#fff;--fg:#1C1C1E;--line:#DEDEE3;
+    --text2:#444;--text3:#666;--text4:#8A8A90;
+    --hairline:#EDEDED;--track:#CCC;--surface-soft:#F7F6F4;
+    --success:#1A7A3C;--success-bg:#E5F6EC;--danger:#AA3333;--danger-bg:#FBE9E9;--warn-text:#B45309;
+    --shadow:rgba(20,20,30,.08);--glow:rgba(232,114,12,.30);
+  }
+  :root[data-theme="dark"]{
+    --accent:#FF8A3D;--accent-dark:#E8720C;--accent-tint:rgba(232,114,12,.22);
+    --bg:#141416;--card:#1E1E22;--fg:#F2F2F4;--line:#302F35;
+    --text2:#D6D6DA;--text3:#A6A6AE;--text4:#86868E;
+    --hairline:#2B2B30;--track:#46454C;--surface-soft:#1A1A1E;
+    --success:#3DDC84;--success-bg:rgba(61,220,132,.16);--danger:#FF6B6B;--danger-bg:rgba(255,107,107,.16);--warn-text:#F0A742;
+    --shadow:rgba(0,0,0,.5);--glow:rgba(255,138,61,.45);
+  }
+  .themeToggle{position:fixed;top:calc(8px + env(safe-area-inset-top,0px));right:10px;z-index:8;width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--text3);font-size:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 6px var(--shadow);opacity:.88;padding:0}
+  .themeToggle:active{opacity:1;transform:scale(.94)}
   *{box-sizing:border-box}
   html,body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,Segoe UI,Roboto,sans-serif}
-  body{padding:10px 12px 100px;max-width:520px;margin:0 auto}
+  body{padding:10px 12px 180px;max-width:520px;margin:0 auto}
   h1{font-size:20px;text-align:center;margin:6px 0 2px}
   .sub{font-size:12px;color:var(--text3);text-align:center;margin-bottom:10px}
   h2{font-size:15px;margin:18px 0 8px;color:var(--text2);text-align:center}
@@ -69,14 +90,15 @@
   input.rangeSlider{-webkit-appearance:none;appearance:none;flex:1;width:auto;height:3px;border-radius:3px;background:var(--line);outline:none}
   input.rangeSlider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.2)}
   input.rangeSlider::-moz-range-thumb{width:18px;height:18px;border:0;border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.2)}
-  .save{position:fixed;left:0;right:0;bottom:0;padding:10px calc(12px + env(safe-area-inset-bottom,0px)) calc(12px + env(safe-area-inset-bottom,0px));background:var(--card);border-top:1px solid var(--line);display:flex;flex-direction:column;gap:6px;max-width:520px;margin:0 auto}
+  .save{position:fixed;left:0;right:0;bottom:calc(62px + env(safe-area-inset-bottom,0px));padding:10px 12px;background:var(--card);border-top:1px solid var(--line);display:flex;flex-direction:column;gap:6px;max-width:520px;margin:0 auto;border-radius:14px 14px 0 0;box-shadow:0 -4px 14px var(--shadow)}
   .save button{width:100%;padding:14px;font-size:17px;font-weight:700;border:0;border-radius:10px;background:var(--accent);color:#fff;box-shadow:0 4px 16px var(--glow);transition:transform .1s}
   .save button:active{transform:scale(.98)}
   .save .alt{background:var(--hairline);color:var(--text2);font-size:13px;padding:9px;font-weight:600}
   .save button:disabled{opacity:.5}
   .toast{position:fixed;left:12px;right:12px;top:12px;background:var(--accent);color:#fff;padding:10px 14px;border-radius:8px;font-size:14px;text-align:center;display:none;z-index:10}
-  .tabbar{position:sticky;top:0;background:var(--card);display:flex;gap:4px;border-bottom:1px solid var(--line);z-index:6;margin:0 -12px 8px;padding:6px 6px 8px}
-  .tabbtn{flex:1;text-align:center;padding:8px 4px;font-size:12.5px;font-weight:700;color:var(--text4);cursor:pointer;border-radius:10px;transition:background .15s,color .15s,box-shadow .15s}
+  .tabbar{position:fixed;left:0;right:0;bottom:0;background:var(--card);display:flex;gap:4px;border-top:1px solid var(--line);z-index:7;max-width:520px;margin:0 auto;padding:8px 6px calc(8px + env(safe-area-inset-bottom,0px))}
+  .tabbtn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-align:center;padding:6px 2px;font-size:11px;font-weight:700;color:var(--text4);cursor:pointer;border-radius:10px;transition:background .15s,color .15s,box-shadow .15s;line-height:1.2}
+  .tabbtn .tbIcon{font-size:18px;line-height:1}
   .tabbtn.on{color:var(--accent);background:var(--accent-tint);box-shadow:0 3px 12px var(--glow)}
   .tabpane{display:none}
   .tabpane.on{display:block}
@@ -149,13 +171,44 @@
 </style>
 </head>
 <body>
+<button type="button" id="themeToggle" class="themeToggle" title="Switch light/dark theme" aria-label="Switch light/dark theme">🌙</button>
+<script>
+// Runs immediately (before the rest of the page's own <script> block, which is loaded later down the
+// file) so the theme is set before first paint - avoids a flash of the wrong theme. Falls back to
+// following the phone's own light/dark setting (the @media rule in <style>) until the person taps the
+// button once, then remembers their choice via localStorage (wrapped in try/catch - private-browsing
+// mode or a locked-down webview can make localStorage throw instead of just being empty).
+(function(){
+  var KEY = 'cdbotTheme';
+  function getSaved(){ try{ return localStorage.getItem(KEY); }catch(e){ return null; } }
+  function setSaved(v){ try{ localStorage.setItem(KEY, v); }catch(e){} }
+  function systemDark(){ return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches; }
+  function effective(){ var s = getSaved(); return (s === 'light' || s === 'dark') ? s : (systemDark() ? 'dark' : 'light'); }
+  function apply(theme){
+    document.documentElement.setAttribute('data-theme', theme);
+    var btn = document.getElementById('themeToggle');
+    if(btn) btn.textContent = theme === 'dark' ? '🌙' : '☀️';
+  }
+  apply(effective());
+  document.addEventListener('DOMContentLoaded', function(){
+    var btn = document.getElementById('themeToggle');
+    if(!btn) return;
+    apply(effective());
+    btn.addEventListener('click', function(){
+      var next = effective() === 'dark' ? 'light' : 'dark';
+      setSaved(next);
+      apply(next);
+    });
+  });
+})();
+</script>
 <div class="toast" id="toast"></div>
 
 <div class="tabbar">
-  <div class="tabbtn on" data-tab="search">🔎 Search</div>
-  <div class="tabbtn" data-tab="sms">✉️ SMS Template</div>
-  <div class="tabbtn" data-tab="help">❓ Help</div>
-  <div class="tabbtn" id="adminTabBtn" data-tab="admin" style="display:none">🛠 Admin</div>
+  <div class="tabbtn on" data-tab="search"><span class="tbIcon">🔎</span><span class="tbLabel">Search</span></div>
+  <div class="tabbtn" data-tab="sms"><span class="tbIcon">✉️</span><span class="tbLabel">SMS Template</span></div>
+  <div class="tabbtn" data-tab="help"><span class="tbIcon">❓</span><span class="tbLabel">Help</span></div>
+  <div class="tabbtn" id="adminTabBtn" data-tab="admin" style="display:none"><span class="tbIcon">🛠</span><span class="tbLabel">Admin</span></div>
 </div>
 
 <!-- ======================= TAB 1: SEARCH (My Searches list + visual builder) ======================= -->
@@ -1034,7 +1087,7 @@ document.getElementById("excludeCoInput").addEventListener("keydown", e=>{
 });
 
 // Real Telegram Mini App integration: when this page is opened from the bot's own reply-keyboard
-// "🖥 Search builder" button, Telegram injects window.Telegram.WebApp and tg.initData is non-empty.
+// "🖥 Search" button, Telegram injects window.Telegram.WebApp and tg.initData is non-empty.
 // In that case tg.sendData() hands the payload straight back to the bot - no copy, no paste, no extra
 // tap on Send, no username to configure. (This only works when the page is opened that specific way -
 // see the note below the buttons.) Opened any other way (plain browser, testing), it falls back to
@@ -1044,7 +1097,7 @@ try{ if(tg){ tg.ready(); tg.expand(); } }catch(e){}
 (function(){
   const sub = document.getElementById("subText");
   if(tg && tg.initData) sub.textContent = "Set your filters and tap \"Save\" — the search starts right away, no copying needed.";
-  else if(tg) sub.textContent = "⚠️ Opened inside Telegram, but without Mini App data (initData is empty). Close this and open it again via the \"🖥 Search builder\" button below the message field - not via any other link or button.";
+  else if(tg) sub.textContent = "⚠️ Opened inside Telegram, but without Mini App data (initData is empty). Close this and open it again via the \"🖥 Search\" button below the message field - not via any other link or button.";
   else sub.textContent = "⚠️ Telegram's Mini App script did not load (no internet, or opened outside Telegram). Set your filters and tap \"Save\" - the message will be copied instead; paste it into the chat with the bot.";
 })();
 
