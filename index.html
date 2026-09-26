@@ -210,14 +210,26 @@
 <div id="shipLocBlock" style="display:none">
 <h2>Origin states</h2>
 <div class="states" id="shipFromStates"></div>
+<div class="tiny" style="margin:8px 0 4px">Or a specific city instead of a whole state:</div>
+<div class="searchwrap">
+  <div class="addrow"><input class="field" id="shipFromCity" placeholder="Start typing a city..." autocomplete="off"></div>
+  <div class="suggest" id="shipFromSuggest"></div>
+</div>
+<div id="shipFromCityList"></div>
 
 <div class="swapWrap"><button id="shipSwapBtn" class="swapBtn" title="Swap Origin and Destination">⇅</button></div>
 
 <h2>Destination states</h2>
 <div class="states" id="shipToStates"></div>
+<div class="tiny" style="margin:8px 0 4px">Or a specific city instead of a whole state:</div>
+<div class="searchwrap">
+  <div class="addrow"><input class="field" id="shipToCity" placeholder="Start typing a city..." autocomplete="off"></div>
+  <div class="suggest" id="shipToSuggest"></div>
+</div>
+<div id="shipToCityList"></div>
 
 <div class="card" style="margin-top:14px">
-  <div class="tiny" style="margin-bottom:8px">Want a route search instead of whole states (loads along the way from A to B)? Ship.Cars needs Google's own place ID for that, which this Mini App can't generate - open ship.cars, build the route there once (Search Along Route tab), copy the page's link, and paste it here. Optional - leave blank to just use the states above.</div>
+  <div class="tiny" style="margin-bottom:8px">Want a route search instead of whole states (loads along the way from A to B)? Ship.Cars needs Google's own place ID for that, which this Mini App can't generate - open ship.cars, build the route there once (Search Along Route tab), copy the page's link, and paste it here. Optional - leave blank to just use the states/cities above.</div>
   <div class="addrow">
     <input class="field" id="shipLinkInput" placeholder="Optional: paste a ship.cars route link...">
     <button type="button" id="shipLinkUseBtn" class="addBtn">✅</button>
@@ -327,7 +339,8 @@
   <div class="card helpCard">
     <div class="helpRow">Ship.Cars works a bit differently: pick <b>"Ship.Cars"</b> as the Site (this replaces Origin/Destination and Vehicle Type with an Origin/Destination <b>states</b> grid, since Ship.Cars can't be searched the same way as CD/SD).</div>
     <div class="helpRow">Just tap the states you want on both grids — no typing, no links needed. This searches all loads between those states.</div>
-    <div class="helpRow">Want a route search instead (loads along the way from a specific city to another, not whole states)? Open ship.cars yourself, use <b>Search Along Route</b> there, copy the page's link, and paste it in the optional box below the states — that replaces the states for this one search. Leave it blank to just use the states above.</div>
+    <div class="helpRow">Prefer a specific city instead of a whole state? Type it in the small search box under each states grid (needs a Google Places API key set up on the computer program - ask the developer if it's not working).</div>
+    <div class="helpRow">Want a route search instead (loads along the way from a specific city to another, not whole states)? Open ship.cars yourself, use <b>Search Along Route</b> there, copy the page's link, and paste it in the optional box below the states — that replaces the states/cities above for this one search. Leave it blank to just use the states/cities above.</div>
     <div class="helpRow">Note: Ship.Cars alerts may not always show the company name or phone number — Ship.Cars only reveals those after opening a load's own details, and it doesn't always work. Route, price, mileage, $/mile and vehicle count are always reliable.</div>
   </div>
 
@@ -455,6 +468,10 @@ const VEH_TYPES = ["ATV","Boat","Car","Heavy Equipment","Large Yacht","Motorcycl
 // grids (shipFromStates/shipToStates) so Ship.Cars gets its own simplified, city-free picker while reusing
 // all the existing logic - see the render loop and paintGrid() below for how the same array feeds both.
 const STATE_GRID_IDS = { from: ["fromStates", "shipFromStates"], to: ["toStates", "shipToStates"] };
+// Same idea as STATE_GRID_IDS, but for the "specific city" chip list - both CD/SD's own city box and
+// Ship.Cars' own (optional, Google-Places-backed) city box read/write the exact same state.from/state.to
+// arrays, so a city added from either UI shows up (and can be removed) in both places.
+const CITY_LIST_IDS = { from: ["fromList", "shipFromCityList"], to: ["toList", "shipToCityList"] };
 const READY = [["All",0],["Today",1],["2",2],["3",3],["4",4],["5",5],["6",6],["7",7],["8",8],["9",9],["10",10],["14",14]];
 
 // state[k] holds BOTH cities (with zip, r) and whole-state picks (st only).
@@ -695,20 +712,23 @@ function paintGrid(k){
 }
 
 function renderList(k){
-  const list = document.getElementById(k+"List"); list.innerHTML="";
-  state[k].forEach((p,i)=>{
-    if(p.st) return;   // whole states live only in the grid, not here
-    const row=document.createElement("div"); row.className="place-row";
-    const name=document.createElement("div"); name.className="name";
-    name.innerHTML = "📍 "+p.c+", "+p.stc + (p.zip ? ` <span class="zip">${p.zip}</span>` : "");
-    row.appendChild(name);
-    const r=document.createElement("input"); r.type="number"; r.value=p.r||50;
-    r.oninput=()=>{ p.r=Number(r.value)||50; };
-    row.appendChild(r);
-    const rm=document.createElement("button"); rm.textContent="−";
-    rm.onclick=()=>{ state[k].splice(i,1); renderList(k); };
-    row.appendChild(rm);
-    list.appendChild(row);
+  CITY_LIST_IDS[k].forEach(lid=>{
+    const list = document.getElementById(lid); if(!list) return;
+    list.innerHTML="";
+    state[k].forEach((p,i)=>{
+      if(p.st) return;   // whole states live only in the grid, not here
+      const row=document.createElement("div"); row.className="place-row";
+      const name=document.createElement("div"); name.className="name";
+      name.innerHTML = "📍 "+p.c+", "+p.stc + (p.zip ? ` <span class="zip">${p.zip}</span>` : "");
+      row.appendChild(name);
+      const r=document.createElement("input"); r.type="number"; r.value=p.r||50;
+      r.oninput=()=>{ p.r=Number(r.value)||50; };
+      row.appendChild(r);
+      const rm=document.createElement("button"); rm.textContent="−";
+      rm.onclick=()=>{ state[k].splice(i,1); renderList(k); };
+      row.appendChild(rm);
+      list.appendChild(row);
+    });
   });
 }
 
@@ -891,6 +911,79 @@ function manualAddWp(){
   el.addEventListener("blur", ()=>setTimeout(hideWpSuggest,150));
 })();
 
+// ---------- Ship.Cars' own "specific city" pickers (writes into the SAME state.from/state.to as CD/SD -
+// see CITY_LIST_IDS/STATE_GRID_IDS) ----------
+// A separate, small set of functions rather than reusing the CD/SD from/to ones directly - those are keyed
+// off DOM ids "fromCity"/"toCity" which already exist (hidden) inside cdSdLocBlock, so this uses its own
+// "shipFromCity"/"shipToCity" ids to avoid two inputs fighting over the same element id. The city goes into
+// the real Google place ID at send-time (in the desktop program, via config.json's Places API key) - this
+// picker itself only needs the same local city dataset already used for CD/SD.
+function shipCityIdPrefix(k){ return k === "from" ? "shipFrom" : "shipTo"; }
+const shipDebTimer = {};
+function onShipCityInput(k){
+  const idp = shipCityIdPrefix(k);
+  const el = document.getElementById(idp+"City"); if(!el) return;
+  clearTimeout(shipDebTimer[k]);
+  const q = el.value.trim();
+  if(q.length<2){ hideShipSuggest(k); return; }
+  shipDebTimer[k] = setTimeout(()=>runShipSearch(k,q), 150);
+}
+async function runShipSearch(k,q){
+  const idp = shipCityIdPrefix(k);
+  const box = document.getElementById(idp+"Suggest"); if(!box) return;
+  box.style.display="block"; box.innerHTML = `<div class="hint">Searching...</div>`;
+  const db = await loadCityDb();
+  if (!db.length) { box.innerHTML = `<div class="hint">City list is unavailable right now (no connection). Type "City, ST" and press Enter.</div>`; return; }
+  const m = q.match(/^(.+?),\s*([A-Za-z .]+)$/);
+  const namePart = (m ? m[1] : q).trim().toLowerCase();
+  const statePart = m ? m[2].trim().toLowerCase() : "";
+  const stFilter = statePart
+    ? (statePart.length === 2 ? statePart.toUpperCase() : STATE_NAME_TO_ABBR[statePart])
+    : null;
+  if (statePart && !stFilter) { box.innerHTML = `<div class="hint">Unknown state "${statePart}". Try "City, ST".</div>`; return; }
+  const starts = [], contains = [];
+  for (const p of db) {
+    if (stFilter && p.stc !== stFilter) continue;
+    const nameLc = p.c.toLowerCase();
+    if (nameLc.startsWith(namePart)) starts.push(p);
+    else if (nameLc.includes(namePart)) contains.push(p);
+    if (starts.length >= 30) break;
+  }
+  const opts = starts.concat(contains).slice(0, 8);
+  if(!opts.length){ box.innerHTML = `<div class="hint">Nothing found. Try typing "City, ST" manually and press Enter.</div>`; return; }
+  box.innerHTML="";
+  opts.forEach(o=>{
+    const row=document.createElement("div"); row.className="opt";
+    row.innerHTML = `<span class="c">${o.c}, ${o.stc}</span>`;
+    row.onclick=()=>{ addShipCity(k, {c:o.c, stc:o.stc, zip:"", r:50}); };
+    box.appendChild(row);
+  });
+}
+function hideShipSuggest(k){ const idp=shipCityIdPrefix(k); const b=document.getElementById(idp+"Suggest"); if(b) b.style.display="none"; }
+function addShipCity(k, place){
+  state[k].push(place);
+  const idp=shipCityIdPrefix(k);
+  const el=document.getElementById(idp+"City"); if(el) el.value="";
+  hideShipSuggest(k);
+  renderList(k);
+}
+function manualAddShip(k){
+  const idp=shipCityIdPrefix(k);
+  const el = document.getElementById(idp+"City"); if(!el) return;
+  const raw = el.value.trim(); if(!raw) return;
+  const m = raw.match(/^(.+?),\s*([A-Za-z]{2})$/);
+  if(!m){ toast("Format: City, ST (e.g. Temecula, CA)"); return; }
+  addShipCity(k, { c: m[1].trim(), stc: m[2].toUpperCase(), zip:"", r:50 });
+}
+["from","to"].forEach(k=>{
+  const idp = shipCityIdPrefix(k);
+  const el = document.getElementById(idp+"City");
+  if(!el) return;
+  el.addEventListener("input", ()=>onShipCityInput(k));
+  el.addEventListener("keydown", e=>{ if(e.key==="Enter"){ e.preventDefault(); manualAddShip(k); } });
+  el.addEventListener("blur", ()=>setTimeout(()=>hideShipSuggest(k),150));
+});
+
 function manualAdd(k){
   const cityEl=document.getElementById(k+"City"), rEl=document.getElementById(k+"R");
   const raw=cityEl.value.trim(); if(!raw) return;
@@ -1042,8 +1135,8 @@ async function save(){
   const isShip = state.sites.includes("ship");
   if(isShip){
     const hasRoute = !!(state.shipOrigin && state.shipDest);
-    const hasStates = state.from.some(p=>p.st) && state.to.some(p=>p.st);
-    if(!hasRoute && !hasStates){ toast("Pick at least one Origin state and one Destination state (or paste a route link)"); return; }
+    const hasPlaces = state.from.length > 0 && state.to.length > 0;   // whole state(s) and/or specific city(ies)
+    if(!hasRoute && !hasPlaces){ toast("Pick at least one Origin and Destination (state or city) - or paste a route link"); return; }
   } else {
     if(!state.from.length || !state.to.length){ toast("Add at least one Origin and Destination place"); return; }
     if(state.route && !isRouteEligible()){ toast("Search along route needs exactly one Origin city and one Destination city (not a whole state)"); return; }
