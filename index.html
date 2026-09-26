@@ -310,6 +310,7 @@
     <div class="helpRow">Tap the <b>🏢 company name</b> — opens their profile page.</div>
     <div class="helpRow"><b>🗺 Route</b> button — opens driving directions on Google Maps.</div>
     <div class="helpRow"><b>📋 SMS template</b> button — copies your ready-to-send message for that load.</div>
+    <div class="helpRow"><b>⭐ Save</b> button — keeps that load for later. Send <b>/favorites</b> to the bot any time to see your last 10 saved loads.</div>
   </div>
 </div>
 
@@ -341,6 +342,20 @@
     <div style="margin-top:10px">
       <div class="lbl" style="margin-bottom:4px">🔗 Invite link (t.me/YourBot)</div>
       <input class="field" id="inviteLinkInput" placeholder="https://t.me/your_bot">
+    </div>
+    <div class="toggleRow" style="margin-top:10px;border-top:1px solid #eee;padding-top:10px">
+      <div>
+        <div class="lbl">🌙 Night mode</div>
+        <div class="tiny">Checks pages 3x less often between these hours (computer's own clock).</div>
+      </div>
+      <label class="swtch"><input type="checkbox" id="nightModeToggle"><span class="slider"></span></label>
+    </div>
+    <div class="intervalRow" style="margin-top:6px">
+      <span class="lbl">From</span>
+      <select class="field" id="nightStartSel" style="width:72px"></select>
+      <span class="lbl">to</span>
+      <select class="field" id="nightEndSel" style="width:72px"></select>
+      <span class="lbl" style="font-weight:400;color:#666">:00</span>
     </div>
     <div id="reloadSecNote" class="saveNote"></div>
   </div>
@@ -1242,13 +1257,25 @@ let reloadSecDirty = false;
   const humanizeToggle = document.getElementById("humanizeToggle");
   const maxSearchesInput = document.getElementById("maxSearchesInput");
   const inviteLinkInput = document.getElementById("inviteLinkInput");
+  const nightModeToggle = document.getElementById("nightModeToggle");
+  const nightStartSel = document.getElementById("nightStartSel");
+  const nightEndSel = document.getElementById("nightEndSel");
   const btn = document.getElementById("reloadSecSaveBtn");
   const note = document.getElementById("reloadSecNote");
   if(!minInput || !maxInput || !btn) return;
+  if(nightStartSel && !nightStartSel.options.length){
+    for(let h=0; h<24; h++){
+      const label = String(h).padStart(2,"0");
+      nightStartSel.appendChild(new Option(label, h));
+      nightEndSel.appendChild(new Option(label, h));
+    }
+  }
   [minInput, maxInput, maxSearchesInput, inviteLinkInput].forEach(el=>{
     el.addEventListener("input", ()=>{ reloadSecDirty = true; });
   });
-  humanizeToggle.addEventListener("change", ()=>{ reloadSecDirty = true; });
+  [humanizeToggle, nightModeToggle, nightStartSel, nightEndSel].forEach(el=>{
+    if(el) el.addEventListener("change", ()=>{ reloadSecDirty = true; });
+  });
   btn.onclick = async ()=>{
     let min = Math.max(5, Math.min(300, Number(minInput.value) || 8));
     let max = Math.max(5, Math.min(300, Number(maxInput.value) || 12));
@@ -1260,6 +1287,7 @@ let reloadSecDirty = false;
     const r = await apiAction({
       type: "set-reload-interval", minSeconds: min, maxSeconds: max, humanize: humanizeToggle.checked,
       maxSearchesPerUser: maxSearches, inviteLink,
+      nightMode: { enabled: nightModeToggle.checked, startHour: Number(nightStartSel.value)||0, endHour: Number(nightEndSel.value)||0 },
     });
     btn.disabled = false;
     if(r && r.ok){
@@ -1326,6 +1354,10 @@ async function refreshBackendState(){
       document.getElementById("humanizeToggle").checked = (st.settings && st.settings.humanize) !== false;
       document.getElementById("maxSearchesInput").value = (st.settings && st.settings.maxSearchesPerUser) || 0;
       document.getElementById("inviteLinkInput").value = (st.settings && st.settings.inviteLink) || "";
+      const nm = (st.settings && st.settings.nightMode) || { enabled:false, startHour:23, endHour:7 };
+      document.getElementById("nightModeToggle").checked = !!nm.enabled;
+      document.getElementById("nightStartSel").value = nm.startHour;
+      document.getElementById("nightEndSel").value = nm.endHour;
     }
     const logsEl = document.getElementById("adminLogs");
     if(logsEl){
