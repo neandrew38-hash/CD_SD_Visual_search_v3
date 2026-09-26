@@ -337,10 +337,11 @@
 
   <h2>🚗 Ship.Cars</h2>
   <div class="card helpCard">
-    <div class="helpRow">Ship.Cars works a bit differently: pick <b>"Ship.Cars"</b> as the Site (this replaces Origin/Destination and Vehicle Type with an Origin/Destination <b>states</b> grid, since Ship.Cars can't be searched the same way as CD/SD).</div>
+    <div class="helpRow">Tick <b>"Ship.Cars"</b> as an extra Site next to Central Dispatch/Super Dispatch (or on its own) — they all share the same Origin/Destination picker below, and the same Vehicle Type pills.</div>
     <div class="helpRow">Just tap the states you want on both grids — no typing, no links needed. This searches all loads between those states.</div>
     <div class="helpRow">Prefer a specific city instead of a whole state? Type it in the search box above each states grid, same as Central Dispatch/Super Dispatch (needs a Google Places API key set up on the computer program - ask the developer if it's not working).</div>
-    <div class="helpRow">Want a route search instead (loads along the way from a specific city to another, not whole states)? Open ship.cars yourself, use <b>Search Along Route</b> there, copy the page's link, and paste it in the optional box below the states — that replaces the states/cities above for this one search. Leave it blank to just use the states/cities above.</div>
+    <div class="helpRow">Want a route search instead (loads along the way from a specific city to another, not whole states)? Open ship.cars yourself, use <b>Search Along Route</b> there, copy the page's link, and paste it in the optional box below the states — that replaces the states/cities above for Ship.Cars only (Central Dispatch/Super Dispatch, if also ticked, still use the states/cities above). Leave it blank to just use the states/cities above.</div>
+    <div class="helpRow"><b>Vehicle Type</b> on Ship.Cars only understands Car (sent as "Sedan"), SUV, Van and Pickup — any other type you tick (ATV, Boat, Heavy Equipment, Large Yacht, Motorcycle, RV) is simply ignored for Ship.Cars (Central Dispatch/Super Dispatch aren't affected).</div>
     <div class="helpRow">Note: Ship.Cars alerts may not always show the company name or phone number — Ship.Cars only reveals those after opening a load's own details, and it doesn't always work. Route, price, mileage, $/mile and vehicle count are always reliable.</div>
   </div>
 
@@ -539,14 +540,15 @@ function renderRouteUi(){
 }
 
 function updateSiteBlocks(){
-  const isShip = state.sites.includes("ship");
+  const hasCdSd = state.sites.includes("cd") || state.sites.includes("sd");
+  const hasShip = state.sites.includes("ship");
   const cdSd = document.getElementById("cdSdLocBlock");
   const ship = document.getElementById("shipLocBlock");
   const vtypes = document.getElementById("vtypesSection");
-  if(cdSd) cdSd.style.display = isShip ? "none" : "";
-  if(ship) ship.style.display = isShip ? "" : "none";
-  if(vtypes) vtypes.style.display = isShip ? "none" : "";
-  if(isShip) renderShipUi();
+  if(cdSd) cdSd.style.display = hasCdSd ? "" : "none";
+  if(ship) ship.style.display = hasShip ? "" : "none";
+  if(vtypes) vtypes.style.display = "";   // Vehicle Type now applies to Ship.Cars too, so always shown
+  if(hasShip) renderShipUi();
 }
 
 // Pulls routeOriginCity/routeDestinationCity straight out of a ship.cars "Search Along Route" link -
@@ -654,16 +656,13 @@ function render(){
   // Ship.Cars is mutually exclusive with CD/SD: its "search along route" needs a pasted link (see
   // shipLocBlock) instead of the Origin/Destination city pickers CD/SD use, so a search is either
   // "CD and/or SD" or "Ship.Cars", never a mix.
+  // Ship.Cars can now be combined with Central Dispatch/Super Dispatch (a plain multi-select, same as CD+SD
+  // already were) - it shares the exact same Origin/Destination arrays (state.from/state.to) via
+  // STATE_GRID_IDS/CITY_LIST_IDS, so there's no data-model conflict in selecting more than one site at once.
   group("sites", [["Central Dispatch","cd"],["Super Dispatch","sd"],["Ship.Cars","ship"]], ()=>state.sites, v=>{
-    if(v === "ship"){
-      state.sites = state.sites.includes("ship") ? ["cd"] : ["ship"];
-    } else if(state.sites.includes("ship")){
-      state.sites = [v];
-    } else {
-      const i=state.sites.indexOf(v);
-      if(i>=0) state.sites.splice(i,1); else state.sites.push(v);
-      if(!state.sites.length) state.sites.push(v);
-    }
+    const i=state.sites.indexOf(v);
+    if(i>=0) state.sites.splice(i,1); else state.sites.push(v);
+    if(!state.sites.length) state.sites.push(v);
     updateSiteBlocks();
   });
   updateSiteBlocks();
@@ -1144,13 +1143,13 @@ function buildPayload(){
 }
 
 async function save(){
-  const isShip = state.sites.includes("ship");
-  if(isShip){
-    const hasRoute = !!(state.shipOrigin && state.shipDest);
-    const hasPlaces = state.from.length > 0 && state.to.length > 0;   // whole state(s) and/or specific city(ies)
-    if(!hasRoute && !hasPlaces){ toast("Pick at least one Origin and Destination (state or city) - or paste a route link"); return; }
-  } else {
-    if(!state.from.length || !state.to.length){ toast("Add at least one Origin and Destination place"); return; }
+  // Ship.Cars shares the exact same Origin/Destination arrays as Central Dispatch/Super Dispatch (see
+  // updateSiteBlocks), so the normal "need at least one Origin and Destination" check already covers it too
+  // when combined with cd/sd. The one exception: Ship.Cars picked ALONE with a pasted route link (which
+  // needs no states/cities at all) skips that check.
+  const onlyShipWithRouteLink = state.sites.length === 1 && state.sites[0] === "ship" && !!(state.shipOrigin && state.shipDest);
+  if(!onlyShipWithRouteLink){
+    if(!state.from.length || !state.to.length){ toast("Add at least one Origin and Destination (state or city)"); return; }
     if(state.route && !isRouteEligible()){ toast("Search along route needs exactly one Origin city and one Destination city (not a whole state)"); return; }
   }
   const payload = buildPayload();
