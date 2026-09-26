@@ -208,25 +208,25 @@
 </div><!-- /cdSdLocBlock -->
 
 <div id="shipLocBlock" style="display:none">
-<h2>Origin states</h2>
-<div class="states" id="shipFromStates"></div>
-<div class="tiny" style="margin:8px 0 4px">Or a specific city instead of a whole state:</div>
+<h2>Origin</h2>
 <div class="searchwrap">
   <div class="addrow"><input class="field" id="shipFromCity" placeholder="Start typing a city..." autocomplete="off"></div>
   <div class="suggest" id="shipFromSuggest"></div>
 </div>
 <div id="shipFromCityList"></div>
+<div class="states-label">Or pick a whole state:</div>
+<div class="states" id="shipFromStates"></div>
 
 <div class="swapWrap"><button id="shipSwapBtn" class="swapBtn" title="Swap Origin and Destination">⇅</button></div>
 
-<h2>Destination states</h2>
-<div class="states" id="shipToStates"></div>
-<div class="tiny" style="margin:8px 0 4px">Or a specific city instead of a whole state:</div>
+<h2>Destination</h2>
 <div class="searchwrap">
   <div class="addrow"><input class="field" id="shipToCity" placeholder="Start typing a city..." autocomplete="off"></div>
   <div class="suggest" id="shipToSuggest"></div>
 </div>
 <div id="shipToCityList"></div>
+<div class="states-label">Or pick a whole state:</div>
+<div class="states" id="shipToStates"></div>
 
 <div class="card" style="margin-top:14px">
   <div class="tiny" style="margin-bottom:8px">Want a route search instead of whole states (loads along the way from A to B)? Ship.Cars needs Google's own place ID for that, which this Mini App can't generate - open ship.cars, build the route there once (Search Along Route tab), copy the page's link, and paste it here. Optional - leave blank to just use the states/cities above.</div>
@@ -339,7 +339,7 @@
   <div class="card helpCard">
     <div class="helpRow">Ship.Cars works a bit differently: pick <b>"Ship.Cars"</b> as the Site (this replaces Origin/Destination and Vehicle Type with an Origin/Destination <b>states</b> grid, since Ship.Cars can't be searched the same way as CD/SD).</div>
     <div class="helpRow">Just tap the states you want on both grids — no typing, no links needed. This searches all loads between those states.</div>
-    <div class="helpRow">Prefer a specific city instead of a whole state? Type it in the small search box under each states grid (needs a Google Places API key set up on the computer program - ask the developer if it's not working).</div>
+    <div class="helpRow">Prefer a specific city instead of a whole state? Type it in the search box above each states grid, same as Central Dispatch/Super Dispatch (needs a Google Places API key set up on the computer program - ask the developer if it's not working).</div>
     <div class="helpRow">Want a route search instead (loads along the way from a specific city to another, not whole states)? Open ship.cars yourself, use <b>Search Along Route</b> there, copy the page's link, and paste it in the optional box below the states — that replaces the states/cities above for this one search. Leave it blank to just use the states/cities above.</div>
     <div class="helpRow">Note: Ship.Cars alerts may not always show the company name or phone number — Ship.Cars only reveals those after opening a load's own details, and it doesn't always work. Route, price, mileage, $/mile and vehicle count are always reliable.</div>
   </div>
@@ -392,15 +392,32 @@
   <h1>🛠 Admin Panel</h1>
   <h2>⏱ Refresh, limits & stealth</h2>
   <div class="card">
+    <div class="tiny" style="margin-bottom:6px;font-weight:600">Page refresh interval - each site can have its own pace:</div>
     <div class="intervalRow">
-      <span class="lbl">From</span>
-      <input type="number" id="reloadMinInput" min="5" max="300" step="1" />
-      <span class="lbl">to</span>
-      <input type="number" id="reloadMaxInput" min="5" max="300" step="1" />
+      <span class="lbl" style="min-width:110px">🚚 Central Dispatch</span>
+      <input type="number" id="reloadMinInput_cd" min="5" max="300" step="1" style="width:64px" />
+      <span class="lbl" style="font-weight:400">to</span>
+      <input type="number" id="reloadMaxInput_cd" min="5" max="300" step="1" style="width:64px" />
       <span class="lbl" style="font-weight:400;color:#666">sec</span>
-      <button id="reloadSecSaveBtn" class="saveBtn" style="margin-left:auto">💾 Save</button>
     </div>
-    <div class="toggleRow">
+    <div class="intervalRow" style="margin-top:8px">
+      <span class="lbl" style="min-width:110px">🚛 Super Dispatch</span>
+      <input type="number" id="reloadMinInput_sd" min="5" max="300" step="1" style="width:64px" />
+      <span class="lbl" style="font-weight:400">to</span>
+      <input type="number" id="reloadMaxInput_sd" min="5" max="300" step="1" style="width:64px" />
+      <span class="lbl" style="font-weight:400;color:#666">sec</span>
+    </div>
+    <div class="intervalRow" style="margin-top:8px">
+      <span class="lbl" style="min-width:110px">🚗 Ship.Cars</span>
+      <input type="number" id="reloadMinInput_ship" min="5" max="300" step="1" style="width:64px" />
+      <span class="lbl" style="font-weight:400">to</span>
+      <input type="number" id="reloadMaxInput_ship" min="5" max="300" step="1" style="width:64px" />
+      <span class="lbl" style="font-weight:400;color:#666">sec</span>
+    </div>
+    <div style="margin-top:10px;text-align:right">
+      <button id="reloadSecSaveBtn" class="saveBtn">💾 Save</button>
+    </div>
+    <div class="toggleRow" style="margin-top:10px;border-top:1px solid #eee;padding-top:10px">
       <div>
         <div class="lbl">🖱 Randomize page activity</div>
         <div class="tiny">Small random mouse moves/scrolls between reloads, to look less like a script.</div>
@@ -411,10 +428,6 @@
       <span class="lbl">Max searches per person</span>
       <input type="number" id="maxSearchesInput" min="0" max="100" step="1" style="width:64px" />
       <span class="lbl" style="font-weight:400;color:#666">(0 = unlimited)</span>
-    </div>
-    <div style="margin-top:10px">
-      <div class="lbl" style="margin-bottom:4px">🔗 Invite link (t.me/YourBot)</div>
-      <input class="field" id="inviteLinkInput" placeholder="https://t.me/your_bot">
     </div>
     <div class="toggleRow" style="margin-top:10px;border-top:1px solid #eee;padding-top:10px">
       <div>
@@ -434,12 +447,11 @@
   </div>
 
   <div class="card" style="margin-top:10px">
-    <div class="toggleRow" style="border-top:none;margin-top:0;padding-top:0">
-      <div>
-        <div class="lbl">➕ Invite a teammate</div>
-        <div class="tiny">Copies a ready message with your bot's invite link (set above).</div>
-      </div>
-      <button id="inviteCopyBtn" class="saveBtn">📋 Copy</button>
+    <div class="lbl">➕ Invite a teammate</div>
+    <div class="tiny" style="margin-bottom:8px">Set your bot's invite link, then copy a ready message to send someone.</div>
+    <input class="field" id="inviteLinkInput" placeholder="https://t.me/your_bot">
+    <div style="margin-top:10px;text-align:right">
+      <button id="inviteCopyBtn" class="saveBtn">📋 Copy invite message</button>
     </div>
   </div>
 
@@ -1597,18 +1609,29 @@ function renderAdminUsersSearches(users, searches){
 }
 
 let reloadSecDirty = false;
+const RELOAD_SITES = ["cd", "sd", "ship"];
+function currentReloadBySite(){
+  const out = {};
+  RELOAD_SITES.forEach(s=>{
+    const minEl = document.getElementById("reloadMinInput_"+s), maxEl = document.getElementById("reloadMaxInput_"+s);
+    if(!minEl || !maxEl) return;
+    let min = Math.max(5, Math.min(300, Number(minEl.value) || 8));
+    let max = Math.max(5, Math.min(300, Number(maxEl.value) || 12));
+    if(max < min) [min, max] = [max, min];
+    minEl.value = min; maxEl.value = max;
+    out[s] = { min, max };
+  });
+  return out;
+}
 (function initReloadSecUi(){
-  const minInput = document.getElementById("reloadMinInput");
-  const maxInput = document.getElementById("reloadMaxInput");
   const humanizeToggle = document.getElementById("humanizeToggle");
   const maxSearchesInput = document.getElementById("maxSearchesInput");
-  const inviteLinkInput = document.getElementById("inviteLinkInput");
   const nightModeToggle = document.getElementById("nightModeToggle");
   const nightStartSel = document.getElementById("nightStartSel");
   const nightEndSel = document.getElementById("nightEndSel");
   const btn = document.getElementById("reloadSecSaveBtn");
   const note = document.getElementById("reloadSecNote");
-  if(!minInput || !maxInput || !btn) return;
+  if(!btn) return;
   if(nightStartSel && !nightStartSel.options.length){
     for(let h=0; h<24; h++){
       const label = String(h).padStart(2,"0");
@@ -1616,23 +1639,18 @@ let reloadSecDirty = false;
       nightEndSel.appendChild(new Option(label, h));
     }
   }
-  [minInput, maxInput, maxSearchesInput, inviteLinkInput].forEach(el=>{
-    el.addEventListener("input", ()=>{ reloadSecDirty = true; });
-  });
+  const watched = [maxSearchesInput, ...RELOAD_SITES.map(s=>document.getElementById("reloadMinInput_"+s)), ...RELOAD_SITES.map(s=>document.getElementById("reloadMaxInput_"+s))];
+  watched.forEach(el=>{ if(el) el.addEventListener("input", ()=>{ reloadSecDirty = true; }); });
   [humanizeToggle, nightModeToggle, nightStartSel, nightEndSel].forEach(el=>{
     if(el) el.addEventListener("change", ()=>{ reloadSecDirty = true; });
   });
   btn.onclick = async ()=>{
-    let min = Math.max(5, Math.min(300, Number(minInput.value) || 8));
-    let max = Math.max(5, Math.min(300, Number(maxInput.value) || 12));
-    if(max < min) [min, max] = [max, min];
-    minInput.value = min; maxInput.value = max;
+    const reloadBySite = currentReloadBySite();
     const maxSearches = Math.max(0, Math.min(100, Number(maxSearchesInput.value) || 0));
-    const inviteLink = inviteLinkInput.value.trim();
     btn.disabled = true;
     const r = await apiAction({
-      type: "set-reload-interval", minSeconds: min, maxSeconds: max, humanize: humanizeToggle.checked,
-      maxSearchesPerUser: maxSearches, inviteLink,
+      type: "set-reload-interval", reloadBySite, humanize: humanizeToggle.checked,
+      maxSearchesPerUser: maxSearches,
       nightMode: { enabled: nightModeToggle.checked, startHour: Number(nightStartSel.value)||0, endHour: Number(nightEndSel.value)||0 },
     });
     btn.disabled = false;
@@ -1650,7 +1668,20 @@ let reloadSecDirty = false;
 
 document.getElementById("inviteCopyBtn").addEventListener("click", async ()=>{
   const link = document.getElementById("inviteLinkInput").value.trim();
-  if(!link){ toast("Set your bot's invite link above first, then Save"); return; }
+  if(!link){ toast("Type your bot's invite link above first"); return; }
+  // Auto-saves the invite link itself (piggy-backing on the same set-reload-interval action, carrying
+  // along whatever refresh/night-mode settings are already showing) so a person doesn't have to scroll up
+  // and press the OTHER "Save" button just to keep a freshly-typed invite link.
+  await apiAction({
+    type: "set-reload-interval", reloadBySite: currentReloadBySite(),
+    humanize: document.getElementById("humanizeToggle").checked, inviteLink: link,
+    maxSearchesPerUser: Math.max(0, Math.min(100, Number(document.getElementById("maxSearchesInput").value) || 0)),
+    nightMode: {
+      enabled: document.getElementById("nightModeToggle").checked,
+      startHour: Number(document.getElementById("nightStartSel").value)||0,
+      endHour: Number(document.getElementById("nightEndSel").value)||0,
+    },
+  }).catch(()=>{});
   const msg = `Join our load search bot: ${link}\nTap Start and I'll set you up with search alerts.`;
   try{ await navigator.clipboard.writeText(msg); toast("Copied! Paste it in a chat to invite someone."); }
   catch(e){ prompt("Copy this message:", msg); }
@@ -1693,10 +1724,18 @@ async function refreshBackendState(){
   if(isAdmin){
     renderAdminUsersSearches(st.users, st.allSearches);
     if(!reloadSecDirty){
-      const minS = (st.settings && st.settings.reloadMinSec) || 8;
-      const maxS = (st.settings && st.settings.reloadMaxSec) || 12;
-      document.getElementById("reloadMinInput").value = minS;
-      document.getElementById("reloadMaxInput").value = maxS;
+      // Old saved settings only ever had one flat reloadMinSec/reloadMaxSec (no per-site split) - fall back
+      // to showing that same range for all three sites so nothing looks broken for a search saved before
+      // this per-platform-interval feature existed.
+      const legacyMin = (st.settings && st.settings.reloadMinSec) || 8;
+      const legacyMax = (st.settings && st.settings.reloadMaxSec) || 12;
+      const bySite = (st.settings && st.settings.reloadBySite) || {};
+      RELOAD_SITES.forEach(s=>{
+        const r = bySite[s];
+        const minEl = document.getElementById("reloadMinInput_"+s), maxEl = document.getElementById("reloadMaxInput_"+s);
+        if(minEl) minEl.value = (r && r.min) || legacyMin;
+        if(maxEl) maxEl.value = (r && r.max) || legacyMax;
+      });
       document.getElementById("humanizeToggle").checked = (st.settings && st.settings.humanize) !== false;
       document.getElementById("maxSearchesInput").value = (st.settings && st.settings.maxSearchesPerUser) || 0;
       document.getElementById("inviteLinkInput").value = (st.settings && st.settings.inviteLink) || "";
