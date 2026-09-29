@@ -389,7 +389,10 @@
 <div class="clear-wrap"><span class="clear" id="vtClear">Clear all filters</span></div>
 
 <div class="save">
-  <button onclick="save()">💾 Save</button>
+  <div style="display:flex;gap:8px">
+    <button id="saveBtn" onclick="save()">💾 Save</button>
+    <button id="saveStartBtn" onclick="save(true)" style="display:none;background:#2fb760;box-shadow:0 4px 16px rgba(47,183,96,.35)">▶️ Save &amp; start</button>
+  </div>
 </div>
 </div><!-- /builderView -->
 </div><!-- /tab-search -->
@@ -1169,6 +1172,7 @@ function newSearch(){
   document.getElementById("searchName").value="";
   render();
   editingId = null;
+  setSaveStartVisible(false);
   showBuilder();
 }
 function editSearch(s){
@@ -1193,14 +1197,21 @@ function editSearch(s){
     document.getElementById("searchName").value = s.name || "";
     render();
     editingId = s.id;
+    // Search is OFF or paused -> offer "Save & start" next to "Save" (saves and switches it on in one tap)
+    const isOff = !s.active || (s.pausedUntil && Date.now() < s.pausedUntil);
+    setSaveStartVisible(!!isOff);
     showBuilder();
   }catch(e){ toast("Could not load this search for editing"); }
 }
 // "⎘ Duplicate" (My Searches row) - loads the search into the builder just like editing it, but as a
 // brand-new one: editingId stays null, so "Save" creates a separate search instead of overwriting this one.
+function setSaveStartVisible(on){
+  const b = document.getElementById("saveStartBtn"); if(b) b.style.display = on ? "" : "none";
+}
 function duplicateSearch(s){
   editSearch(s);
   editingId = null;
+  setSaveStartVisible(false);
   document.getElementById("searchName").value = (s.name || "Search") + " (copy)";
   toast("Duplicated - review and tap Save to create it as a new search");
 }
@@ -1258,7 +1269,7 @@ function buildPayload(){
   return b64urlEncode(payload);
 }
 
-async function save(){
+async function save(andStart){
   // Ship.Cars shares the exact same Origin/Destination arrays as Central Dispatch/Super Dispatch (see
   // updateSiteBlocks), so the normal "need at least one Origin and Destination" check already covers it too
   // when combined with cd/sd. The one exception: Ship.Cars picked ALONE with a pasted route link (which
@@ -1277,9 +1288,10 @@ async function save(){
     if(editingId) body.id = editingId;
     const nm = document.getElementById("searchName").value.trim();
     if(nm) body.name = nm;
+    if(andStart === true) body.start = true;
     const r = await apiAction(body);
     if(r && r.ok){
-      toast(editingId ? "Saved! Updating your search..." : "Saved! Starting your search...");
+      toast(andStart === true ? "Saved and started!" : editingId ? "Saved! Updating your search..." : "Saved! Starting your search...");
       showList();
       // a brand-new search needs a moment to reach the userscript and get pushed back up - poll a
       // few times in quick succession right after Save instead of waiting for the regular 2s interval
