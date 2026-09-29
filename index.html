@@ -287,7 +287,7 @@
 <div id="cdSdLocBlock">
 <h2>Origin</h2>
 <div class="searchwrap">
-  <div class="addrow"><input class="field" id="fromCity" placeholder="Start typing a city..." autocomplete="off"><input class="field" id="fromR" type="number" value="50" style="max-width:64px" title="miles"></div>
+  <div class="addrow"><input class="field" id="fromCity" placeholder="City or ZIP code..." autocomplete="off"><input class="field" id="fromR" type="number" value="50" style="max-width:64px" title="miles"></div>
   <div class="suggest" id="fromSuggest"></div>
 </div>
 <div id="fromList"></div>
@@ -298,7 +298,7 @@
 
 <h2>Destination</h2>
 <div class="searchwrap">
-  <div class="addrow"><input class="field" id="toCity" placeholder="Start typing a city..." autocomplete="off"><input class="field" id="toR" type="number" value="50" style="max-width:64px" title="miles"></div>
+  <div class="addrow"><input class="field" id="toCity" placeholder="City or ZIP code..." autocomplete="off"><input class="field" id="toR" type="number" value="50" style="max-width:64px" title="miles"></div>
   <div class="suggest" id="toSuggest"></div>
 </div>
 <div id="toList"></div>
@@ -322,7 +322,7 @@
   <div id="routeWaypointsBox" style="display:none;margin-top:14px">
     <div class="tiny" style="margin-bottom:4px">Waypoints (optional cities the route passes through, in order). Work on all platforms - Central Dispatch, Super Dispatch and Ship.Cars.</div>
     <div class="searchwrap">
-      <div class="addrow"><input class="field" id="wpCity" placeholder="Start typing a city..." autocomplete="off"></div>
+      <div class="addrow"><input class="field" id="wpCity" placeholder="City or ZIP code..." autocomplete="off"></div>
       <div class="suggest" id="wpSuggest"></div>
     </div>
     <div id="wpList"></div>
@@ -911,29 +911,54 @@ function addCity(k, place){
   renderList(k);
 }
 
-// ---------- city + state autocomplete ----------
-// Loads a bundled US cities+states dataset once (from a CDN mirror of a public GitHub list, ~6,000
-// cities) and searches it locally in the browser. This replaces the earlier live Nominatim geocoder,
-// which was unreliable inside Telegram's in-app browser (blocked/rate-limited requests caused
-// "Nothing found" even for well-formed queries like "Los Angeles, CA"). Local search has no such
-// problem: it works instantly, offline after the first load, and the same everywhere.
-const CITY_DB_URL = "https://cdn.jsdelivr.net/gh/ibm-developer-skills-network/graphy_server/UScities.json";
-const CITY_CACHE_KEY = "cd_city_db_v1";
-let CITY_DB = null;       // [{c:"Los Angeles", stc:"CA"}, ...] once loaded
+// ---------- city + state + ZIP autocomplete (2026-09-30) ----------
+// ~31,000 US cities with all their ZIP codes (42,000 ZIPs) in one small text file next to this page
+// (cities-us.txt, one line per city: "City|ST|zip zip zip..." with 5-digit ZIPs glued together, most
+// populous cities first). Loaded once and cached in the phone. Tapping an empty field shows the popular
+// car-shipping cities; typing a ZIP (3-5 digits) finds its city. Only "City, ST" goes into the search -
+// exactly as before - so the searches on the load boards work the same.
+const CITY_TXT_URL = "cities-us.txt?v=1";
+const CITY_CACHE_KEY = "cd_city_db_v2";
+const CITY_DB_URL_OLD = "https://cdn.jsdelivr.net/gh/ibm-developer-skills-network/graphy_server/UScities.json";
+let CITY_DB = null;       // [{c:"Los Angeles", stc:"CA", z:"9000190002..."}, ...] most populous first
 let cityDbPromise = null;
+const POPULAR_CITIES = [
+  ["Los Angeles","CA"],["Houston","TX"],["Dallas","TX"],["Miami","FL"],["Atlanta","GA"],["Chicago","IL"],
+  ["Phoenix","AZ"],["Orlando","FL"],["Jacksonville","FL"],["Tampa","FL"],["Las Vegas","NV"],["Denver","CO"],
+  ["Seattle","WA"],["San Diego","CA"],["San Antonio","TX"],["Austin","TX"],["New York","NY"],["Newark","NJ"],
+  ["Charlotte","NC"],["Nashville","TN"],["Salt Lake City","UT"],["Sacramento","CA"],["Portland","OR"],
+  ["Columbus","OH"],["Detroit","MI"],["Baltimore","MD"],["Kansas City","MO"],["Oklahoma City","OK"],
+];
 
+function parseCityTxt(txt){
+  const out = [];
+  for (const line of String(txt).split("\n")) {
+    const p = line.split("|");
+    if (p.length >= 2 && p[0] && p[1]) out.push({ c: p[0], stc: p[1], z: p[2] || "" });
+  }
+  return out;
+}
 function loadCityDb(){
   if (cityDbPromise) return cityDbPromise;
   cityDbPromise = (async () => {
-    // 1) try a cached copy from a previous visit - instant, no network needed
+    try { localStorage.removeItem("cd_city_db_v1"); } catch(e){}
     try {
       const cached = localStorage.getItem(CITY_CACHE_KEY);
-      if (cached) { CITY_DB = JSON.parse(cached); return CITY_DB; }
+      if (cached) { const db = parseCityTxt(cached); if (db.length > 1000) { CITY_DB = db; return CITY_DB; } }
     } catch(e){}
-    // 2) otherwise fetch it once and cache it
     try {
-      const res = await fetch(CITY_DB_URL);
+      const res = await fetch(CITY_TXT_URL);
       if (!res.ok) throw new Error("http " + res.status);
+      const txt = await res.text();
+      const db = parseCityTxt(txt);
+      if (db.length < 1000) throw new Error("bad city file");
+      CITY_DB = db;
+      try { localStorage.setItem(CITY_CACHE_KEY, txt); } catch(e){}
+      return CITY_DB;
+    } catch(e){}
+    // fallback: the old, smaller list (no ZIPs)
+    try {
+      const res = await fetch(CITY_DB_URL_OLD);
       const raw = await res.json();
       const seen = new Set(); const out = [];
       for (const r of raw) {
@@ -941,65 +966,86 @@ function loadCityDb(){
         if (!r.city || !stAbbr) continue;
         const key = r.city + "|" + stAbbr;
         if (seen.has(key)) continue; seen.add(key);
-        out.push({ c: r.city, stc: stAbbr });
+        out.push({ c: r.city, stc: stAbbr, z: "" });
       }
       CITY_DB = out;
-      try { localStorage.setItem(CITY_CACHE_KEY, JSON.stringify(out)); } catch(e){}
-      return CITY_DB;
-    } catch(e){
-      CITY_DB = [];   // network unavailable - searches below just return nothing, manual entry still works
-      return CITY_DB;
-    }
+    } catch(e){ CITY_DB = []; }
+    return CITY_DB;
   })();
   return cityDbPromise;
 }
 loadCityDb();   // start loading right away so it is usually ready by the time the user starts typing
 
-let debTimer=null;
-function onCityInput(k){
-  const el = document.getElementById(k+"City");
-  clearTimeout(debTimer);
-  const q = el.value.trim();
-  if(q.length<2){ hideSuggest(k); return; }
-  debTimer = setTimeout(()=>runSearch(k,q), 150);
-}
-
-async function runSearch(k,q){
-  const box = document.getElementById(k+"Suggest");
-  box.style.display="block"; box.innerHTML = `<div class="hint">Searching...</div>`;
+// Returns { opts:[{c, stc, zip}], msg } for what the user typed ("" = popular cities).
+async function findCities(q){
+  q = String(q || "").trim();
+  if (!q) return { opts: POPULAR_CITIES.map(x => ({ c: x[0], stc: x[1], zip: "" })), title: "Popular cities" };
   const db = await loadCityDb();
-  if (!db.length) {
-    box.innerHTML = `<div class="hint">City list is unavailable right now (no connection). Type "City, ST" and press Enter.</div>`;
-    return;
+  if (!db.length) return { opts: [], msg: 'City list is unavailable right now (no connection). Type "City, ST" and press Enter.' };
+  if (/^\d{3,5}$/.test(q)) {
+    const opts = [];
+    for (const p of db) {
+      for (let i = 0; i + 5 <= p.z.length; i += 5) {
+        const zip = p.z.substr(i, 5);
+        if (zip.startsWith(q)) { opts.push({ c: p.c, stc: p.stc, zip }); break; }
+      }
+      if (opts.length >= 8) break;
+    }
+    return opts.length ? { opts } : { opts, msg: "No city with ZIP " + q + "." };
   }
-  // Accept "city", "city, st" or "city, state name" - split on the last comma if present.
+  if (/^\d+$/.test(q)) return { opts: [], msg: "Type at least 3 digits of the ZIP." };
   const m = q.match(/^(.+?),\s*([A-Za-z .]+)$/);
   const namePart = (m ? m[1] : q).trim().toLowerCase();
   const statePart = m ? m[2].trim().toLowerCase() : "";
   const stFilter = statePart
     ? (statePart.length === 2 ? statePart.toUpperCase() : STATE_NAME_TO_ABBR[statePart])
     : null;
-  if (statePart && !stFilter) { box.innerHTML = `<div class="hint">Unknown state "${statePart}". Try "City, ST".</div>`; return; }
-
+  if (statePart && !stFilter) return { opts: [], msg: 'Unknown state "' + statePart + '". Try "City, ST".' };
   const starts = [], contains = [];
   for (const p of db) {
     if (stFilter && p.stc !== stFilter) continue;
     const nameLc = p.c.toLowerCase();
     if (nameLc.startsWith(namePart)) starts.push(p);
-    else if (nameLc.includes(namePart)) contains.push(p);
-    if (starts.length >= 30) break;
+    else if (contains.length < 8 && nameLc.includes(namePart)) contains.push(p);
+    if (starts.length >= 8) break;
   }
-  const opts = starts.concat(contains).slice(0, 8);
-  if(!opts.length){ box.innerHTML = `<div class="hint">Nothing found. Try typing "City, ST" manually and press Enter.</div>`; return; }
-  box.innerHTML="";
-  opts.forEach(o=>{
-    const row=document.createElement("div"); row.className="opt";
-    row.innerHTML = `<span class="c">${o.c}, ${o.stc}</span>`;
-    row.onclick=()=>{
-      const rEl = document.getElementById(k+"R");
-      addCity(k, {c:o.c, stc:o.stc, zip:"", r:Number(rEl.value)||50});
-    };
+  const opts = starts.concat(contains).slice(0, 8).map(p => ({ c: p.c, stc: p.stc, zip: "" }));
+  return opts.length ? { opts } : { opts, msg: 'Nothing found. Try typing "City, ST" manually and press Enter.' };
+}
+function escTxt(v){ return String(v).replace(/[&<>"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch])); }
+let citySeq = 0;
+async function showCityOptions(box, q, onPick){
+  const my = ++citySeq;
+  box.style.display = "block";
+  if (q) box.innerHTML = '<div class="hint">Searching...</div>';
+  const r = await findCities(q);
+  if (my !== citySeq) return;   // a newer keystroke already replaced this list
+  box.innerHTML = "";
+  if (r.title) box.insertAdjacentHTML("beforeend", '<div class="hint">' + escTxt(r.title) + '</div>');
+  if (!r.opts.length) { box.insertAdjacentHTML("beforeend", '<div class="hint">' + escTxt(r.msg || "Nothing found.") + '</div>'); return; }
+  r.opts.forEach(o => {
+    const row = document.createElement("div"); row.className = "opt";
+    row.innerHTML = '<span class="c">' + escTxt(o.c + ", " + o.stc) + '</span>' + (o.zip ? '<span class="z">' + escTxt(o.zip) + '</span>' : "");
+    row.addEventListener("mousedown", e => e.preventDefault());   // keep the field focused while tapping
+    row.onclick = () => onPick(o);
     box.appendChild(row);
+  });
+}
+function firstCityFor(q){ return findCities(q).then(r => r.opts[0] || null); }
+
+let debTimer=null;
+function onCityInput(k){
+  const el = document.getElementById(k+"City");
+  clearTimeout(debTimer);
+  const q = el.value.trim();
+  if(q.length===1){ hideSuggest(k); return; }
+  debTimer = setTimeout(()=>runSearch(k,q), 150);
+}
+
+function runSearch(k,q){
+  return showCityOptions(document.getElementById(k+"Suggest"), q, o => {
+    const rEl = document.getElementById(k+"R");
+    addCity(k, {c:o.c, stc:o.stc, zip:"", r:Number(rEl.value)||50});
   });
 }
 
@@ -1034,43 +1080,18 @@ function onWpCityInput(){
   const el = document.getElementById("wpCity"); if(!el) return;
   clearTimeout(wpDebTimer);
   const q = el.value.trim();
-  if(q.length<2){ hideWpSuggest(); return; }
+  if(q.length===1){ hideWpSuggest(); return; }
   wpDebTimer = setTimeout(()=>runWpSearch(q), 150);
 }
-async function runWpSearch(q){
+function runWpSearch(q){
   const box = document.getElementById("wpSuggest"); if(!box) return;
-  box.style.display="block"; box.innerHTML = `<div class="hint">Searching...</div>`;
-  const db = await loadCityDb();
-  if (!db.length) { box.innerHTML = `<div class="hint">City list is unavailable right now (no connection). Type "City, ST" and press Enter.</div>`; return; }
-  const m = q.match(/^(.+?),\s*([A-Za-z .]+)$/);
-  const namePart = (m ? m[1] : q).trim().toLowerCase();
-  const statePart = m ? m[2].trim().toLowerCase() : "";
-  const stFilter = statePart
-    ? (statePart.length === 2 ? statePart.toUpperCase() : STATE_NAME_TO_ABBR[statePart])
-    : null;
-  if (statePart && !stFilter) { box.innerHTML = `<div class="hint">Unknown state "${statePart}". Try "City, ST".</div>`; return; }
-  const starts = [], contains = [];
-  for (const p of db) {
-    if (stFilter && p.stc !== stFilter) continue;
-    const nameLc = p.c.toLowerCase();
-    if (nameLc.startsWith(namePart)) starts.push(p);
-    else if (nameLc.includes(namePart)) contains.push(p);
-    if (starts.length >= 30) break;
-  }
-  const opts = starts.concat(contains).slice(0, 8);
-  if(!opts.length){ box.innerHTML = `<div class="hint">Nothing found. Try typing "City, ST" manually and press Enter.</div>`; return; }
-  box.innerHTML="";
-  opts.forEach(o=>{
-    const row=document.createElement("div"); row.className="opt";
-    row.innerHTML = `<span class="c">${o.c}, ${o.stc}</span>`;
-    row.onclick=()=>{ addWaypoint({c:o.c, stc:o.stc}); };
-    box.appendChild(row);
-  });
+  return showCityOptions(box, q, o => addWaypoint({c:o.c, stc:o.stc}));
 }
 function hideWpSuggest(){ const b=document.getElementById("wpSuggest"); if(b) b.style.display="none"; }
-function manualAddWp(){
+async function manualAddWp(){
   const el = document.getElementById("wpCity"); if(!el) return;
   const raw = el.value.trim(); if(!raw) return;
+  if(/^\d{5}$/.test(raw)){ const o = await firstCityFor(raw); if(o){ addWaypoint({c:o.c, stc:o.stc}); } else toast("Unknown ZIP"); return; }
   const m = raw.match(/^(.+?),\s*([A-Za-z]{2})$/);
   if(!m){ toast("Format: City, ST (e.g. Phoenix, AZ)"); return; }
   addWaypoint({ c: m[1].trim(), stc: m[2].toUpperCase() });
@@ -1079,13 +1100,15 @@ function manualAddWp(){
   const el = document.getElementById("wpCity");
   if(!el) return;
   el.addEventListener("input", onWpCityInput);
+  el.addEventListener("focus", ()=>{ const q=el.value.trim(); if(q.length!==1) runWpSearch(q); });
   el.addEventListener("keydown", e=>{ if(e.key==="Enter"){ e.preventDefault(); manualAddWp(); } });
   el.addEventListener("blur", ()=>setTimeout(hideWpSuggest,150));
 })();
 
-function manualAdd(k){
+async function manualAdd(k){
   const cityEl=document.getElementById(k+"City"), rEl=document.getElementById(k+"R");
   const raw=cityEl.value.trim(); if(!raw) return;
+  if(/^\d{5}$/.test(raw)){ const o = await firstCityFor(raw); if(o){ addCity(k, { c:o.c, stc:o.stc, zip:"", r:Number(rEl.value)||50 }); } else toast("Unknown ZIP"); return; }
   const m = raw.match(/^(.+?),\s*([A-Za-z]{2})$/);
   if(!m){ toast("Format: City, ST (e.g. Temecula, CA)"); return; }
   addCity(k, { c: m[1].trim(), stc: m[2].toUpperCase(), zip:"", r: Number(rEl.value)||50 });
@@ -1094,6 +1117,7 @@ function manualAdd(k){
 ["from","to"].forEach(k=>{
   const cityEl = document.getElementById(k+"City");
   cityEl.addEventListener("input", ()=>onCityInput(k));
+  cityEl.addEventListener("focus", ()=>{ const q=cityEl.value.trim(); if(q.length!==1) runSearch(k,q); });
   cityEl.addEventListener("keydown", e=>{ if(e.key==="Enter"){ e.preventDefault(); manualAdd(k); } });
   cityEl.addEventListener("blur", ()=>setTimeout(()=>hideSuggest(k),150));
 });
