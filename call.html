@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HaulHawk · Call</title>
+<style>
+  :root { --bg: #f6f5f2; --card: #ffffff; --text: #1d1d1b; --muted: #6b6a66; --line: #e3e1da; --accent: #ee8a3c; --btn2: #efeee9; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #121316; --card: #1b1d22; --text: #ecebe7; --muted: #9a9892; --line: #2c2f36; --btn2: #262930; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--bg); color: var(--text); font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 16px; }
+  .card { width: 100%; max-width: 380px; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 22px 20px; text-align: center; }
+  .num { font-size: 26px; font-weight: 700; letter-spacing: .3px; margin: 6px 0 18px; }
+  .muted { color: var(--muted); font-size: 14px; }
+  a.btn, button.btn { display: block; width: 100%; padding: 14px; border-radius: 12px; border: 0; font-size: 17px; font-weight: 600; text-decoration: none; margin-top: 10px; cursor: pointer; font-family: inherit; }
+  .primary { background: var(--accent); color: #fff; }
+  .secondary { background: var(--btn2); color: var(--text); }
+  .small { font-size: 13px; margin-top: 14px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="muted">HaulHawk · 📞 Call</div>
+  <div class="num" id="num">—</div>
+  <a class="btn primary" id="mainBtn" href="#">📞 Call</a>
+  <a class="btn secondary" id="altBtn" href="#">Regular phone call</a>
+  <button class="btn secondary" id="copyBtn" type="button">📋 Copy number</button>
+  <div class="muted small" id="hint"></div>
+</div>
+<script>
+// Opens the caller's app with the number typed in (it does NOT start the call by itself).
+//   ?n=+12243005433   the number
+//   ?a=quo | tel      which app (set per person with /call in the bot; default Quo)
+// Quo's own link (openphone://dial?number=...) works in the Quo PHONE apps only; on a computer a normal
+// tel: link opens whatever app is set as the default for calls (Quo, once set up in Windows / FaceTime settings).
+(function () {
+  var q = new URLSearchParams(location.search);
+  var raw = (q.get('n') || '').replace(/[^\d+]/g, '');
+  var digits = raw.replace(/\D/g, '');
+  if (digits.length === 10) digits = '1' + digits;
+  var e164 = digits ? '+' + digits : '';
+  var app = q.get('a') === 'tel' ? 'tel' : 'quo';
+  var mobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  var pretty = digits.length === 11 && digits[0] === '1'
+    ? '+1 (' + digits.slice(1, 4) + ') ' + digits.slice(4, 7) + '-' + digits.slice(7) : (e164 || 'No number');
+  document.getElementById('num').textContent = pretty;
+  var tel = 'tel:' + e164;
+  var quo = 'openphone://dial?number=' + encodeURIComponent(e164);
+  var target = (app === 'quo' && mobile) ? quo : tel;
+  var main = document.getElementById('mainBtn'), alt = document.getElementById('altBtn');
+  main.href = target;
+  main.textContent = app === 'quo' ? '📞 Call with Quo' : '📞 Call';
+  alt.href = tel;
+  if (target === tel) alt.style.display = 'none';
+  document.getElementById('hint').textContent = app === 'quo' && !mobile
+    ? 'On a computer this opens your default calling app. To make it Quo: Windows - Settings > Default apps > TEL; Mac - FaceTime > Settings.'
+    : 'If nothing opened, tap the button above.';
+  document.getElementById('copyBtn').onclick = function () {
+    var b = this;
+    (navigator.clipboard ? navigator.clipboard.writeText(e164) : Promise.reject()).then(function () { b.textContent = '✅ Copied'; }, function () { prompt('Copy the number:', e164); });
+  };
+  if (e164) setTimeout(function () { location.href = target; }, 150);
+})();
+</script>
+</body>
+</html>
