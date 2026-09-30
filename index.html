@@ -486,6 +486,13 @@
     <div class="helpRow">Company name and phone number aren't always shown for Ship.Cars alerts — that's a Ship.Cars limitation, not a bug. No phone = no 📞 Call button on that alert.</div>
   </div>
 
+  <h2>🛷 Autosled</h2>
+  <div class="card helpCard">
+    <div class="helpRow">Tick <b>"Autosled"</b> next to the other sites — Origin/Destination (states, cities with radius, Search along route), price, $/mile, trailer, operable/inoperable, number of vehicles and Vehicle Type all work.</div>
+    <div class="helpRow">Autosled itself is the shipper on every load, so alerts have <b>no company or phone</b> (no 📞 Call / 🚫 Block buttons). Tap the <b>Load ID</b> or <b>🏢 Autosled</b> to open the load and book it on the site.</div>
+    <div class="helpRow">Vehicle Type on Autosled is by class: Car, SUV, Pickup (Autosled calls it Truck), Van. Autosled doesn't separate mini-vans from vans, and usually doesn't give the make/model — the alert shows the class, weight and size instead.</div>
+  </div>
+
   <h2>📋 Managing your searches</h2>
   <div class="card helpCard">
     <div class="helpRow">
@@ -502,7 +509,7 @@
 
   <h2>🔔 Alerts</h2>
   <div class="card helpCard">
-    <div class="helpRow">Every new matching load is sent to you as soon as it appears. All sites (Central Dispatch, Super Dispatch, Ship.Cars) look the same:</div>
+    <div class="helpRow">Every new matching load is sent to you as soon as it appears. All sites (Central Dispatch, Super Dispatch, Ship.Cars, Autosled) look the same:</div>
     <div class="msgDemo">Load ID: <a>236291</a>  🔁 reposted (was $850)
 
 Vehicles:
@@ -859,7 +866,7 @@ function render(){
   // (state.from/state.to) - sites are just a plain multi-select of where to run the same search.
   // Ship.Cars additionally supports an optional pasted route link (shipLocBlock) as an alternative to
   // the shared picker above, and ignores the "Search along route" toggle (CD/SD only) - see shipRouteWarn.
-  group("sites", [["Central Dispatch","cd"],["Super Dispatch","sd"],["Ship.Cars","ship"]], ()=>state.sites, v=>{
+  group("sites", [["Central Dispatch","cd"],["Super Dispatch","sd"],["Ship.Cars","ship"],["Autosled","as"]], ()=>state.sites, v=>{
     const i=state.sites.indexOf(v);
     if(i>=0) state.sites.splice(i,1); else state.sites.push(v);
     if(!state.sites.length) state.sites.push(v);
