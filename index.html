@@ -391,7 +391,7 @@
 <div class="save">
   <div style="display:flex;gap:8px">
     <button id="saveBtn" onclick="save()">💾 Save</button>
-    <button id="saveStartBtn" onclick="save(true)" style="display:none;background:#2fb760;box-shadow:0 4px 16px rgba(47,183,96,.35)">▶️ Save &amp; start</button>
+    <button id="saveStartBtn" onclick="save(true)" style="background:linear-gradient(135deg,#3ccf8e,#1f9d6b);box-shadow:0 4px 14px rgba(31,157,107,.28)">▶ Save &amp; start</button>
   </div>
 </div>
 </div><!-- /builderView -->
@@ -1205,8 +1205,9 @@ function editSearch(s){
 }
 // "⎘ Duplicate" (My Searches row) - loads the search into the builder just like editing it, but as a
 // brand-new one: editingId stays null, so "Save" creates a separate search instead of overwriting this one.
+// (2026-09-30) "Save & start" is shown for EVERY search - new, on, off or paused - so it's always in the same place.
 function setSaveStartVisible(on){
-  const b = document.getElementById("saveStartBtn"); if(b) b.style.display = on ? "" : "none";
+  const b = document.getElementById("saveStartBtn"); if(b) b.style.display = "";
 }
 function duplicateSearch(s){
   editSearch(s);
