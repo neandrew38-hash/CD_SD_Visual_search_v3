@@ -209,6 +209,162 @@
     #splash .hawk{animation:none}
     #splash .brand,#splash .tag{animation:none;opacity:1}
   }
+
+  /* ===================== 2026-10-01 redesign (variant A + one-scroll form) ===================== */
+  body{padding:10px 14px 200px}
+  h1{font-size:20px}
+  .themeToggle{display:none}
+  .brandHead{justify-content:flex-start;font-size:17px;margin:4px 0 0}
+  .brandLogo{width:26px;height:26px}
+  .tagline{display:none}
+  #subText{text-align:left;margin:4px 0 6px;max-width:none;font-size:12px}
+  .pageTitle{font-size:24px;font-weight:800;letter-spacing:-.01em}
+  .pageSub{font-size:13px;color:var(--text3);margin-top:2px}
+  .listHead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:10px 0 12px}
+  .iconBtn{width:40px;height:40px;flex:0 0 auto;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--fg);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+  .iconBtn svg{width:18px;height:18px}
+
+  /* bottom tab bar: 3 items */
+  .tabbar{gap:0;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px))}
+  .tabbtn{gap:3px;padding:6px 2px;font-size:11px;border-radius:10px;box-shadow:none!important;background:none!important}
+  .tabbtn .tbIcon{width:22px;height:22px;display:block}
+  .tabbtn .tbIcon svg{width:22px;height:22px}
+  .tabbtn.on{color:var(--accent)}
+
+  /* My searches: cards */
+  .fab{position:fixed;right:max(16px,calc(50% - 244px));bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:6;display:flex;align-items:center;gap:8px;height:52px;padding:0 20px;border:0;border-radius:16px;background:var(--accent);color:#fff;font-size:15px;font-weight:700;box-shadow:0 8px 22px var(--glow);cursor:pointer}
+  .fab svg{width:18px;height:18px}
+  .fab:active{transform:scale(.97)}
+  #builderView:not([style*="none"]) ~ .fab{display:none}
+  .scard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 14px 10px;margin-top:10px;box-shadow:0 1px 3px var(--shadow)}
+  .scard.off{opacity:.6}
+  .scTop{display:flex;align-items:flex-start;gap:12px}
+  .scMain{flex:1;min-width:0;cursor:pointer}
+  .scName{font-size:16px;font-weight:700;display:flex;align-items:center;gap:7px}
+  .scName .dot{width:8px;height:8px;border-radius:50%;flex:0 0 auto;background:var(--text4)}
+  .scName .dot.run{background:var(--success)}
+  .scName .dot.wait{background:#E0A100}
+  .scName .dot.pause{background:var(--text4)}
+  .scRoute{font-size:13px;color:var(--text3);margin-top:4px;line-height:1.4;word-break:break-word}
+  .scRoute b{color:var(--fg);font-weight:600}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .scChips{margin-top:10px}
+  .chip{display:inline-flex;align-items:center;gap:4px;font-size:12px;padding:4px 8px;border-radius:7px;background:var(--surface-soft);border:1px solid var(--hairline);color:var(--text2);font-weight:600}
+  .scFoot{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:10px;padding-top:8px;border-top:1px solid var(--hairline)}
+  .scStat{font-size:12px;color:var(--text3);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .scStat b{color:var(--accent)}
+  .scActs{display:flex;gap:2px;flex:0 0 auto}
+  .scActs .trash{width:34px;height:34px;border-radius:9px;font-size:15px;display:flex;align-items:center;justify-content:center}
+  .scActs .trash:active{background:var(--surface-soft)}
+
+  /* builder */
+  .builderTop{display:flex;align-items:center;gap:12px;margin:8px 0 12px}
+  .nameField{margin-bottom:4px}
+  .sec{padding:18px 0 4px;border-top:1px solid var(--hairline);margin-top:14px}
+  .secHead{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:12px}
+  .secIcon svg{width:15px;height:15px;display:block}
+  .fieldLbl{font-size:13px;font-weight:600;color:var(--text2);margin:14px 0 6px}
+  .fieldBlock .fieldLbl{margin-top:0}
+  .field{border-radius:10px;padding:9px 12px;font-size:15px}
+  .platGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+  .platGrid .pill{display:flex;align-items:center;justify-content:center;gap:6px;height:40px;padding:0 6px;border-radius:10px;font-size:13px;min-width:0}
+  .pill.on{box-shadow:none}
+  .platGrid .pill.on::before{content:"";width:12px;height:12px;flex:0 0 auto;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 12l5 5 11-11' fill='none' stroke='black' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 12l5 5 11-11' fill='none' stroke='black' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat}
+  .placeBox{border:1px solid var(--line);border-radius:12px;background:var(--card);padding:8px;display:flex;flex-direction:column;gap:8px}
+  .placeBox .chips:empty{display:none}
+  .placeBox .addrow{margin-top:0}
+  .rBox{flex:0 0 58px!important;max-width:58px;text-align:center;padding:9px 4px!important}
+  .statesBtn{flex:0 0 auto;display:flex;align-items:center;gap:5px;padding:0 10px;border:1px solid var(--line);border-radius:10px;background:var(--surface-soft);color:var(--accent);font-size:13px;font-weight:700;cursor:pointer}
+  .statesBtn svg{width:15px;height:15px}
+  .pchip{display:inline-flex;align-items:center;gap:5px;height:32px;padding:0 2px 0 10px;border-radius:8px;font-size:13px;font-weight:600;background:var(--surface-soft);border:1px solid var(--hairline);color:var(--fg)}
+  .pchip.st{background:var(--accent-tint);border-color:transparent;color:var(--accent)}
+  .pchip input{width:42px;height:24px;padding:0 2px;border:1px solid var(--line);border-radius:6px;text-align:center;font-size:12px;background:var(--card);color:var(--fg)}
+  .pchip .mi{font-size:11px;color:var(--text3);font-weight:500}
+  .pchip .x{width:26px;height:26px;border:0;background:none;color:var(--text3);font-size:15px;line-height:1;cursor:pointer;padding:0}
+  .pchip.st .x{color:var(--accent)}
+  .swapWrap{margin:6px 0}
+  .swapBtn{width:34px;height:34px;display:flex;align-items:center;justify-content:center;padding:0}
+  .swapBtn svg{width:16px;height:16px}
+  .hintLine{margin:8px 0 0;line-height:1.4}
+  .routeCard{border:1px solid var(--line);background:var(--card);border-radius:16px;padding:14px;margin-top:14px;display:flex;flex-direction:column;gap:12px}
+  .routeHead{display:flex;gap:12px;align-items:flex-start}
+  .routeIcon{width:38px;height:38px;flex:0 0 auto;border-radius:11px;background:var(--accent-tint);color:var(--accent);display:flex;align-items:center;justify-content:center}
+  .routeIcon svg{width:21px;height:21px}
+  .routeTxt{flex:1;min-width:0}
+  .routeTxt .lbl{font-size:15px;font-weight:700}
+  .routeTxt .tiny{font-size:12px;color:var(--text3);line-height:1.4;margin-top:3px}
+  .routeCard .intervalRow{justify-content:space-between}
+  .routeCard .intervalRow input[type=number]{width:62px;padding:7px;background:var(--card);color:var(--fg)}
+  .routeCard .unit{font-size:13px;color:var(--text3)}
+  .place-row{border-radius:10px}
+  .vtGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+  .vtGrid .pill{height:40px;display:flex;align-items:center;justify-content:center;padding:0 4px;border-radius:10px;font-size:13px;min-width:0}
+  .pill.on{background:var(--accent-tint);color:var(--accent);border-color:var(--accent)}
+  .stepGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .stepper{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:6px;display:flex;flex-direction:column;gap:4px}
+  .stepLbl{font-size:11px;color:var(--text4);text-align:center}
+  .stepRow{display:flex;align-items:center;justify-content:space-between}
+  .stepBtn{width:32px;height:32px;border:0;border-radius:8px;background:var(--surface-soft);color:var(--fg);font-size:18px;font-weight:600;cursor:pointer;line-height:1}
+  .stepBtn:disabled{opacity:.35}
+  .stepVal{font-size:16px;font-weight:800}
+  .seg{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:3px;background:var(--surface-soft);border:1px solid var(--hairline);padding:3px;border-radius:10px}
+  .seg .pill{border:0;background:none;color:var(--text3);height:34px;display:flex;align-items:center;justify-content:center;padding:0;border-radius:8px;font-size:13px;min-width:0}
+  .seg .pill.on{background:var(--card);color:var(--fg);box-shadow:0 1px 3px var(--shadow)}
+  .fieldGrid2 .fieldLbl{margin-top:0}
+  .inlineSliderRow{margin:16px 0 4px}
+  .addBtn{display:flex;align-items:center;justify-content:center;width:44px;padding:0}
+  .addBtn svg{width:18px;height:18px}
+  #excludeCoList{margin-top:8px}
+  .save{gap:8px;padding:10px 14px}
+  .saveSummary{font-size:12px;color:var(--text3);text-align:center;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .save button{padding:13px;font-size:15px;border-radius:12px}
+  .save button.secondary{flex:0 0 34%;background:var(--surface-soft);color:var(--fg);border:1px solid var(--line);box-shadow:none}
+
+  /* state picker sheet */
+  .sheetOverlay{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.5);display:none;align-items:flex-end;justify-content:center}
+  .sheetOverlay.open{display:flex}
+  .sheet{width:100%;max-width:520px;background:var(--bg);border-radius:20px 20px 0 0;padding:8px 14px calc(14px + env(safe-area-inset-bottom,0px));max-height:88vh;overflow-y:auto}
+  .sheetGrab{width:40px;height:4px;border-radius:4px;background:var(--track);margin:2px auto 10px}
+  .sheetTitle{font-size:17px;font-weight:800;margin-bottom:10px}
+  .sheetTop{display:flex;gap:8px}
+  .ghostBtn{flex:0 0 auto;padding:0 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text2);font-size:13px;font-weight:600;cursor:pointer}
+  .regionRow{display:flex;gap:6px;overflow-x:auto;padding:10px 0 2px;scrollbar-width:none}
+  .regionRow::-webkit-scrollbar{display:none}
+  .regionRow button{flex:0 0 auto;height:32px;padding:0 11px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer}
+  .sheet .states{margin-top:10px;gap:5px}
+  .sheet .states .pill{height:40px;display:flex;align-items:center;justify-content:center;padding:0;font-size:13px;border-radius:9px}
+  .sheet .states .pill.hide{display:none}
+  .sheetFoot{margin-top:12px}
+  .primaryBtn{width:100%;height:48px;border:0;border-radius:12px;background:var(--accent);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+
+  /* alerts feed */
+  .chipRow{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+  .chipRow::-webkit-scrollbar{display:none}
+  .chipRow button{flex:0 0 auto;height:34px;padding:0 13px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--text2);font-size:13px;font-weight:600;white-space:nowrap;cursor:pointer}
+  .chipRow button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+  .acard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:13px 14px;margin-top:10px;box-shadow:0 1px 3px var(--shadow)}
+  .acard.fresh{border-color:var(--accent)}
+  .aTop{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+  .aPrice{font-size:21px;font-weight:800}
+  .aMeta{font-size:12px;color:var(--text3);white-space:nowrap}
+  .aRate{font-size:13px;color:var(--accent);font-weight:700;margin-top:2px}
+  .aRoute{font-size:15px;font-weight:600;margin-top:6px;line-height:1.35}
+  .aCars{font-size:13px;color:var(--text3);margin-top:3px;line-height:1.4}
+  .aBtns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}
+  .aBtns a{height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;text-decoration:none;border:1px solid var(--line);color:var(--fg);background:var(--surface-soft)}
+  .aBtns a.call{background:var(--accent);border-color:var(--accent);color:#fff}
+
+  /* More menu */
+  .menuList{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+  .menuRow{display:flex;align-items:center;gap:12px;padding:0 14px;min-height:52px;border-top:1px solid var(--hairline);cursor:pointer;color:var(--fg)}
+  .menuRow:first-child{border-top:0}
+  .menuRow:active{background:var(--surface-soft)}
+  .menuRow .mIcon{width:24px;text-align:center;font-size:17px}
+  .menuRow .mTxt{flex:1;font-size:15px;font-weight:600}
+  .menuRow svg{width:16px;height:16px;color:var(--text4)}
+  .menuRow .mVal{font-size:13px;color:var(--text3)}
+  .subBack{display:inline-flex;align-items:center;gap:4px;margin:6px 0 2px;font-size:14px;font-weight:700;color:var(--accent);cursor:pointer}
+  .subBack svg{width:16px;height:16px}
 </style>
 </head>
 <body>
@@ -263,12 +419,9 @@
 <div class="toast" id="toast"></div>
 
 <div class="tabbar">
-  <div class="tabbtn on" data-tab="search"><span class="tbIcon">🔎</span><span class="tbLabel">Search</span></div>
-  <div class="tabbtn" data-tab="saved"><span class="tbIcon">⭐</span><span class="tbLabel">Saved</span></div>
-  <div class="tabbtn" data-tab="blocked"><span class="tbIcon">🚫</span><span class="tbLabel">Blocked</span></div>
-  <div class="tabbtn" data-tab="sms"><span class="tbIcon">✉️</span><span class="tbLabel">SMS</span></div>
-  <div class="tabbtn" data-tab="help"><span class="tbIcon">❓</span><span class="tbLabel">Help</span></div>
-  <div class="tabbtn" id="adminTabBtn" data-tab="admin" style="display:none"><span class="tbIcon">🛠</span><span class="tbLabel">Admin</span></div>
+  <div class="tabbtn on" data-tab="search"><span class="tbIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></span><span class="tbLabel">Searches</span></div>
+  <div class="tabbtn" data-tab="alerts"><span class="tbIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0112 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21h4"/></svg></span><span class="tbLabel">Alerts</span></div>
+  <div class="tabbtn" data-tab="more"><span class="tbIcon"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></span><span class="tbLabel">More</span></div>
 </div>
 
 <!-- ======================= TAB 1: SEARCH (My Searches list + visual builder) ======================= -->
@@ -279,61 +432,69 @@
 
 <!-- default view: the list of this person's own saved searches -->
 <div id="mySearchesView">
-  <h2 style="display:flex;align-items:center;justify-content:space-between;margin-top:8px">
-    My Searches
-    <span id="newSearchBtn" class="addNewBtn">➕ New</span>
-  </h2>
+  <div class="listHead">
+    <div><div class="pageTitle">My searches</div><div class="pageSub" id="mySearchesSummary"></div></div>
+  </div>
+  <button type="button" id="newSearchBtn" class="fab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg><span>New search</span></button>
   <div id="mySearches"><div class="muted">Loading...</div></div>
   <div id="mySearchesNote" class="warn" style="display:none"></div>
 </div>
 
 <!-- builder view: shown for "+ New" or tapping/editing an existing search -->
 <div id="builderView" style="display:none">
-<div style="margin:4px 0 2px;text-align:center"><span id="backToListBtn" style="font-size:13px;color:var(--accent);cursor:pointer;font-weight:700">‹ My Searches</span></div>
-
-<h2>Search name</h2>
-<input class="field" id="searchName" placeholder="e.g. Mid-FL, CA to TX..." maxlength="40">
-
-<h2>Site</h2>
-<div class="row" id="sites"></div>
-
-<div id="cdSdLocBlock">
-<h2>Origin</h2>
-<div class="searchwrap">
-  <div class="addrow"><input class="field" id="fromCity" placeholder="City or ZIP code..." autocomplete="off"><input class="field" id="fromR" type="number" value="50" style="max-width:64px" title="miles"></div>
-  <div class="suggest" id="fromSuggest"></div>
+<div class="builderTop">
+  <button type="button" id="backToListBtn" class="iconBtn" aria-label="Back to my searches"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+  <div class="pageTitle" id="builderTitle">New search</div>
 </div>
-<div id="fromList"></div>
-<div class="states-label">Or pick a whole state:</div>
-<div class="states" id="fromStates"></div>
+<input class="field nameField" id="searchName" placeholder="Search name, e.g. Dallas → FL" maxlength="40">
 
-<div class="swapWrap"><button id="swapBtn" class="swapBtn" title="Swap Origin and Destination">⇅</button></div>
-
-<h2>Destination</h2>
-<div class="searchwrap">
-  <div class="addrow"><input class="field" id="toCity" placeholder="City or ZIP code..." autocomplete="off"><input class="field" id="toR" type="number" value="50" style="max-width:64px" title="miles"></div>
-  <div class="suggest" id="toSuggest"></div>
+<div class="sec">
+  <div class="secHead">1 · Platforms</div>
+  <div class="platGrid" id="sites"></div>
 </div>
-<div id="toList"></div>
-<div class="states-label">Or pick a whole state:</div>
-<div class="states" id="toStates"></div>
 
-<div class="card" style="margin-top:14px">
-  <div class="toggleRow" style="border-top:none;margin-top:0;padding-top:0">
-    <div>
-      <div class="lbl">🛣 Search along route</div>
+<div class="sec">
+  <div class="secHead">2 · Route</div>
+  <div id="cdSdLocBlock">
+<div class="fieldBlock">
+  <div class="fieldLbl">Origin</div>
+  <div class="placeBox">
+    <div class="chips" id="fromList"></div>
+    <div class="searchwrap">
+      <div class="addrow"><input class="field" id="fromCity" placeholder="Add city, ZIP or state..." autocomplete="off"><input class="field rBox" id="fromR" type="number" value="50" title="radius, miles"><button type="button" class="statesBtn" data-sheet="from"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg>States</button></div>
+      <div class="suggest" id="fromSuggest"></div>
+    </div>
+  </div>
+</div>
+<div class="swapWrap"><button type="button" id="swapBtn" class="swapBtn" title="Swap Origin and Destination" aria-label="Swap Origin and Destination"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4"/></svg></button></div>
+<div class="fieldBlock">
+  <div class="fieldLbl">Destination</div>
+  <div class="placeBox">
+    <div class="chips" id="toList"></div>
+    <div class="searchwrap">
+      <div class="addrow"><input class="field" id="toCity" placeholder="Add city, ZIP or state..." autocomplete="off"><input class="field rBox" id="toR" type="number" value="50" title="radius, miles"><button type="button" class="statesBtn" data-sheet="to"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg>States</button></div>
+      <div class="suggest" id="toSuggest"></div>
+    </div>
+  </div>
+</div>
+<div class="tiny hintLine">Mix cities and whole states. Type a city and set its radius (mi), or tap <b>States</b>.</div>
+
+<div class="routeCard">
+  <div class="routeHead">
+    <div class="routeIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M8 19h7.5a3.5 3.5 0 000-7h-7a3.5 3.5 0 010-7H16"/></svg></div>
+    <div class="routeTxt">
+      <div class="lbl">Search along route</div>
       <div class="tiny">Loads whose route passes between Origin and Destination. Needs exactly one city in each (not a whole state).</div>
     </div>
     <label class="swtch"><input type="checkbox" id="routeToggle"><span class="slider"></span></label>
   </div>
-  <div class="intervalRow" id="routeMilesRow" style="display:none;margin-top:10px">
+  <div class="intervalRow" id="routeMilesRow" style="display:none">
     <span class="lbl">Distance off route</span>
-    <input type="number" id="routeMilesInput" min="5" max="500" step="5" style="width:70px">
-    <span class="lbl" style="font-weight:400;color:var(--text3)">mi</span>
+    <span style="display:flex;align-items:center;gap:6px"><input type="number" id="routeMilesInput" min="5" max="500" step="5"><span class="unit">mi</span></span>
   </div>
-  <div id="shipRouteWarn" class="tiny" style="display:none;margin-top:10px;color:var(--warn-text);font-weight:600">⚠️ This only works for Central Dispatch / Super Dispatch. Ship.Cars ignores it and will search the Origin/Destination above as whole states/cities instead — for a route search on Ship.Cars, paste a ship.cars route link below.</div>
-  <div id="routeWaypointsBox" style="display:none;margin-top:14px">
-    <div class="tiny" style="margin-bottom:4px">Waypoints (optional cities the route passes through, in order). Work on all platforms - Central Dispatch, Super Dispatch and Ship.Cars.</div>
+  <div id="shipRouteWarn" class="tiny" style="display:none"></div>
+  <div id="routeWaypointsBox" style="display:none">
+    <div class="tiny" style="margin-bottom:6px">Waypoints — optional cities the route passes through, in order. Work on all platforms.</div>
     <div class="searchwrap">
       <div class="addrow"><input class="field" id="wpCity" placeholder="City or ZIP code..." autocomplete="off"></div>
       <div class="suggest" id="wpSuggest"></div>
@@ -341,8 +502,7 @@
     <div id="wpList"></div>
   </div>
 </div>
-</div><!-- /cdSdLocBlock -->
-
+  </div><!-- /cdSdLocBlock -->
 <div id="shipLocBlock" style="display:none">
 <!-- Old "paste a ship.cars route link" box - no longer needed (route search works for Ship.Cars from the
      normal Origin/Destination + "Search along route" toggle). Kept hidden so older searches that used a
@@ -361,55 +521,94 @@
   </div>
 </div>
 </div><!-- /shipLocBlock -->
-
-<div class="fieldGrid2">
-  <div><h2>Min Total Pay</h2><input class="field" id="pay" type="number" inputmode="numeric" placeholder="0" value="0"></div>
-  <div><h2>Min $/mile</h2><input class="field" id="rpm" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00" value="0"></div>
 </div>
 
-<div class="fieldGrid2">
-  <div><h2>Vehicle Status</h2><div class="row" id="status"></div></div>
-  <div><h2>Trailer Type</h2><div class="row" id="trailer"></div></div>
+<div class="sec">
+  <div class="secHead">3 · Vehicles</div>
+  <div id="vtypesSection"><div class="vtGrid" id="vtypes"></div></div>
+  <div class="fieldLbl">Number of vehicles</div>
+  <div class="stepGrid"><div class="stepper"><div class="stepLbl">Min</div><div class="stepRow"><button type="button" class="stepBtn" aria-label="Decrease" data-step="minVeh:-1">−</button><span class="stepVal" id="minVehVal">1</span><button type="button" class="stepBtn" aria-label="Increase" data-step="minVeh:1">+</button></div></div><div class="stepper"><div class="stepLbl">Max</div><div class="stepRow"><button type="button" class="stepBtn" aria-label="Decrease" data-step="maxVeh:-1">−</button><span class="stepVal" id="maxVehVal">1</span><button type="button" class="stepBtn" aria-label="Increase" data-step="maxVeh:1">+</button></div></div></div>
+  <div class="fieldLbl">Condition</div>
+  <div class="seg" id="status"></div>
+  <div class="fieldLbl">Trailer</div>
+  <div class="seg" id="trailer"></div>
 </div>
 
-<div class="fieldGrid2">
-  <div><h2>Min # of Vehicles</h2><select class="field" id="minVehSel"></select></div>
-  <div><h2>Max # of Vehicles</h2><select class="field" id="maxVehSel"></select></div>
+<div class="sec">
+  <div class="secHead">4 · Price &amp; dates</div>
+  <div class="fieldGrid2">
+    <div><div class="fieldLbl">Min total pay</div><input class="field" id="pay" type="number" inputmode="numeric" placeholder="0" value="0"></div>
+    <div><div class="fieldLbl">Min $/mile</div><input class="field" id="rpm" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00" value="0"></div>
+  </div>
+  <div class="inlineSliderRow">
+    <span class="inlineLbl">Ready to ship within</span>
+    <input type="range" id="readySlider" class="rangeSlider" min="0" max="11" step="1" value="0">
+    <span class="inlineVal" id="readyLabel">All</span>
+  </div>
 </div>
 
-<div class="inlineSliderRow">
-  <span class="inlineLbl">Ready to ship</span>
-  <input type="range" id="readySlider" class="rangeSlider" min="0" max="11" step="1" value="0">
-  <span class="inlineVal" id="readyLabel">All</span>
-</div>
-
-<div id="vtypesSection">
-<h2>Vehicle Type</h2>
-<div class="row" id="vtypes"></div>
-</div>
-
-<div id="excludeCoSection">
-<h2>🚫 Exclude companies</h2>
-<div class="addrow">
-  <input class="field" id="excludeCoInput" placeholder="Type a company/broker name..." maxlength="60">
-  <button type="button" id="excludeCoAddBtn" class="addBtn">➕</button>
-</div>
-<div id="excludeCoList"></div>
-<div class="tiny" style="margin-top:6px">There's no list to pick from - just type part of a broker/company name you've seen on a past load (e.g. "Acme"), then tap ➕ or press Enter. It'll match that automatically, even as a partial name.</div>
+<div class="sec" id="excludeCoSection">
+  <div class="secHead"><span class="secIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg></span>5 · Blocked companies</div>
+  <div class="tiny" style="margin-bottom:8px">No alerts from these companies in this search. Type part of a company name and tap +. (Your list for all searches is in More → Blocked.)</div>
+  <div class="addrow">
+    <input class="field" id="excludeCoInput" placeholder="Start typing a company name..." maxlength="60">
+    <button type="button" id="excludeCoAddBtn" class="addBtn" aria-label="Add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+  </div>
+  <div class="chips" id="excludeCoList"></div>
 </div>
 
 <div class="clear-wrap"><span class="clear" id="vtClear">Clear all filters</span></div>
 
 <div class="save">
+  <div class="saveSummary" id="saveSummary"></div>
   <div style="display:flex;gap:8px">
-    <button id="saveBtn" onclick="save()">💾 Save</button>
-    <button id="saveStartBtn" onclick="save(true)" style="background:linear-gradient(135deg,#3ccf8e,#1f9d6b);box-shadow:0 4px 14px rgba(31,157,107,.28)">▶ Save &amp; start</button>
+    <button id="saveBtn" class="secondary" onclick="save()">Save</button>
+    <button id="saveStartBtn" onclick="save(true)">Save &amp; start</button>
+  </div>
+</div>
+<div class="sheetOverlay" id="fromSheet">
+  <div class="sheet">
+    <div class="sheetGrab"></div>
+    <div class="sheetTitle">Origin states</div>
+    <div class="sheetTop"><input class="field" placeholder="Search state" data-sfilter="from"><button type="button" class="ghostBtn" data-sclear="from">Clear</button></div>
+    <div class="regionRow" data-regions="from"></div>
+    <div class="states" id="fromStates"></div>
+    <div class="sheetFoot"><button type="button" class="primaryBtn" data-sdone="from">Done</button></div>
+  </div>
+</div>
+<div class="sheetOverlay" id="toSheet">
+  <div class="sheet">
+    <div class="sheetGrab"></div>
+    <div class="sheetTitle">Destination states</div>
+    <div class="sheetTop"><input class="field" placeholder="Search state" data-sfilter="to"><button type="button" class="ghostBtn" data-sclear="to">Clear</button></div>
+    <div class="regionRow" data-regions="to"></div>
+    <div class="states" id="toStates"></div>
+    <div class="sheetFoot"><button type="button" class="primaryBtn" data-sdone="to">Done</button></div>
   </div>
 </div>
 </div><!-- /builderView -->
 </div><!-- /tab-search -->
 
 <!-- ======================= SAVED LOADS (⭐ Save under an alert; read from the office computer) ======================= -->
+<div class="tabpane" id="tab-alerts">
+  <div class="listHead"><div><div class="pageTitle">Alerts</div><div class="pageSub" id="alertsSub">Your recent alerts, newest first</div></div>
+  <button type="button" class="iconBtn" id="alertsRefresh" aria-label="Refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 10-2.3 5.7"/><path d="M20 4v7h-7"/></svg></button></div>
+  <div class="chipRow" id="alertsFilter"></div>
+  <div id="alertsList"><div class="muted">Loading...</div></div>
+</div>
+
+<div class="tabpane" id="tab-more">
+  <div class="listHead"><div><div class="pageTitle">More</div></div></div>
+  <div class="menuList">
+    <div class="menuRow" data-go="saved"><span class="mIcon">⭐</span><span class="mTxt">Saved loads</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
+    <div class="menuRow" data-go="blocked"><span class="mIcon">🚫</span><span class="mTxt">Blocked companies</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
+    <div class="menuRow" data-go="sms"><span class="mIcon">✉️</span><span class="mTxt">SMS template</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
+    <div class="menuRow" data-go="help"><span class="mIcon">❓</span><span class="mTxt">Help</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
+    <div class="menuRow" data-go="admin" id="adminTabBtn" style="display:none"><span class="mIcon">🛠</span><span class="mTxt">Admin</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
+    <div class="menuRow" id="moreThemeRow"><span class="mIcon">🌓</span><span class="mTxt">Theme</span><span class="mVal" id="moreThemeVal"></span></div>
+  </div>
+</div>
+
 <div class="tabpane" id="tab-saved">
   <h1>⭐ Saved loads</h1>
   <div class="sub">Loads you saved with <b>⭐ Save</b> under an alert. Newest first.</div>
@@ -697,16 +896,14 @@ function renderExcludeCoList(){
   const wrap = document.getElementById("excludeCoList"); if(!wrap) return;
   wrap.innerHTML = "";
   state.excludeCo.forEach((name, i)=>{
-    const row = document.createElement("div"); row.className = "place-row";
-    const nm = document.createElement("div"); nm.className = "name"; nm.textContent = "🚫 " + name;
-    row.appendChild(nm);
-    const rm = document.createElement("button"); rm.textContent = "−";
+    const chip = document.createElement("span"); chip.className = "pchip";
+    chip.appendChild(document.createTextNode(name));
+    const rm = document.createElement("button"); rm.type="button"; rm.className="x"; rm.textContent = "×"; rm.setAttribute("aria-label","Remove");
     rm.onclick = ()=>{ state.excludeCo.splice(i,1); renderExcludeCoList(); };
-    row.appendChild(rm);
-    wrap.appendChild(row);
+    chip.appendChild(rm);
+    wrap.appendChild(chip);
   });
-}
-function addExcludeCo(){
+}function addExcludeCo(){
   const input = document.getElementById("excludeCoInput");
   const v = input.value.trim().slice(0,60);
   if(!v){ return; }
@@ -816,7 +1013,7 @@ function group(id, opts, single, onSet){
     const b=document.createElement("div"); b.className="pill sm"; b.textContent=label;
     const cur = single();
     if (Array.isArray(cur) ? cur.includes(val) : cur===val) b.classList.add("on");
-    b.onclick=()=>{ onSet(val); group(id,opts,single,onSet); };
+    b.onclick=()=>{ onSet(val); group(id,opts,single,onSet); updateSaveSummary(); };
     el.appendChild(b);
   });
 }
@@ -847,20 +1044,34 @@ function renderReadySlider(){
 // wheel/carousel picker (exactly the "тицяєш і відкривається скролінг" behavior asked for), instead of a
 // wide row of pill buttons.
 function renderVehicleSelects(){
-  const minSel = document.getElementById("minVehSel");
-  const maxSel = document.getElementById("maxVehSel");
-  minSel.innerHTML = [1,2,3,4,5,6,7,8,9].map(n=>`<option value="${n}">${n}</option>`).join("");
-  maxSel.innerHTML = [["0","Any"],[1,1],[2,2],[3,3],[4,4],[5,5],[6,6],[7,7],[8,8],[9,9]]
-    .map(([v,l])=>`<option value="${v}">${l}</option>`).join("");
-  minSel.value = String(state.minVeh || 1);
-  maxSel.value = String(state.maxVeh || 0);
-  minSel.onchange = ()=>{
-    state.minVeh = Number(minSel.value) || 1;
-    if(state.maxVeh && state.maxVeh < state.minVeh){ state.maxVeh = state.minVeh; maxSel.value = String(state.maxVeh); }
+  // Min / Max # of vehicles as − / + steppers (2026-10-01 redesign). Max 0 = "Any".
+  const minV = document.getElementById("minVehVal"), maxV = document.getElementById("maxVehVal");
+  const paint = ()=>{
+    minV.textContent = String(state.minVeh || 1);
+    maxV.textContent = state.maxVeh ? String(state.maxVeh) : "Any";
+    document.querySelectorAll("[data-step]").forEach(b=>{
+      const [k, d] = b.dataset.step.split(":"); const dir = Number(d);
+      if(k === "minVeh") b.disabled = dir < 0 ? (state.minVeh||1) <= 1 : (state.minVeh||1) >= 9;
+      else b.disabled = dir < 0 ? !state.maxVeh : state.maxVeh >= 9;
+    });
+    updateSaveSummary();
   };
-  maxSel.onchange = ()=>{ state.maxVeh = Number(maxSel.value) || 0; };
+  document.querySelectorAll("[data-step]").forEach(b=>{
+    b.onclick = ()=>{
+      const [k, d] = b.dataset.step.split(":"); const dir = Number(d);
+      if(k === "minVeh"){
+        state.minVeh = Math.max(1, Math.min(9, (state.minVeh||1) + dir));
+        if(state.maxVeh && state.maxVeh < state.minVeh) state.maxVeh = state.minVeh;
+      } else {
+        // Any(0) -> + -> min value; at min -> − -> Any
+        if(dir > 0) state.maxVeh = state.maxVeh ? Math.min(9, state.maxVeh + 1) : (state.minVeh || 1);
+        else state.maxVeh = (!state.maxVeh || state.maxVeh <= (state.minVeh||1)) ? 0 : state.maxVeh - 1;
+      }
+      paint();
+    };
+  });
+  paint();
 }
-
 function render(){
   // Every site (CD/SD/Ship.Cars) now shares the exact same single Origin/Destination picker below
   // (state.from/state.to) - sites are just a plain multi-select of where to run the same search.
@@ -873,8 +1084,8 @@ function render(){
     updateSiteBlocks();
   });
   updateSiteBlocks();
-  group("status", [["Any","any"],["Operable","op"],["Inoperable","inop"]], ()=>state.status, v=>state.status=v);
-  group("trailer", [["Any","any"],["Open","open"],["Enclosed","enc"]], ()=>state.trailer, v=>state.trailer=v);
+  group("status", [["Both","any"],["Operable","op"],["Inoperable","inop"]], ()=>state.status, v=>state.status=v);
+  group("trailer", [["Both","any"],["Open","open"],["Enclosed","enc"]], ()=>state.trailer, v=>state.trailer=v);
   renderVehicleSelects();
   renderReadySlider();
   renderRouteUi();
@@ -909,7 +1120,7 @@ function render(){
         b.onclick=()=>{
           const i=state[k].findIndex(p=>p.st===code);
           if(i>=0) state[k].splice(i,1); else state[k].push({st:code});
-          paintGrid(k);   // whole-state toggles never touch the list above, just repaint the grid itself
+          paintGrid(k); renderList(k);
         };
         stEl.appendChild(b);
       });
@@ -930,26 +1141,32 @@ function paintGrid(k){
 }
 
 function renderList(k){
+  // Origin / Destination as one box of chips: cities (with their radius) and whole states together.
   CITY_LIST_IDS[k].forEach(lid=>{
     const list = document.getElementById(lid); if(!list) return;
     list.innerHTML="";
     state[k].forEach((p,i)=>{
-      if(p.st) return;   // whole states live only in the grid, not here
-      const row=document.createElement("div"); row.className="place-row";
-      const name=document.createElement("div"); name.className="name";
-      name.innerHTML = "📍 "+p.c+", "+p.stc + (p.zip ? ` <span class="zip">${p.zip}</span>` : "");
-      row.appendChild(name);
-      const r=document.createElement("input"); r.type="number"; r.value=p.r||50;
-      r.oninput=()=>{ p.r=Number(r.value)||50; };
-      row.appendChild(r);
-      const rm=document.createElement("button"); rm.textContent="−";
-      rm.onclick=()=>{ state[k].splice(i,1); renderList(k); };
-      row.appendChild(rm);
-      list.appendChild(row);
+      const chip = document.createElement("span");
+      if(p.st){
+        chip.className = "pchip st";
+        chip.appendChild(document.createTextNode(p.st));
+      } else {
+        chip.className = "pchip";
+        chip.appendChild(document.createTextNode(p.c + ", " + p.stc));
+        const r=document.createElement("input"); r.type="number"; r.value=p.r||50; r.title="radius, miles";
+        r.oninput=()=>{ p.r=Number(r.value)||50; updateSaveSummary(); };
+        chip.appendChild(r);
+        const mi=document.createElement("span"); mi.className="mi"; mi.textContent="mi"; chip.appendChild(mi);
+      }
+      const rm=document.createElement("button"); rm.type="button"; rm.className="x"; rm.textContent="×";
+      rm.setAttribute("aria-label","Remove");
+      rm.onclick=()=>{ state[k].splice(i,1); renderList(k); paintGrid(k); };
+      chip.appendChild(rm);
+      list.appendChild(chip);
     });
   });
+  updateSaveSummary();
 }
-
 function addCity(k, place){
   state[k].push(place);
   document.getElementById(k+"City").value = "";
@@ -1088,13 +1305,32 @@ function onCityInput(k){
   debTimer = setTimeout(()=>runSearch(k,q), 150);
 }
 
-function runSearch(k,q){
-  return showCityOptions(document.getElementById(k+"Suggest"), q, o => {
+const ABBR_TO_STATE_NAME = Object.fromEntries(Object.entries(STATE_NAME_TO_ABBR).map(([n,a])=>[a, n.replace(/\b\w/g, c=>c.toUpperCase())]));
+function stateFromQuery(q){
+  const t = String(q||"").trim().toLowerCase();
+  if(!t) return null;
+  if(t.length === 2 && US.includes(t.toUpperCase())) return t.toUpperCase();
+  return STATE_NAME_TO_ABBR[t] || null;
+}
+async function runSearch(k,q){
+  const box = document.getElementById(k+"Suggest");
+  await showCityOptions(box, q, o => {
     const rEl = document.getElementById(k+"R");
     addCity(k, {c:o.c, stc:o.stc, zip:"", r:Number(rEl.value)||50});
   });
+  const st = stateFromQuery(q);
+  if(st && box.style.display !== "none"){
+    const row = document.createElement("div"); row.className = "opt";
+    row.innerHTML = '<span class="c">Whole state: ' + escTxt(ABBR_TO_STATE_NAME[st] || st) + ' (' + st + ')</span>';
+    row.addEventListener("mousedown", e => e.preventDefault());
+    row.onclick = () => {
+      if(!state[k].some(p=>p.st===st)) state[k].push({st});
+      document.getElementById(k+"City").value = ""; hideSuggest(k);
+      renderList(k); paintGrid(k);
+    };
+    box.insertBefore(row, box.firstChild);
+  }
 }
-
 function hideSuggest(k){ document.getElementById(k+"Suggest").style.display="none"; }
 
 // ---------- route waypoints (Central Dispatch "Search along route" only) ----------
@@ -1195,6 +1431,8 @@ function showList(){
 function showBuilder(){
   document.getElementById("mySearchesView").style.display = "none";
   document.getElementById("builderView").style.display = "";
+  updateSaveSummary();
+  window.scrollTo(0, 0);
 }
 function newSearch(){
   state.sites=["cd"]; state.status="any"; state.trailer="any"; state.minVeh=1; state.maxVeh=0; state.ready=0;
@@ -1207,6 +1445,7 @@ function newSearch(){
   render();
   editingId = null;
   setSaveStartVisible(false);
+  document.getElementById("builderTitle").textContent = "New search";
   showBuilder();
 }
 function editSearch(s){
@@ -1234,6 +1473,7 @@ function editSearch(s){
     // Search is OFF or paused -> offer "Save & start" next to "Save" (saves and switches it on in one tap)
     const isOff = !s.active || (s.pausedUntil && Date.now() < s.pausedUntil);
     setSaveStartVisible(!!isOff);
+    document.getElementById("builderTitle").textContent = "Edit search";
     showBuilder();
   }catch(e){ toast("Could not load this search for editing"); }
 }
@@ -1248,6 +1488,7 @@ function duplicateSearch(s){
   editingId = null;
   setSaveStartVisible(false);
   document.getElementById("searchName").value = (s.name || "Search") + " (copy)";
+  document.getElementById("builderTitle").textContent = "New search (copy)";
   toast("Duplicated - review and tap Save to create it as a new search");
 }
 document.getElementById("newSearchBtn").addEventListener("click", newSearch);
@@ -1275,7 +1516,7 @@ const tg = (window.Telegram && window.Telegram.WebApp) || null;
 try{ if(tg){ tg.ready(); tg.expand(); } }catch(e){}
 (function(){
   const sub = document.getElementById("subText");
-  if(tg && tg.initData) sub.textContent = "Set your filters and tap \"Save\" — the search starts right away, no copying needed.";
+  if(tg && tg.initData) sub.style.display = "none";   // 2026-10-01: only shown when something is wrong
   else if(tg) sub.textContent = "⚠️ Opened inside Telegram, but without Mini App data (initData is empty). Close this and open it again via the \"🖥 Search\" button below the message field - not via any other link or button.";
   else sub.textContent = "⚠️ Telegram's Mini App script did not load (no internet, or opened outside Telegram). Set your filters and tap \"Save\" - the message will be copied instead; paste it into the chat with the bot.";
 })();
@@ -1372,12 +1613,18 @@ const DEFAULT_TPL_PREVIEW =
   "Hi, is your {vehicle} ({origin} -> {dest}) still available? Load ID {loadId}. " +
   "We can pick up right away. Please call or text me back.";
 
+const MORE_PAGES = ["saved","blocked","sms","help","admin"];
+let alertsTimer = null;
 function switchTab(name){
-  document.querySelectorAll(".tabbtn").forEach(b=>b.classList.toggle("on", b.dataset.tab===name));
+  const main = MORE_PAGES.includes(name) ? "more" : name;
+  document.querySelectorAll(".tabbtn").forEach(b=>b.classList.toggle("on", b.dataset.tab===main));
   document.querySelectorAll(".tabpane").forEach(p=>p.classList.toggle("on", p.id==="tab-"+name));
+  window.scrollTo(0, 0);
   if(name==="saved") loadSaved();
+  clearInterval(alertsTimer); alertsTimer = null;
+  if(name==="alerts"){ loadAlerts(); alertsTimer = setInterval(loadAlerts, 30000); }
+  if(name==="more") paintThemeRow();
 }
-
 // ---- ⭐ Saved loads (2026-09-30) ----
 // Saved loads live on the office computer (the bot's data folder), so this tab reads them straight from
 // there through its public Tailscale address. Telegram's signed initData proves who is asking, so everyone
@@ -1628,59 +1875,105 @@ function applyOverrides(list){
 }
 function rerenderMySearches(){ renderMySearches(applyOverrides(Object.values(lastSearches))); }
 
+function placesText(list){
+  if(!Array.isArray(list) || !list.length) return "Anywhere";
+  const parts = list.map(p => p.st ? p.st : (p.c + (p.r ? " · " + p.r + " mi" : "")));
+  return parts.length > 4 ? parts.slice(0,4).join(", ") + " +" + (parts.length-4) : parts.join(", ");
+}
+const SITE_SHORT = { cd:"CD", sd:"Super Dispatch", ship:"Ship.Cars", as:"Autosled" };
+function searchChips(p){
+  const out = [];
+  if(p.rt) out.push("Along route");
+  if(p.pm) out.push("$" + Number(p.pm).toFixed(2) + "+/mi");
+  if(p.p) out.push("$" + p.p + "+");
+  if(p.tr === "open") out.push("Open"); else if(p.tr === "enc") out.push("Enclosed");
+  if(p.vs === "op") out.push("Operable"); else if(p.vs === "inop") out.push("Inoperable");
+  if((p.mn||1) > 1 || p.mx) out.push((p.mn||1) + "–" + (p.mx || "any") + " cars");
+  if(Array.isArray(p.vt) && p.vt.length) out.push(p.vt.length <= 2 ? p.vt.join(", ") : p.vt.length + " vehicle types");
+  if(p.rd) out.push(p.rd === 1 ? "Ready today" : "Ready ≤ " + p.rd + "d");
+  return out;
+}
 function renderMySearches(list){
   const wrap = document.getElementById("mySearches");
-  if(!list || !list.length){ wrap.innerHTML = '<div class="muted">No saved searches yet. Tap "➕ New" above to create one.</div>'; return; }
+  const sum = document.getElementById("mySearchesSummary");
+  if(!list || !list.length){
+    wrap.innerHTML = '<div class="muted">No searches yet. Tap <b>New search</b> to create one.</div>';
+    if(sum) sum.textContent = "";
+    return;
+  }
+  const today = new Date().toISOString().slice(0,10);
+  let on = 0, alertsToday = 0;
+  list.forEach(s=>{ if(s.active && !(s.pausedUntil && s.pausedUntil > Date.now())) on++; if(s.alertsDay === today) alertsToday += (s.alertsToday||0); });
+  if(sum) sum.textContent = `${on} active · ${list.length - on} off or paused · ${alertsToday} alert${alertsToday===1?"":"s"} today`;
   wrap.innerHTML = "";
   list.slice().sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0)).forEach(s=>{
-    const row = document.createElement("div"); row.className = "srow";
+    let p = {}; try{ p = b64urlDecode(s.payload) || {}; }catch(e){}
+    const paused = s.pausedUntil && s.pausedUntil > Date.now();
+    const card = document.createElement("div"); card.className = "scard" + ((!s.active || paused) ? " off" : "");
 
-    const info = document.createElement("div"); info.className = "info"; info.style.cursor = "pointer";
-    info.innerHTML = `<div class="nm">${tabIcon(s)} ${escapeHtml(s.name||s.id)}</div>` +
-      `<div class="meta">${(s.sites||[]).map(x=>x.toUpperCase()).join(" + ")}` +
-      (s.cards ? ` · ${s.cards} loads` : "") + pauseMetaText(s) + alertsMetaText(s) + `</div>`;
-    info.onclick = ()=> editSearch(s);
-    row.appendChild(info);
-
-    row.appendChild(makePauseBtn(s, rerenderMySearches));
-
-    const dup = document.createElement("button"); dup.className = "trash"; dup.style.color = "var(--text3)"; dup.textContent = "📑";
-    dup.title = "Duplicate this search";
-    dup.onclick = (e)=>{ e.stopPropagation(); duplicateSearch(s); };
-    row.appendChild(dup);
+    const top = document.createElement("div"); top.className = "scTop";
+    const main = document.createElement("div"); main.className = "scMain";
+    const dotCls = paused ? "pause" : !s.active ? "" : (s.online && s.running) ? "run" : "wait";
+    const sites = (s.sites||[]).map(x=>SITE_SHORT[x]||x.toUpperCase()).join(" + ");
+    main.innerHTML = `<div class="scName"><span class="dot ${dotCls}"></span>${escapeHtml(s.name||s.id)}</div>` +
+      `<div class="scRoute"><b>${escapeHtml(placesText(p.f))}</b> → <b>${escapeHtml(placesText(p.to))}</b></div>`;
+    main.onclick = ()=> editSearch(s);
+    top.appendChild(main);
 
     const sw = document.createElement("label"); sw.className = "swtch";
     const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = !!s.active;
+    cb.setAttribute("aria-label", "Search on/off");
     cb.onchange = async ()=>{
       const want = cb.checked;
       searchOverrides[s.id] = { active: want, ts: Date.now() };
-      rerenderMySearches();   // instant feedback, no waiting for the round trip
+      rerenderMySearches();
       toast(want ? "Starting..." : "Stopping...");
       const r = await apiAction({ type: "toggle-search", id: s.id, active: want });
       if(!r || !r.ok){ delete searchOverrides[s.id]; toast("Could not update"); rerenderMySearches(); }
     };
     const sl = document.createElement("span"); sl.className = "slider";
     sw.appendChild(cb); sw.appendChild(sl);
-    row.appendChild(sw);
+    top.appendChild(sw);
+    card.appendChild(top);
 
+    const chips = document.createElement("div"); chips.className = "chips scChips";
+    [sites].concat(searchChips(p)).filter(Boolean).forEach(t=>{
+      const c = document.createElement("span"); c.className = "chip"; c.textContent = t; chips.appendChild(c);
+    });
+    card.appendChild(chips);
+
+    const foot = document.createElement("div"); foot.className = "scFoot";
+    const stat = document.createElement("div"); stat.className = "scStat";
+    const todayCount = s.alertsDay === today ? (s.alertsToday||0) : 0;
+    stat.innerHTML = (!s.active ? "Stopped" : paused ? escapeHtml(pauseMetaText(s).replace(/^ · /,"")) : `<b>${todayCount}</b> alert${todayCount===1?"":"s"} today`) +
+      (s.alertsTotal ? ` · ${s.alertsTotal} total` : "");
+    foot.appendChild(stat);
+
+    const acts = document.createElement("div"); acts.className = "scActs";
+    acts.appendChild(makePauseBtn(s, rerenderMySearches));
+    const dup = document.createElement("button"); dup.className = "trash"; dup.style.color = "var(--text3)"; dup.textContent = "📑";
+    dup.title = "Duplicate this search"; dup.setAttribute("aria-label","Duplicate");
+    dup.onclick = (e)=>{ e.stopPropagation(); duplicateSearch(s); };
+    acts.appendChild(dup);
     const edit = document.createElement("button"); edit.className = "trash"; edit.style.color = "var(--text3)"; edit.textContent = "✏️";
+    edit.setAttribute("aria-label","Edit");
     edit.onclick = ()=> editSearch(s);
-    row.appendChild(edit);
-
-    const del = document.createElement("button"); del.className = "trash"; del.textContent = "🗑";
+    acts.appendChild(edit);
+    const del = document.createElement("button"); del.className = "trash"; del.textContent = "🗑"; del.setAttribute("aria-label","Delete");
     del.onclick = async ()=>{
       if(!confirm(`Delete "${s.name||s.id}"?`)) return;
       searchOverrides[s.id] = { deleted: true, ts: Date.now() };
-      rerenderMySearches();   // instant: it disappears right away instead of waiting for the round trip
+      rerenderMySearches();
       const r = await apiAction({ type: "delete-search", id: s.id });
       if(!r || !r.ok){ delete searchOverrides[s.id]; toast("Could not delete"); rerenderMySearches(); }
     };
-    row.appendChild(del);
+    acts.appendChild(del);
+    foot.appendChild(acts);
+    card.appendChild(foot);
 
-    wrap.appendChild(row);
+    wrap.appendChild(card);
   });
 }
-
 // One search row, reused inside each user's nested list below - same look/behavior as "My Searches",
 // admin is simply allowed to toggle/delete ANY search here (the Worker's role check already permits this).
 // `siblings` is the user's full search list (sorted the same way it's rendered) so the 👁 filter viewer
@@ -2021,7 +2314,7 @@ async function refreshBackendState(){
   const isAdmin = !!(st && st.role === "admin");
   const canUseTpl = !!(st && (st.role === "admin" || st.role === "member"));
   adminBtn.style.display = isAdmin ? "" : "none";
-  if(!isAdmin && document.querySelector('.tabbtn[data-tab="admin"]').classList.contains("on")) switchTab("search");
+  if(!isAdmin && document.getElementById("tab-admin").classList.contains("on")) switchTab("more");
 
   const tplNote = document.getElementById("tplNote");
   const tplBtn = document.getElementById("tplSaveBtn");
@@ -2085,6 +2378,161 @@ async function refreshBackendState(){
     }
   }
 }
+
+// ===================== 2026-10-01 redesign helpers =====================
+function updateSaveSummary(){
+  const el = document.getElementById("saveSummary"); if(!el) return;
+  if(document.getElementById("builderView").style.display === "none") return;
+  const parts = [];
+  parts.push(state.sites.map(x=>SITE_SHORT[x]||x).join(", "));
+  parts.push(placesText(state.from) + " → " + placesText(state.to) + (state.route && isRouteEligible() ? " (route)" : ""));
+  const mn = state.minVeh||1, mx = state.maxVeh;
+  if(mn > 1 || mx) parts.push(mn + "–" + (mx || "any") + " cars");
+  const pm = Number(document.getElementById("rpm").value)||0;
+  if(pm) parts.push("$" + pm.toFixed(2) + "+/mi");
+  el.textContent = parts.join(" · ");
+}
+document.getElementById("builderView").addEventListener("input", updateSaveSummary);
+document.getElementById("builderView").addEventListener("click", ()=>setTimeout(updateSaveSummary, 0));
+
+// ---- whole-state picker (bottom sheet) ----
+const REGIONS = {
+  "West": ["CA","OR","WA","NV","ID","MT","WY","UT","CO","AK","HI"],
+  "Southwest": ["AZ","NM","TX","OK"],
+  "Midwest": ["ND","SD","NE","KS","MN","IA","MO","WI","IL","IN","MI","OH"],
+  "Southeast": ["AR","LA","MS","AL","TN","KY","GA","FL","SC","NC","VA","WV"],
+  "Northeast": ["MD","DE","PA","NJ","NY","CT","RI","MA","VT","NH","ME"],
+};
+function openSheet(k){
+  const ov = document.getElementById(k+"Sheet"); if(!ov) return;
+  hideSuggest(k);
+  const f = ov.querySelector("[data-sfilter]"); if(f){ f.value = ""; filterSheet(k, ""); }
+  ov.classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+function closeSheet(k){
+  const ov = document.getElementById(k+"Sheet"); if(!ov) return;
+  ov.classList.remove("open");
+  document.body.style.overflow = "";
+  renderList(k); paintGrid(k);
+}
+function filterSheet(k, q){
+  q = String(q||"").trim().toLowerCase();
+  const grid = document.getElementById(k+"States"); if(!grid) return;
+  [...grid.children].forEach(b=>{
+    const code = b.textContent; const name = (ABBR_TO_STATE_NAME[code]||"").toLowerCase();
+    b.classList.toggle("hide", !!q && !code.toLowerCase().startsWith(q) && !name.includes(q));
+  });
+}
+["from","to"].forEach(k=>{
+  const ov = document.getElementById(k+"Sheet");
+  ov.addEventListener("click", e=>{ if(e.target === ov) closeSheet(k); });
+  ov.querySelector("[data-sdone]").onclick = ()=> closeSheet(k);
+  ov.querySelector("[data-sclear]").onclick = ()=>{ state[k] = state[k].filter(p=>!p.st); paintGrid(k); };
+  ov.querySelector("[data-sfilter]").oninput = e=> filterSheet(k, e.target.value);
+  const rr = ov.querySelector("[data-regions]");
+  Object.keys(REGIONS).forEach(name=>{
+    const b = document.createElement("button"); b.type = "button"; b.textContent = name;
+    b.onclick = ()=>{
+      const codes = REGIONS[name];
+      const allOn = codes.every(c=>state[k].some(p=>p.st===c));
+      if(allOn) state[k] = state[k].filter(p=>!(p.st && codes.includes(p.st)));
+      else codes.forEach(c=>{ if(!state[k].some(p=>p.st===c)) state[k].push({st:c}); });
+      paintGrid(k);
+    };
+    rr.appendChild(b);
+  });
+});
+document.querySelectorAll("[data-sheet]").forEach(b=> b.onclick = ()=> openSheet(b.dataset.sheet));
+
+// ---- Alerts tab: this person's own recent alerts, read from the office computer ----
+let alertsData = [], alertsFilter = "", alertsLoading = false;
+function moneyText(v){ const n = parseFloat(String(v||"").replace(/[^0-9.]/g,"")); return isFinite(n) && n ? "$" + n.toLocaleString("en-US") : (v ? String(v) : ""); }
+function timeAgo(t){
+  const m = Math.round((Date.now() - t) / 60000);
+  if(m < 1) return "just now"; if(m < 60) return m + " min ago";
+  const h = Math.round(m/60); if(h < 24) return h + " h ago";
+  const d = new Date(t); return (d.getMonth()+1) + "/" + d.getDate();
+}
+async function loadAlerts(){
+  const box = document.getElementById("alertsList");
+  if(!(tg && tg.initData)){ box.innerHTML = '<div class="muted">Open this app from the bot chat to see your alerts.</div>'; return; }
+  if(alertsLoading) return;
+  alertsLoading = true;
+  if(!box.querySelector(".acard")) box.innerHTML = '<div class="muted">Loading...</div>';
+  try{
+    const j = await pcApi("/api/miniapp/alerts", { limit: 100 });
+    alertsData = j.list || [];
+    renderAlerts();
+  }catch(e){
+    if(!box.querySelector(".acard")) box.innerHTML = '<div class="warn">Couldn\'t reach the office computer right now (it may be off or restarting). Try again in a minute.</div>';
+  }finally{ alertsLoading = false; }
+}
+function renderAlerts(){
+  const box = document.getElementById("alertsList");
+  const bar = document.getElementById("alertsFilter");
+  const names = [];
+  alertsData.forEach(a=>{ const n = a.searchName || ""; if(n && !names.includes(n)) names.push(n); });
+  if(alertsFilter && !names.includes(alertsFilter)) alertsFilter = "";
+  bar.innerHTML = "";
+  [["", "All · " + alertsData.length]].concat(names.map(n=>[n, n + " · " + alertsData.filter(a=>a.searchName===n).length])).forEach(([v,label])=>{
+    const b = document.createElement("button"); b.type = "button"; b.textContent = label;
+    if(v === alertsFilter) b.className = "on";
+    b.onclick = ()=>{ alertsFilter = v; renderAlerts(); };
+    bar.appendChild(b);
+  });
+  bar.style.display = names.length > 1 ? "" : "none";
+  const list = alertsFilter ? alertsData.filter(a=>a.searchName===alertsFilter) : alertsData;
+  if(!list.length){ box.innerHTML = '<div class="muted">No alerts yet. New loads that match your searches show up here (and in the bot chat, as before).</div>'; return; }
+  box.innerHTML = "";
+  list.forEach(a=>{
+    const c = document.createElement("div"); c.className = "acard" + ((Date.now() - a.ts) < 5*60000 ? " fresh" : "");
+    const rateBits = [a.miles ? Number(a.miles).toLocaleString("en-US") + " mi" : "", a.rate ? "$" + String(a.rate).replace(/^\$/,"") + "/mi" : ""].filter(Boolean).join(" · ");
+    const site = SITE_SHORT[a.site] || a.site || "";
+    c.innerHTML =
+      `<div class="aTop"><div class="aPrice">${escapeHtml(moneyText(a.price) || "—")}</div><div class="aMeta">${escapeHtml(timeAgo(a.ts))} · ${escapeHtml(site)}</div></div>` +
+      (rateBits ? `<div class="aRate">${escapeHtml(rateBits)}${a.repost ? " · reposted" : ""}</div>` : "") +
+      `<div class="aRoute">${escapeHtml(a.origin || "?")} → ${escapeHtml(a.dest || "?")}</div>` +
+      `<div class="aCars">${escapeHtml([a.vehicle, a.trailer, a.pickup ? "Pickup " + a.pickup : ""].filter(Boolean).join(" · "))}</div>` +
+      (a.company ? `<div class="aCars">${escapeHtml(a.company)}${a.searchName ? " · " + escapeHtml(a.searchName) : ""}</div>` : (a.searchName ? `<div class="aCars">${escapeHtml(a.searchName)}</div>` : ""));
+    const btns = document.createElement("div"); btns.className = "aBtns";
+    const open = (url)=>{ if(tg && tg.openLink) tg.openLink(url); else window.open(url, "_blank", "noopener"); };
+    if(a.callUrl || a.phone){
+      const call = document.createElement("a"); call.className = "call"; call.textContent = "Call";
+      call.href = a.callUrl || ("tel:" + a.phone);
+      call.onclick = e=>{ if(a.callUrl){ e.preventDefault(); open(a.callUrl); } };
+      btns.appendChild(call);
+    }
+    if(/^https?:\/\//.test(a.loadUrl || "")){
+      const o = document.createElement("a"); o.textContent = "Open load"; o.href = a.loadUrl; o.target = "_blank"; o.rel = "noopener";
+      o.onclick = e=>{ e.preventDefault(); open(a.loadUrl); };
+      btns.appendChild(o);
+    }
+    if(btns.children.length === 1) btns.style.gridTemplateColumns = "1fr";
+    if(btns.children.length) c.appendChild(btns);
+    box.appendChild(c);
+  });
+}
+document.getElementById("alertsRefresh").onclick = loadAlerts;
+
+// ---- More menu ----
+document.querySelectorAll(".menuRow[data-go]").forEach(r=> r.onclick = ()=> switchTab(r.dataset.go));
+function paintThemeRow(){
+  const v = document.getElementById("moreThemeVal");
+  if(v) v.textContent = document.documentElement.getAttribute("data-theme") === "light" ? "Light" : "Dark";
+}
+document.getElementById("moreThemeRow").onclick = ()=>{
+  const t = document.getElementById("themeToggle"); if(t) t.click();
+  setTimeout(paintThemeRow, 0);
+};
+// "‹ More" link at the top of each page that lives under More
+MORE_PAGES.forEach(name=>{
+  const pane = document.getElementById("tab-" + name); if(!pane) return;
+  const back = document.createElement("div"); back.className = "subBack";
+  back.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>More';
+  back.onclick = ()=> switchTab("more");
+  pane.insertBefore(back, pane.firstChild);
+});
 
 refreshBackendState();
 // 2s, not 4s: the round trip (Mini App -> Worker -> userscript -> Worker -> Mini App) already takes a
