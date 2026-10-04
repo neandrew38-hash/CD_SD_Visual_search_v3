@@ -1674,7 +1674,7 @@ function switchTab(name){
 // Saved loads live on the office computer (the bot's data folder), so this tab reads them straight from
 // there through its public Tailscale address. Telegram's signed initData proves who is asking, so everyone
 // only sees their own. If the computer is off, the tab just says so.
-const PC_URL = "https://desktop-320e7c6.tail2a7952.ts.net";
+const PC_URL = "https://macs-macbook-pro.tail2a7952.ts.net";
 async function pcApi(path, extra){
   const r = await fetch(PC_URL + path, { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(Object.assign({ initData: (tg && tg.initData) || "" }, extra || {})) });
   const j = await r.json().catch(()=>null);
@@ -2072,7 +2072,7 @@ function renderMySearches(list){
     wrap.appendChild(card);
   });
 }// ---- 🎛 Control panel (admins only): the desktop program's own panel, over HTTPS via Tailscale Funnel ----
-const PANEL_URL = "https://desktop-320e7c6.tail2a7952.ts.net/";
+const PANEL_URL = "https://macs-macbook-pro.tail2a7952.ts.net/";
 
 function escapeHtml(s){
   return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
