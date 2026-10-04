@@ -789,6 +789,7 @@
     <div class="menuRow" data-go="blocked"><span class="mIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M6 6l12 12"/></svg></span><span class="mTxt">Blocked companies</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
     <div class="menuRow" data-go="sms"><span class="mIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="13" rx="2.5"/><path d="M4 7l8 6 8-6"/></svg></span><span class="mTxt">SMS template</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
     <div class="menuRow" data-go="help"><span class="mIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.5a2.5 2.5 0 014.8 1c0 1.6-2.4 2-2.4 3.5"/><path d="M12 17h.01"/></svg></span><span class="mTxt">Help</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
+    <div class="menuRow" id="contactUsRow"><span class="mIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4L3 11l6.5 2.5M21 4l-3 16-8.5-6.5M21 4L9.5 13.5V19l3-3"/></svg></span><span class="mTxt">Contact us</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
     <div class="menuRow" id="controlPanelRow" style="display:none"><span class="mIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4" width="17" height="12" rx="2"/><path d="M8 20h8M12 16v4M7 12l3-3 2 2 4-4"/></svg></span><span class="mTxt">Control panel</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
   </div>
 </div>
@@ -2271,6 +2272,15 @@ document.getElementById("pauseAllBtn").onclick = ()=>{
 document.getElementById("controlPanelRow").onclick = ()=>{
   // Opens in the phone's real browser (Telegram's in-app view can't show the panel's login prompt).
   if(tg && tg.openLink) tg.openLink(PANEL_URL); else window.open(PANEL_URL, "_blank");
+};
+// "Contact us" (2026-10-04): opens the bot chat with /start contact - the bot then replies with a button
+// that opens the support Telegram account BY ITS NUMERIC ID (tg://user?id=...), so no @username is needed
+// and the account can be swapped later in the bot's config.json ("contactTelegramId") without touching this page.
+const BOT_USERNAME = "central0217bot";
+document.getElementById("contactUsRow").onclick = ()=>{
+  const link = "https://t.me/" + BOT_USERNAME + "?start=contact";
+  if(tg && tg.openTelegramLink){ tg.openTelegramLink(link); try{ tg.close(); }catch(e){} }
+  else window.open(link, "_blank");
 };
 document.querySelectorAll(".menuRow[data-go]").forEach(r=> r.onclick = ()=> switchTab(r.dataset.go));
 // "‹ More" link at the top of each page that lives under More
