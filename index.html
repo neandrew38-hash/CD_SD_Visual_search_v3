@@ -2277,6 +2277,27 @@ document.getElementById("controlPanelRow").onclick = ()=>{
 // that opens the support Telegram account BY ITS NUMERIC ID (tg://user?id=...), so no @username is needed
 // and the account can be swapped later in the bot's config.json ("contactTelegramId") without touching this page.
 const BOT_USERNAME = "central0217bot";
+// 🛡 Security check-in (2026-10-04): once per app open, tells the office computer which device this is.
+// The device id is a random value kept on this phone/computer (no personal data); the IP is seen by the
+// office computer itself. Used only to spot one person opening many trial accounts.
+(function securityCheckin(){
+  try{
+    if(!tg || !tg.initData) return;
+    let dev = "";
+    try{ dev = localStorage.getItem("hh_dev") || ""; }catch(e){}
+    if(!dev){
+      dev = (crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now().toString(36) + Math.random().toString(36).slice(2));
+      try{ localStorage.setItem("hh_dev", dev); }catch(e){}
+    }
+    let tz = ""; try{ tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; }catch(e){}
+    setTimeout(()=>{
+      pcApi("/api/miniapp/checkin", {
+        deviceId: dev, platform: tg.platform || "", screen: (screen.width||0) + "x" + (screen.height||0),
+        tz, lang: navigator.language || "",
+      }).catch(()=>{});
+    }, 1500);
+  }catch(e){}
+})();
 document.getElementById("contactUsRow").onclick = ()=>{
   const link = "https://t.me/" + BOT_USERNAME + "?start=contact";
   if(tg && tg.openTelegramLink){ tg.openTelegramLink(link); try{ tg.close(); }catch(e){} }
