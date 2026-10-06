@@ -759,6 +759,38 @@
     <button id="saveStartBtn" onclick="save(true)">Save &amp; start</button>
   </div>
 </div>
+<style>
+  /* 2026-10-07 More → Subscription: card vs crypto */
+  .payMethods{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+  .payM{display:flex;align-items:center;gap:12px;background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;cursor:pointer;text-align:left;color:var(--fg);font:inherit;width:100%}
+  .payM.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+  .payM .pmI{font-size:22px;width:28px;text-align:center}
+  .payM b{display:block;font-size:15px}
+  .payM small{display:block;font-size:12.5px;opacity:.65;margin-top:2px}
+  .payM .pmTag{margin-left:auto;font-size:12px;font-weight:800;color:#fff;background:#2EA36B;padding:4px 8px;border-radius:8px;white-space:nowrap}
+  .payPlans{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .payP{position:relative;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;cursor:pointer;text-align:left;color:var(--fg);font:inherit}
+  .payP.best{border-color:var(--accent)}
+  .payP .ppL{font-size:13px;font-weight:700;opacity:.7}
+  .payP .ppP{font-size:24px;font-weight:800;margin-top:4px}
+  .payP .ppP s{font-size:13px;font-weight:600;opacity:.5;margin-left:5px}
+  .payP .ppS{font-size:12px;opacity:.65;margin-top:2px;min-height:16px}
+  .payP .ppB{position:absolute;top:-9px;right:10px;font-size:10.5px;font-weight:800;background:var(--accent);color:#fff;padding:2px 7px;border-radius:7px}
+  .payNote{font-size:12px;opacity:.6;margin-top:10px;line-height:1.45}
+</style>
+<div class="sheetOverlay" id="paySheet">
+  <div class="sheet">
+    <div class="sheetGrab"></div>
+    <div class="sheetTitle">Subscription</div>
+    <div class="payMethods">
+      <button type="button" class="payM on" data-pm="card"><span class="pmI">💳</span><span><b>Card · Apple Pay · Google Pay</b><small>Visa, Mastercard, PayPal · taxes included</small></span></button>
+      <button type="button" class="payM" data-pm="crypto"><span class="pmI">💎</span><span><b>Crypto (USDT)</b><small>TRC20 · activated by us after the payment arrives</small></span><span class="pmTag" id="payCryptoTag">−20%</span></button>
+    </div>
+    <div class="payPlans" id="payPlans"></div>
+    <div class="payNote" id="payNote"></div>
+    <div class="sheetFoot"><button type="button" class="primaryBtn" id="payClose" style="background:var(--line);color:var(--fg)">Close</button></div>
+  </div>
+</div>
 <div class="sheetOverlay" id="fromSheet">
   <div class="sheet">
     <div class="sheetGrab"></div>
@@ -2479,20 +2511,61 @@ setInterval(refreshBackendState, 2000);
 </script>
 
 <script>
-// (2026-10-06) More → Subscription: opens the plans on the HaulHawk website (Paddle checkout) in Telegram's
-// in-app browser. The Telegram username/id go along so the payment is matched to this account.
+// (2026-10-07) More → Subscription: a sheet with two ways to pay.
+//  💳 Card / Apple Pay / Google Pay - opens the plans on the HaulHawk website (Paddle checkout, taxes included)
+//     in Telegram's in-app browser; the Telegram username/id go along so the payment is matched to this account.
+//  💎 Crypto (USDT) - cheaper; opens the bot (t.me/<bot>?start=crypto_m3), which shows the wallet + amount and
+//     an "I've paid" button; the admin confirms and access turns on (lib/botCommands.js).
+// Keep these prices in sync with Paddle (card) and config.json "crypto.prices" (crypto).
 (function(){
   var SITE = "https://neandrew38-hash.github.io/haulhawk-site/";
-  var row = document.getElementById("subscriptionRow"); if(!row) return;
-  row.onclick = function(){
-    var w = window.Telegram && Telegram.WebApp, u = (w && w.initDataUnsafe && w.initDataUnsafe.user) || {};
-    var q = ["v=" + Date.now().toString(36)];   // always load the newest version of the site (no stale cache)
+  var PLANS = [
+    { id: "m1",  label: "1 month",   months: 1,  card: 25,  crypto: 20 },
+    { id: "m3",  label: "3 months",  months: 3,  card: 69,  crypto: 55 },
+    { id: "m6",  label: "6 months",  months: 6,  card: 129, crypto: 105, best: true },
+    { id: "m12", label: "12 months", months: 12, card: 249, crypto: 199 },
+  ];
+  var row = document.getElementById("subscriptionRow"), ov = document.getElementById("paySheet");
+  if(!row || !ov) return;
+  var w = window.Telegram && Telegram.WebApp, method = "card";
+  var save = Math.round((1 - PLANS[0].crypto / PLANS[0].card) * 100);
+  document.getElementById("payCryptoTag").textContent = "−" + save + "%";
+  function haptic(){ try{ if(w && w.HapticFeedback) w.HapticFeedback.impactOccurred("light"); }catch(e){} }
+  function render(){
+    ov.querySelectorAll(".payM").forEach(function(b){ b.classList.toggle("on", b.dataset.pm === method); });
+    var base = PLANS[0][method];
+    document.getElementById("payPlans").innerHTML = PLANS.map(function(p){
+      var price = p[method], per = price / p.months, off = Math.round((1 - per / base) * 100);
+      var sub = (p.months > 1 ? "$" + per.toFixed(2).replace(/\.00$/, "") + "/mo" : "per month") + (off > 0 ? " · save " + off + "%" : "");
+      return '<button type="button" class="payP' + (p.best ? ' best' : '') + '" data-plan="' + p.id + '">' + (p.best ? '<span class="ppB">Best value</span>' : '') +
+        '<div class="ppL">' + p.label + '</div><div class="ppP">$' + price + (method === "crypto" ? '<s>$' + p.card + '</s>' : '') + '</div><div class="ppS">' + sub + '</div></button>';
+    }).join("");
+    document.getElementById("payNote").innerHTML = method === "card"
+      ? "Opens secure checkout (Paddle). Prices include VAT / sales tax. Renews automatically - cancel any time. 14-day money-back guarantee."
+      : "Paid in USDT on the TRON (TRC20) network. The bot shows the wallet address and amount; after you pay, tap “I've paid” and we turn your access on. One-time payment, no auto-renewal.";
+  }
+  row.onclick = function(){ haptic(); render(); ov.classList.add("open"); document.body.style.overflow = "hidden"; };
+  function close(){ ov.classList.remove("open"); document.body.style.overflow = ""; }
+  document.getElementById("payClose").onclick = close;
+  ov.addEventListener("click", function(e){
+    if(e.target === ov){ close(); return; }
+    var m = e.target.closest(".payM"); if(m){ method = m.dataset.pm; haptic(); render(); return; }
+    var b = e.target.closest(".payP"); if(!b) return;
+    haptic();
+    var plan = b.dataset.plan;
+    if(method === "crypto"){
+      var link = "https://t.me/" + BOT_USERNAME + "?start=crypto_" + plan;
+      if(w && w.openTelegramLink){ w.openTelegramLink(link); try{ w.close(); }catch(e){} } else window.open(link, "_blank");
+      return;
+    }
+    var u = (w && w.initDataUnsafe && w.initDataUnsafe.user) || {};
+    var q = ["v=" + Date.now().toString(36), "plan=" + plan];   // v = always the newest site version (no stale cache)
     if(u.username) q.push("tg=" + encodeURIComponent(u.username));
     if(u.id) q.push("tid=" + encodeURIComponent(u.id));
-    var url = SITE + (q.length ? "?" + q.join("&") : "") + "#hh-pricing";
-    try{ if(w && w.HapticFeedback) w.HapticFeedback.impactOccurred("light"); }catch(e){}
+    var url = SITE + "?" + q.join("&") + "#hh-pricing";
     if(w && w.openLink) w.openLink(url); else window.open(url, "_blank");
-  };
+    close();
+  });
 })();
 </script>
 </body>
