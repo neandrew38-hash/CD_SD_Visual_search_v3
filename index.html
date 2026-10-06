@@ -2497,7 +2497,7 @@ setInterval(refreshBackendState, 2000);
   var row = document.getElementById("subscriptionRow"); if(!row) return;
   row.onclick = function(){
     var w = window.Telegram && Telegram.WebApp, u = (w && w.initDataUnsafe && w.initDataUnsafe.user) || {};
-    var q = [];
+    var q = ["v=" + Date.now().toString(36)];   // always load the newest version of the site (no stale cache)
     if(u.username) q.push("tg=" + encodeURIComponent(u.username));
     if(u.id) q.push("tid=" + encodeURIComponent(u.id));
     var url = SITE + (q.length ? "?" + q.join("&") : "") + "#hh-pricing";
