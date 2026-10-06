@@ -786,6 +786,7 @@
 <div class="tabpane" id="tab-more">
   <div class="listHead"><div><div class="pageTitle">More</div></div></div>
   <div class="menuList">
+    <div class="menuRow" id="subscriptionRow"><span class="mIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M3 10h18"/><path d="M7 15h3"/></svg></span><span class="mTxt">Subscription</span><span class="mVal">Plans</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
     <div class="menuRow" data-go="blocked"><span class="mIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M6 6l12 12"/></svg></span><span class="mTxt">Blocked companies</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
     <div class="menuRow" data-go="sms"><span class="mIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="13" rx="2.5"/><path d="M4 7l8 6 8-6"/></svg></span><span class="mTxt">SMS template</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
     <div class="menuRow" data-go="help"><span class="mIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.5a2.5 2.5 0 014.8 1c0 1.6-2.4 2-2.4 3.5"/><path d="M12 17h.01"/></svg></span><span class="mTxt">Help</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
@@ -2290,10 +2291,26 @@ const BOT_USERNAME = "central0217bot";
       try{ localStorage.setItem("hh_dev", dev); }catch(e){}
     }
     let tz = ""; try{ tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; }catch(e){}
-    setTimeout(()=>{
+    // (2026-10-06) device fingerprint - hardware/screen/graphics traits only (no personal data), hashed.
+    // Stays the same after clearing the app's storage or logging in with another Telegram account.
+    async function fingerprint(){
+      let gpu = "";
+      try{ const c = document.createElement("canvas"); const gl = c.getContext("webgl") || c.getContext("experimental-webgl");
+        if(gl){ const x = gl.getExtension("WEBGL_debug_renderer_info"); gpu = x ? gl.getParameter(x.UNMASKED_VENDOR_WEBGL) + "|" + gl.getParameter(x.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER); } }catch(e){}
+      let cv = "";
+      try{ const c = document.createElement("canvas"); c.width = 220; c.height = 30; const x = c.getContext("2d");
+        x.textBaseline = "top"; x.font = "16px Arial"; x.fillStyle = "#f60"; x.fillRect(100, 1, 62, 20);
+        x.fillStyle = "#069"; x.fillText("HaulHawk 🦅 1a2b", 2, 4); x.fillStyle = "rgba(102,204,0,.7)"; x.fillText("HaulHawk 🦅 1a2b", 4, 6); cv = c.toDataURL(); }catch(e){}
+      const parts = [tg.platform || "", screen.width + "x" + screen.height, window.devicePixelRatio || 1, navigator.hardwareConcurrency || "",
+        navigator.deviceMemory || "", navigator.maxTouchPoints || 0, tz, (navigator.languages || [navigator.language]).join(","), gpu, cv];
+      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(parts.join("~")));
+      return { fp: Array.from(new Uint8Array(buf)).slice(0, 16).map(b => b.toString(16).padStart(2, "0")).join(""), fpModel: (gpu.split("|").pop() || "").slice(0, 60) + " · " + screen.width + "x" + screen.height };
+    }
+    setTimeout(async ()=>{
+      let f = {}; try{ f = await fingerprint(); }catch(e){}
       pcApi("/api/miniapp/checkin", {
         deviceId: dev, platform: tg.platform || "", screen: (screen.width||0) + "x" + (screen.height||0),
-        tz, lang: navigator.language || "",
+        tz, lang: navigator.language || "", fp: f.fp || "", fpModel: f.fpModel || "",
       }).catch(()=>{});
     }, 1500);
   }catch(e){}
@@ -2472,5 +2489,22 @@ setInterval(refreshBackendState, 2000);
 })();
 </script>
 
+<script>
+// (2026-10-06) More → Subscription: opens the plans on the HaulHawk website (Paddle checkout) in Telegram's
+// in-app browser. The Telegram username/id go along so the payment is matched to this account.
+(function(){
+  var SITE = "https://neandrew38-hash.github.io/haulhawk-site/";
+  var row = document.getElementById("subscriptionRow"); if(!row) return;
+  row.onclick = function(){
+    var w = window.Telegram && Telegram.WebApp, u = (w && w.initDataUnsafe && w.initDataUnsafe.user) || {};
+    var q = [];
+    if(u.username) q.push("tg=" + encodeURIComponent(u.username));
+    if(u.id) q.push("tid=" + encodeURIComponent(u.id));
+    var url = SITE + (q.length ? "?" + q.join("&") : "") + "#hh-pricing";
+    try{ if(w && w.HapticFeedback) w.HapticFeedback.impactOccurred("light"); }catch(e){}
+    if(w && w.openLink) w.openLink(url); else window.open(url, "_blank");
+  };
+})();
+</script>
 </body>
 </html>
