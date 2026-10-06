@@ -624,7 +624,7 @@
 <div id="mySearchesView">
   <div class="listHead">
     <div><div class="pageTitle">My searches</div><div class="pageSub" id="mySearchesSummary"></div></div>
-    <div class="headBtns"><button type="button" id="themeToggle" class="iconBtn themeBtn" title="Switch light/dark theme" aria-label="Switch light/dark theme">🌙</button>
+    <div class="headBtns"><button type="button" id="introBtn" class="iconBtn" title="How HaulHawk works" aria-label="How HaulHawk works" onclick="window.showIntro && window.showIntro()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.6h.01"/></svg></button><button type="button" id="themeToggle" class="iconBtn themeBtn" title="Switch light/dark theme" aria-label="Switch light/dark theme">🌙</button>
     <button type="button" class="iconBtn" id="pauseAllBtn" aria-label="Pause all searches" title="Pause all"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 5v14M16 5v14"/></svg></button></div>
   </div>
   <div class="chipRow" id="siteFilter"></div>
@@ -2335,7 +2335,7 @@ refreshBackendState();
 // couple of seconds on its own, polling faster here just means we notice sooner once it's actually ready.
 setInterval(refreshBackendState, 2000);
 </script>
-<!-- ===== 👋 First-run intro (2026-10-06) - shown once per Telegram account; reopen from More → How HaulHawk works ===== -->
+<!-- ===== 👋 First-run intro (2026-10-06) - shown once per Telegram account; reopen with the ⓘ button next to the theme toggle ===== -->
 <style>
   #hhIntro{position:fixed;inset:0;z-index:50;display:none;flex-direction:column;background:var(--bg);color:var(--fg);
     padding:calc(env(safe-area-inset-top,0px) + 14px) 20px calc(env(safe-area-inset-bottom,0px) + 18px);opacity:0;transition:opacity .35s ease}
@@ -2412,7 +2412,7 @@ setInterval(refreshBackendState, 2000);
       <ul class="ixList">
         <li><span class="ixDot">➕</span><span>Tap <b>New search</b> on the next screen to create your first one - alerts start within a minute.</span></li>
         <li><span class="ixDot">⭐️</span><span><b>Saved</b> keeps the loads you starred. <b>More</b> has blocked companies, your SMS template and help.</span></li>
-        <li><span class="ixDot">💬</span><span>Questions? <b>More → Contact us</b>. This intro is under <b>More → How HaulHawk works</b>.</span></li>
+        <li><span class="ixDot">💬</span><span>Questions? <b>More → Contact us</b>. Tap <b>ⓘ</b> at the top of My searches to see this intro again.</span></li>
       </ul>
     </div>
   </div></div>
@@ -2474,17 +2474,6 @@ setInterval(refreshBackendState, 2000);
       });
     } catch (e) { clearTimeout(t); done = true; setTimeout(open, 1400); }
   }
-  // the menu row under More
-  try {
-    var helpRow = document.querySelector('.menuRow[data-go="help"]');
-    if (helpRow) {
-      var row = helpRow.cloneNode(true); row.removeAttribute('data-go'); row.id = 'introRow';
-      var ic = row.querySelector('.mIcon'); if (ic) ic.innerHTML = '<span style="font-size:16px">👋</span>';
-      var tx = row.querySelector('.mTxt'); if (tx) tx.textContent = 'How HaulHawk works';
-      row.onclick = open;
-      helpRow.parentNode.insertBefore(row, helpRow);
-    }
-  } catch (e) {}
   maybeShow();
 })();
 </script>
