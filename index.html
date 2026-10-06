@@ -2318,5 +2318,159 @@ refreshBackendState();
 // couple of seconds on its own, polling faster here just means we notice sooner once it's actually ready.
 setInterval(refreshBackendState, 2000);
 </script>
+<!-- ===== 👋 First-run intro (2026-10-06) - shown once per Telegram account; reopen from More → How HaulHawk works ===== -->
+<style>
+  #hhIntro{position:fixed;inset:0;z-index:50;display:none;flex-direction:column;background:var(--bg);color:var(--fg);
+    padding:calc(env(safe-area-inset-top,0px) + 14px) 20px calc(env(safe-area-inset-bottom,0px) + 18px);opacity:0;transition:opacity .35s ease}
+  #hhIntro.show{display:flex}
+  #hhIntro.in{opacity:1}
+  #hhIntro .ixTop{display:flex;justify-content:space-between;align-items:center;min-height:32px}
+  #hhIntro .ixBrand{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+  #hhIntro .ixSkip{background:none;border:0;color:var(--text3);font-size:14px;font-weight:600;padding:6px 2px;cursor:pointer}
+  #hhIntro .ixTrack{flex:1;display:flex;overflow:hidden;position:relative;touch-action:pan-y}
+  #hhIntro .ixSlides{display:flex;width:100%;transition:transform .42s cubic-bezier(.2,.8,.2,1)}
+  #hhIntro .ixSlide{flex:0 0 100%;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:8px 6px;box-sizing:border-box}
+  #hhIntro .ixArt{position:relative;width:168px;height:168px;margin-bottom:26px;display:flex;align-items:center;justify-content:center}
+  #hhIntro .ixArt::before{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 50% 45%,var(--glow),transparent 68%)}
+  #hhIntro .ixArt img{width:104px;height:104px;position:relative;filter:drop-shadow(0 8px 24px var(--glow));animation:ixFloat 3.2s ease-in-out infinite}
+  #hhIntro .ixEmoji{position:relative;font-size:72px;line-height:1;animation:ixFloat 3.2s ease-in-out infinite}
+  @keyframes ixFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+  #hhIntro h1{font-size:26px;line-height:1.15;margin:0 0 10px;font-weight:800;letter-spacing:-.01em}
+  #hhIntro h1 em{font-style:normal;color:var(--accent)}
+  #hhIntro .ixLead{font-size:15px;line-height:1.5;color:var(--text2);max-width:340px;margin:0 auto}
+  #hhIntro .ixList{list-style:none;padding:0;margin:18px auto 0;max-width:330px;text-align:left}
+  #hhIntro .ixList li{display:flex;gap:11px;align-items:flex-start;font-size:14px;line-height:1.45;color:var(--text2);padding:7px 0}
+  #hhIntro .ixList li b{color:var(--fg)}
+  #hhIntro .ixList .ixDot{flex:0 0 26px;height:26px;border-radius:8px;background:var(--accent-tint);display:flex;align-items:center;justify-content:center;font-size:14px}
+  #hhIntro .ixPlats{display:flex;flex-wrap:wrap;justify-content:center;gap:7px;margin-top:18px}
+  #hhIntro .ixPlats span{font-size:12.5px;font-weight:700;padding:6px 11px;border-radius:999px;background:var(--card);border:1px solid var(--line);color:var(--text2)}
+  #hhIntro .ixAlert{margin:16px auto 0;max-width:300px;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 13px;font-size:12.5px;line-height:1.5;box-shadow:0 8px 28px var(--shadow)}
+  #hhIntro .ixAlert .ixRoute{font-weight:700;color:var(--fg)}
+  #hhIntro .ixAlert .ixMoney{font-weight:800;margin-top:4px}
+  #hhIntro .ixAlert .ixDeal{display:inline-block;margin-top:5px;font-size:11.5px;font-weight:700;padding:2px 7px;border-radius:6px;background:var(--accent-tint);color:var(--accent)}
+  #hhIntro .ixBtns{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:9px}
+  #hhIntro .ixBtns i{font-style:normal;text-align:center;font-size:11.5px;font-weight:700;padding:6px 0;border-radius:7px;background:var(--surface-soft);border:1px solid var(--hairline)}
+  #hhIntro .ixFoot{display:flex;flex-direction:column;align-items:center;gap:16px}
+  #hhIntro .ixDots{display:flex;gap:7px}
+  #hhIntro .ixDots i{width:7px;height:7px;border-radius:99px;background:var(--track);transition:all .3s}
+  #hhIntro .ixDots i.on{width:22px;background:var(--accent)}
+  #hhIntro .ixNext{width:100%;max-width:420px;padding:15px;border:0;border-radius:14px;background:var(--accent);color:#fff;font-size:17px;font-weight:800;box-shadow:0 6px 20px var(--glow);cursor:pointer;transition:transform .1s}
+  #hhIntro .ixNext:active{transform:scale(.98)}
+  @media (prefers-reduced-motion:reduce){#hhIntro .ixSlides{transition:none}#hhIntro .ixArt img,#hhIntro .ixEmoji{animation:none}}
+</style>
+<div id="hhIntro" role="dialog" aria-label="Welcome to HaulHawk">
+  <div class="ixTop"><span class="ixBrand">HaulHawk</span><button class="ixSkip" type="button" id="ixSkip">Skip</button></div>
+  <div class="ixTrack"><div class="ixSlides" id="ixSlides">
+    <div class="ixSlide">
+      <div class="ixArt"><img id="ixLogo" alt=""></div>
+      <h1>Your eyes on <em>every load board</em></h1>
+      <p class="ixLead">HaulHawk watches the load boards around the clock and pings you here in Telegram the second a load that fits your truck is posted - before everyone else calls.</p>
+      <div class="ixPlats"><span>Central Dispatch</span><span>Super Dispatch</span><span>Ship.Cars</span><span>Autosled</span></div>
+    </div>
+    <div class="ixSlide">
+      <div class="ixArt"><span class="ixEmoji">🎯</span></div>
+      <h1>Set up a <em>search</em> once</h1>
+      <ul class="ixList">
+        <li><span class="ixDot">📍</span><span><b>Route</b> - origin and destination: cities with a radius, whole states, or a route with stops along the way.</span></li>
+        <li><span class="ixDot">💵</span><span><b>Money</b> - minimum price and $/mile, so cheap loads never bother you.</span></li>
+        <li><span class="ixDot">🚚</span><span><b>Truck</b> - open or enclosed, operable or inop, how many cars, vehicle type, pickup date.</span></li>
+        <li><span class="ixDot">🖥</span><span><b>Platforms</b> - pick which load boards to watch. Turn a search off any time.</span></li>
+      </ul>
+    </div>
+    <div class="ixSlide">
+      <div class="ixArt"><span class="ixEmoji">⚡️</span></div>
+      <h1>Act on an alert <em>in one tap</em></h1>
+      <div class="ixAlert">
+        <div class="ixRoute">Sherman Oaks, CA → Parkton, MD</div>
+        <div>2015 BMW 3 Series + 2005 BMW X5 · Open · Operable</div>
+        <div class="ixMoney">💳 $2,100 · 2,663 mi · $0.79/mi</div>
+        <span class="ixDeal">💰 +58% vs this lane</span>
+        <div class="ixBtns"><i>📞 Call</i><i>📋 SMS</i><i>🗺 Route</i><i>⭐️ Save</i><i>🚫 Block</i></div>
+      </div>
+      <p class="ixLead" style="margin-top:14px">Call the shipper, copy a ready SMS, see the route, save the load for later - or block a company you never want to hear from again.</p>
+    </div>
+    <div class="ixSlide">
+      <div class="ixArt"><span class="ixEmoji">🚀</span></div>
+      <h1>You're <em>all set</em></h1>
+      <ul class="ixList">
+        <li><span class="ixDot">➕</span><span>Tap <b>New search</b> on the next screen to create your first one - alerts start within a minute.</span></li>
+        <li><span class="ixDot">⭐️</span><span><b>Saved</b> keeps the loads you starred. <b>More</b> has blocked companies, your SMS template and help.</span></li>
+        <li><span class="ixDot">💬</span><span>Questions? <b>More → Contact us</b>. This intro is under <b>More → How HaulHawk works</b>.</span></li>
+      </ul>
+    </div>
+  </div></div>
+  <div class="ixFoot"><div class="ixDots" id="ixDots"></div><button class="ixNext" type="button" id="ixNext">Next</button></div>
+</div>
+<script>
+(function(){
+  var KEY = 'hh_intro_v1';
+  var box = document.getElementById('hhIntro'), slides = document.getElementById('ixSlides');
+  var dots = document.getElementById('ixDots'), next = document.getElementById('ixNext');
+  var n = slides.children.length, i = 0;
+  try { var ic = document.querySelector('link[rel="icon"]'); if (ic) document.getElementById('ixLogo').src = ic.href; } catch (e) {}
+  for (var k = 0; k < n; k++) dots.appendChild(document.createElement('i'));
+  function go(to){
+    i = Math.max(0, Math.min(n - 1, to));
+    slides.style.transform = 'translateX(' + (-100 * i) + '%)';
+    for (var k = 0; k < n; k++) dots.children[k].className = k === i ? 'on' : '';
+    next.textContent = i === n - 1 ? 'Start searching' : 'Next';
+    document.getElementById('ixSkip').style.visibility = i === n - 1 ? 'hidden' : '';
+    try { var h = window.Telegram && Telegram.WebApp && Telegram.WebApp.HapticFeedback; if (h) h.selectionChanged(); } catch (e) {}
+  }
+  function cloud(){ try { var c = window.Telegram && Telegram.WebApp && Telegram.WebApp.CloudStorage; return c && Telegram.WebApp.isVersionAtLeast && Telegram.WebApp.isVersionAtLeast('6.9') ? c : null; } catch (e) { return null; } }
+  function markSeen(){
+    try { localStorage.setItem(KEY, '1'); } catch (e) {}
+    var c = cloud(); if (c) try { c.setItem(KEY, '1'); } catch (e) {}
+  }
+  function open(){
+    go(0); box.classList.add('show');
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){ box.classList.add('in'); }); });
+  }
+  function close(){
+    markSeen(); box.classList.remove('in');
+    setTimeout(function(){ box.classList.remove('show'); }, 360);
+    try { if (typeof switchTab === 'function') switchTab('search'); } catch (e) {}
+  }
+  window.showIntro = open;
+  next.onclick = function(){ if (i < n - 1) go(i + 1); else close(); };
+  document.getElementById('ixSkip').onclick = close;
+  // swipe left / right
+  var x0 = null;
+  box.addEventListener('touchstart', function(e){ x0 = e.touches[0].clientX; }, { passive: true });
+  box.addEventListener('touchend', function(e){
+    if (x0 == null) return; var dx = e.changedTouches[0].clientX - x0; x0 = null;
+    if (Math.abs(dx) > 50) go(i + (dx < 0 ? 1 : -1));
+  }, { passive: true });
+  // first visit only: check this phone, then the Telegram account (so a new phone doesn't show it again)
+  function maybeShow(){
+    var seen = false; try { seen = localStorage.getItem(KEY) === '1'; } catch (e) {}
+    if (seen) return;
+    var c = cloud();
+    if (!c) { setTimeout(open, 1400); return; }
+    var done = false;
+    var t = setTimeout(function(){ if (!done) { done = true; open(); } }, 2500);
+    try {
+      c.getItem(KEY, function(err, val){
+        if (done) return; done = true; clearTimeout(t);
+        if (val === '1') { try { localStorage.setItem(KEY, '1'); } catch (e) {} return; }
+        setTimeout(open, 1100);
+      });
+    } catch (e) { clearTimeout(t); done = true; setTimeout(open, 1400); }
+  }
+  // the menu row under More
+  try {
+    var helpRow = document.querySelector('.menuRow[data-go="help"]');
+    if (helpRow) {
+      var row = helpRow.cloneNode(true); row.removeAttribute('data-go'); row.id = 'introRow';
+      var ic = row.querySelector('.mIcon'); if (ic) ic.innerHTML = '<span style="font-size:16px">👋</span>';
+      var tx = row.querySelector('.mTxt'); if (tx) tx.textContent = 'How HaulHawk works';
+      row.onclick = open;
+      helpRow.parentNode.insertBefore(row, helpRow);
+    }
+  } catch (e) {}
+  maybeShow();
+})();
+</script>
+
 </body>
 </html>
