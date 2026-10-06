@@ -759,38 +759,6 @@
     <button id="saveStartBtn" onclick="save(true)">Save &amp; start</button>
   </div>
 </div>
-<style>
-  /* 2026-10-07 More → Subscription: card vs crypto */
-  .payMethods{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
-  .payM{display:flex;align-items:center;gap:12px;background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;cursor:pointer;text-align:left;color:var(--fg);font:inherit;width:100%}
-  .payM.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
-  .payM .pmI{font-size:22px;width:28px;text-align:center}
-  .payM b{display:block;font-size:15px}
-  .payM small{display:block;font-size:12.5px;opacity:.65;margin-top:2px}
-  .payM .pmTag{margin-left:auto;font-size:12px;font-weight:800;color:#fff;background:#2EA36B;padding:4px 8px;border-radius:8px;white-space:nowrap}
-  .payPlans{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-  .payP{position:relative;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;cursor:pointer;text-align:left;color:var(--fg);font:inherit}
-  .payP.best{border-color:var(--accent)}
-  .payP .ppL{font-size:13px;font-weight:700;opacity:.7}
-  .payP .ppP{font-size:24px;font-weight:800;margin-top:4px}
-  .payP .ppP s{font-size:13px;font-weight:600;opacity:.5;margin-left:5px}
-  .payP .ppS{font-size:12px;opacity:.65;margin-top:2px;min-height:16px}
-  .payP .ppB{position:absolute;top:-9px;right:10px;font-size:10.5px;font-weight:800;background:var(--accent);color:#fff;padding:2px 7px;border-radius:7px}
-  .payNote{font-size:12px;opacity:.6;margin-top:10px;line-height:1.45}
-</style>
-<div class="sheetOverlay" id="paySheet">
-  <div class="sheet">
-    <div class="sheetGrab"></div>
-    <div class="sheetTitle">Subscription</div>
-    <div class="payMethods">
-      <button type="button" class="payM on" data-pm="card"><span class="pmI">💳</span><span><b>Card · Apple Pay · Google Pay</b><small>Visa, Mastercard, PayPal · taxes included</small></span></button>
-      <button type="button" class="payM" data-pm="crypto"><span class="pmI">💎</span><span><b>Crypto (USDT)</b><small>TRC20 · activated by us after the payment arrives</small></span><span class="pmTag" id="payCryptoTag">−20%</span></button>
-    </div>
-    <div class="payPlans" id="payPlans"></div>
-    <div class="payNote" id="payNote"></div>
-    <div class="sheetFoot"><button type="button" class="primaryBtn" id="payClose" style="background:var(--line);color:var(--fg)">Close</button></div>
-  </div>
-</div>
 <div class="sheetOverlay" id="fromSheet">
   <div class="sheet">
     <div class="sheetGrab"></div>
@@ -2510,6 +2478,38 @@ setInterval(refreshBackendState, 2000);
 })();
 </script>
 
+<style>
+  /* 2026-10-07 More → Subscription: card vs crypto */
+  .payMethods{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+  .payM{display:flex;align-items:center;gap:12px;background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;cursor:pointer;text-align:left;color:var(--fg);font:inherit;width:100%}
+  .payM.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+  .payM .pmI{font-size:22px;width:28px;text-align:center}
+  .payM b{display:block;font-size:15px}
+  .payM small{display:block;font-size:12.5px;opacity:.65;margin-top:2px}
+  .payM .pmTag{margin-left:auto;font-size:12px;font-weight:800;color:#fff;background:#2EA36B;padding:4px 8px;border-radius:8px;white-space:nowrap}
+  .payPlans{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .payP{position:relative;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;cursor:pointer;text-align:left;color:var(--fg);font:inherit}
+  .payP.best{border-color:var(--accent)}
+  .payP .ppL{font-size:13px;font-weight:700;opacity:.7}
+  .payP .ppP{font-size:24px;font-weight:800;margin-top:4px}
+  .payP .ppP s{font-size:13px;font-weight:600;opacity:.5;margin-left:5px}
+  .payP .ppS{font-size:12px;opacity:.65;margin-top:2px;min-height:16px}
+  .payP .ppB{position:absolute;top:-9px;right:10px;font-size:10.5px;font-weight:800;background:var(--accent);color:#fff;padding:2px 7px;border-radius:7px}
+  .payNote{font-size:12px;opacity:.6;margin-top:10px;line-height:1.45}
+</style>
+<div class="sheetOverlay" id="paySheet">
+  <div class="sheet">
+    <div class="sheetGrab"></div>
+    <div class="sheetTitle">Subscription</div>
+    <div class="payMethods">
+      <button type="button" class="payM on" data-pm="card"><span class="pmI">💳</span><span><b>Card · Apple Pay · Google Pay</b><small>Visa, Mastercard, PayPal · taxes included</small></span></button>
+      <button type="button" class="payM" data-pm="crypto"><span class="pmI">💎</span><span><b>Crypto (USDT)</b><small>TRC20 · activated by us after the payment arrives</small></span><span class="pmTag" id="payCryptoTag">−20%</span></button>
+    </div>
+    <div class="payPlans" id="payPlans"></div>
+    <div class="payNote" id="payNote"></div>
+    <div class="sheetFoot"><button type="button" class="primaryBtn" id="payClose" style="background:var(--line);color:var(--fg)">Close</button></div>
+  </div>
+</div>
 <script>
 // (2026-10-07) More → Subscription: a sheet with two ways to pay.
 //  💳 Card / Apple Pay / Google Pay - opens the plans on the HaulHawk website (Paddle checkout, taxes included)
