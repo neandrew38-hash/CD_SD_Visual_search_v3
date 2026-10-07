@@ -913,6 +913,17 @@ Vehicle status: Operable ✅
     <div class="helpRow"><div><b>✉️ SMS template</b> — the message <b>📋 SMS</b> copies. Tags <code>{{vehicle}} {{origin}} {{dest}} {{price}} {{company}} {{loadId}}</code> are filled in from each load. It is only yours.</div></div>
 
   </div>
+
+  <div class="helpSec">Subscription &amp; payment</div>
+  <div class="card helpCard">
+    <div class="helpRow"><div>Open <b>More → Subscription</b>, pick <b>💎 Crypto (USDT)</b> and tap a plan: <b>1, 3, 6 or 12 months</b>. The longer the plan, the cheaper each month. Card payments are <b>temporarily unavailable</b>.</div></div>
+    <div class="helpRow"><div>The bot opens and shows <b>your own amount</b> (for example <b>20.37 USDT</b>) and the wallet address. <b>Send exactly that amount</b> - the cents are how we recognise <b>your</b> payment. Tap the amount and the address to copy them.</div></div>
+    <div class="helpRow"><div>Send it as <b>USDT on the TRON (TRC20) network</b> only - from Binance, Bybit, OKX, Trust Wallet or any other wallet. Choose <b>TRC20 / TRON</b> as the network when you withdraw. Other networks (ERC20, BEP20…) or other coins can be lost.</div></div>
+    <div class="helpRow"><div>If your exchange takes a <b>withdrawal fee</b>, add it on top so that the full amount arrives on our wallet.</div></div>
+    <div class="helpRow"><div>Pay within <b>1 hour</b>. After that the amount is no longer reserved for you - just choose the plan again to get a new one.</div></div>
+    <div class="helpRow"><div>Access turns on <b>automatically</b>, usually a few minutes after the payment arrives, and the bot sends you a message. If you already have time left, the new plan is <b>added on top</b> - you never lose days by paying early.</div></div>
+    <div class="helpRow"><div>Tapped <b>✅ I've paid</b> and nothing after 30 minutes? Or want to pay another way? Send <b>/contact</b> to the bot (or <b>More → Contact us</b>) with the transaction ID (<b>TXID</b>) from your wallet - we'll sort it out.</div></div>
+  </div>
 </div>
 
 
@@ -2496,11 +2507,22 @@ setInterval(refreshBackendState, 2000);
   .payP .ppS{font-size:12px;opacity:.65;margin-top:2px;min-height:16px}
   .payP .ppB{position:absolute;top:-9px;right:10px;font-size:10.5px;font-weight:800;background:var(--accent);color:#fff;padding:2px 7px;border-radius:7px}
   .payNote{font-size:12px;opacity:.6;margin-top:10px;line-height:1.45}
+  /* card payments switched off for now (CARD_ENABLED below) */
+  .payM.off{cursor:default;background:transparent;border-style:dashed;box-shadow:none}
+  .payM.off .pmI,.payM.off b,.payM.off small{opacity:.45}
+  .payM .pmSoon{margin-left:auto;font-size:11px;font-weight:700;color:var(--fg);opacity:.75;background:var(--line);padding:4px 8px;border-radius:8px;white-space:nowrap}
+  .payInfo{display:none;align-items:flex-start;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:11px 13px;margin-bottom:12px;font-size:12.5px;line-height:1.45}
+  .payInfo.show{display:flex}
+  .payInfo .piI{font-size:17px;line-height:1.2}
+  .payInfo a{color:var(--accent);font-weight:700;text-decoration:none;white-space:nowrap}
+  .payM.shake{animation:payShake .3s}
+  @keyframes payShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
 </style>
 <div class="sheetOverlay" id="paySheet">
   <div class="sheet">
     <div class="sheetGrab"></div>
     <div class="sheetTitle">Subscription</div>
+    <div class="payInfo" id="payInfo"><span class="piI">ℹ️</span><span>Card payments are <b>temporarily unavailable</b>. Please pay with crypto (USDT) below, or <a href="#" id="paySupport">contact support</a> and we'll help you with the payment.</span></div>
     <div class="payMethods">
       <button type="button" class="payM on" data-pm="card"><span class="pmI">💳</span><span><b>Card · Apple Pay · Google Pay</b><small>Visa, Mastercard, PayPal · taxes included</small></span></button>
       <button type="button" class="payM" data-pm="crypto"><span class="pmI">💎</span><span><b>Crypto (USDT)</b><small>TRC20 · activated automatically</small></span><span class="pmTag" id="payCryptoTag">−20%</span></button>
@@ -2527,7 +2549,26 @@ setInterval(refreshBackendState, 2000);
   ];
   var row = document.getElementById("subscriptionRow"), ov = document.getElementById("paySheet");
   if(!row || !ov) return;
-  var w = window.Telegram && Telegram.WebApp, method = "card";
+  // (2026-10-07) card payments (Paddle) are switched off for now - set to true to bring them back
+  var CARD_ENABLED = false;
+  var w = window.Telegram && Telegram.WebApp, method = CARD_ENABLED ? "card" : "crypto";
+  var cardBtn = ov.querySelector('.payM[data-pm="card"]');
+  if(!CARD_ENABLED && cardBtn){
+    cardBtn.classList.add("off");
+    cardBtn.setAttribute("aria-disabled", "true");
+    cardBtn.querySelector("small").textContent = "Temporarily unavailable";
+    var soon = document.createElement("span"); soon.className = "pmSoon"; soon.textContent = "Soon";
+    cardBtn.appendChild(soon);
+    document.getElementById("payInfo").classList.add("show");
+    // crypto first
+    cardBtn.parentNode.appendChild(cardBtn);
+  }
+  function openSupport(){
+    var link = "https://t.me/" + BOT_USERNAME + "?start=contact";
+    if(w && w.openTelegramLink){ w.openTelegramLink(link); try{ w.close(); }catch(e){} } else window.open(link, "_blank");
+  }
+  var sup = document.getElementById("paySupport");
+  if(sup) sup.onclick = function(e){ e.preventDefault(); haptic(); openSupport(); };
   var save = Math.round((1 - PLANS[0].crypto / PLANS[0].card) * 100);
   document.getElementById("payCryptoTag").textContent = "−" + save + "%";
   function haptic(){ try{ if(w && w.HapticFeedback) w.HapticFeedback.impactOccurred("light"); }catch(e){} }
@@ -2565,7 +2606,14 @@ setInterval(refreshBackendState, 2000);
   document.getElementById("payClose").onclick = close;
   ov.addEventListener("click", function(e){
     if(e.target === ov){ close(); return; }
-    var m = e.target.closest(".payM"); if(m){ method = m.dataset.pm; haptic(); render(); return; }
+    var m = e.target.closest(".payM");
+    if(m && m.classList.contains("off")){
+      // card is off: a small shake + point at the note instead of switching
+      m.classList.remove("shake"); void m.offsetWidth; m.classList.add("shake");
+      try{ if(w && w.HapticFeedback) w.HapticFeedback.notificationOccurred("warning"); }catch(err){}
+      return;
+    }
+    if(m){ method = m.dataset.pm; haptic(); render(); return; }
     var b = e.target.closest(".payP"); if(!b) return;
     haptic();
     var plan = b.dataset.plan;
