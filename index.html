@@ -812,7 +812,8 @@
 <div class="tabpane" id="tab-sms">
   <div class="listHead"><div><div class="pageTitle">SMS template</div><div class="pageSub">The message 📋 SMS copies under an alert. Only yours.</div></div></div>
   <textarea class="field" id="tplText" placeholder="Loading..."></textarea>
-  <div class="tagRow"><span class="tiny">Tags:</span><code>{vehicle}</code><code>{origin}</code><code>{dest}</code><code>{price}</code><code>{company}</code><code>{loadId}</code></div>
+  <div id="tplCount" class="tiny" style="text-align:right;margin:4px 2px 0;opacity:.6">0 / 256</div>
+  <div class="tagRow"><span class="tiny">Tags:</span><code>{vehicle}</code><code>{origin}</code><code>{dest}</code><code>{price}</code><code>{company}</code><code>{loadId}</code><code>{pickup}</code></div>
   <div id="tplNote" class="warn" style="display:none"></div>
   <div class="tplBtns">
     <button id="tplSaveBtn" class="primaryBtn" onclick="saveTpl()">Save for me</button>
@@ -910,7 +911,7 @@ Vehicle status: Operable ✅
 
     <div class="helpRow"><div><b>🚫 Blocked companies</b> — no alerts from these companies on any site or search. Block one with <b>🚫 Block</b> under an alert or type its name here; <b>Unblock</b> undoes it.</div></div>
 
-    <div class="helpRow"><div><b>✉️ SMS template</b> — the message <b>📋 SMS</b> copies. Tags <code>{{vehicle}} {{origin}} {{dest}} {{price}} {{company}} {{loadId}}</code> are filled in from each load. It is only yours.</div></div>
+    <div class="helpRow"><div><b>✉️ SMS template</b> — the message <b>📋 SMS</b> copies. Tags <code>{vehicle} {origin} {dest} {price} {company} {loadId} {pickup}</code> are filled in from each load. Up to 256 characters. It is only yours - tap <b>Save for me</b> and new alerts use it.</div></div>
 
   </div>
 
@@ -1809,17 +1810,37 @@ async function apiAction(body){
 let tplDirty = false;   // true while the admin is typing, so a background refresh does not overwrite it
 document.getElementById("tplText").addEventListener("input", ()=>{ tplDirty = true; });
 
+// (2026-10-07) the template is saved on the bot's computer (pcApi → /api/miniapp/tpl) - it used to go to the
+// Worker, which the bot never read, so "Save for me" looked like it did nothing.
+let tplLoaded = false;
+function tplCount(){
+  const el = document.getElementById("tplCount"), v = document.getElementById("tplText").value;
+  if(el){ el.textContent = v.length + " / 256"; el.style.color = v.length > 256 ? "#e5484d" : ""; }
+}
+async function loadTpl(){
+  try{
+    const j = await pcApi("/api/miniapp/tpl");
+    if(j && j.ok && !tplDirty){ document.getElementById("tplText").value = j.value || DEFAULT_TPL_PREVIEW; tplLoaded = true; tplCount(); }
+  }catch(e){}
+}
 async function saveTpl(){
   const value = document.getElementById("tplText").value;
-  const r = await apiAction({ type: "set-tpl", value });
-  if(r && r.ok){ tplDirty = false; toast("Saved! The script will pick it up in a few seconds."); }
-  else toast("Could not save" + (r && r.error ? " ("+r.error+")" : ""));
+  if(value.length > 256){ toast("Too long: " + value.length + " / 256 characters"); return; }
+  const btn = document.getElementById("tplSaveBtn"); btn.disabled = true;
+  try{
+    const j = await pcApi("/api/miniapp/tpl", { value });
+    if(j && j.ok){ tplDirty = false; tplLoaded = true; document.getElementById("tplText").value = j.value; tplCount(); toast(j.custom ? "Saved ✓ New alerts will use it." : "Back to the default text ✓"); }
+    else toast("Could not save" + (j && j.error ? " (" + j.error + ")" : ""));
+  }catch(e){ toast("Could not save (" + (e && e.message || e) + ")"); }
+  btn.disabled = false;
 }
 function resetTpl(){
   document.getElementById("tplText").value = DEFAULT_TPL_PREVIEW;
-  tplDirty = true;
-  toast("Now press \"Save\" to apply it");
+  tplDirty = true; tplCount();
+  toast("Now press \"Save for me\" to apply it");
 }
+document.getElementById("tplText").addEventListener("input", tplCount);
+loadTpl();
 
 function tabIcon(t){
   if(t.active && t.pausedUntil && t.pausedUntil > Date.now()) return "⏸";
@@ -2161,7 +2182,7 @@ async function refreshBackendState(){
   if(canUseTpl){
     tplNote.style.display = "none";
     tplBtn.disabled = false;
-    if(!tplDirty) document.getElementById("tplText").value = (st.myTpl || st.tpl || DEFAULT_TPL_PREVIEW);
+    if(!tplDirty && !tplLoaded) loadTpl();
   } else {
     tplBtn.disabled = true;
     tplNote.style.display = "block";
