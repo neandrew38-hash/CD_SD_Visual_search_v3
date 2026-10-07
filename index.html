@@ -2073,12 +2073,7 @@ function renderMySearches(list){
     wrap.appendChild(card);
   });
 }// ---- 🎛 Control panel (admins only): the desktop program's own panel, over HTTPS via Tailscale Funnel ----
-// (2026-10-07) No panel address in this public page: the secret link comes from the computer itself, and only
-// for the admin (checked there by Telegram's signature). Fetched in advance so the tap opens it instantly.
-let panelLink = null;
-async function loadPanelLink(){
-  try { const j = await pcApi("/api/miniapp/panel-link"); if(j && j.ok && j.path) panelLink = PC_URL + j.path; } catch(e) { panelLink = null; }
-}
+const PANEL_URL = "https://macs-macbook-pro.tail2a7952.ts.net/";
 
 function escapeHtml(s){
   return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
@@ -2149,7 +2144,6 @@ async function refreshBackendState(){
   const isAdmin = !!(st && st.role === "admin");
   const canUseTpl = !!(st && (st.role === "admin" || st.role === "member"));
   document.getElementById("controlPanelRow").style.display = isAdmin ? "" : "none";
-  if(isAdmin && !panelLink) loadPanelLink();
 
   const tplNote = document.getElementById("tplNote");
   const tplBtn = document.getElementById("tplSaveBtn");
@@ -2276,11 +2270,9 @@ document.getElementById("pauseAllBtn").onclick = ()=>{
 };
 
 // ---- More menu ----
-document.getElementById("controlPanelRow").onclick = async ()=>{
+document.getElementById("controlPanelRow").onclick = ()=>{
   // Opens in the phone's real browser (Telegram's in-app view can't show the panel's login prompt).
-  if(!panelLink) await loadPanelLink();
-  if(!panelLink){ toast("Control panel is not reachable right now (computer off?)"); return; }
-  if(tg && tg.openLink) tg.openLink(panelLink); else window.open(panelLink, "_blank");
+  if(tg && tg.openLink) tg.openLink(PANEL_URL); else window.open(PANEL_URL, "_blank");
 };
 // "Contact us" (2026-10-04): opens the bot chat with /start contact - the bot then replies with a button
 // that opens the support Telegram account BY ITS NUMERIC ID (tg://user?id=...), so no @username is needed
