@@ -2503,7 +2503,7 @@ setInterval(refreshBackendState, 2000);
     <div class="sheetTitle">Subscription</div>
     <div class="payMethods">
       <button type="button" class="payM on" data-pm="card"><span class="pmI">💳</span><span><b>Card · Apple Pay · Google Pay</b><small>Visa, Mastercard, PayPal · taxes included</small></span></button>
-      <button type="button" class="payM" data-pm="crypto"><span class="pmI">💎</span><span><b>Crypto (USDT)</b><small>TRC20 · activated by us after the payment arrives</small></span><span class="pmTag" id="payCryptoTag">−20%</span></button>
+      <button type="button" class="payM" data-pm="crypto"><span class="pmI">💎</span><span><b>Crypto (USDT)</b><small>TRC20 · activated automatically</small></span><span class="pmTag" id="payCryptoTag">−20%</span></button>
     </div>
     <div class="payPlans" id="payPlans"></div>
     <div class="payNote" id="payNote"></div>
@@ -2542,9 +2542,25 @@ setInterval(refreshBackendState, 2000);
     }).join("");
     document.getElementById("payNote").innerHTML = method === "card"
       ? "Opens secure checkout (Paddle). Prices include VAT / sales tax. Renews automatically - cancel any time. 14-day money-back guarantee."
-      : "Paid in USDT on the TRON (TRC20) network. The bot shows the wallet address and amount; after you pay, tap “I've paid” and we turn your access on. One-time payment, no auto-renewal.";
+      : "Paid in USDT on the TRON (TRC20) network. The bot shows the wallet address and your exact amount; access turns on automatically a few minutes after the payment arrives. One-time payment, no auto-renewal.";
   }
-  row.onclick = function(){ haptic(); render(); ov.classList.add("open"); document.body.style.overflow = "hidden"; };
+  // (2026-10-07) crypto prices come live from the bot (panel → Settings → 💎 Crypto); the numbers above are
+  // only a fallback when the computer can't be reached.
+  function loadPrices(){
+    try{
+      if(typeof pcApi !== "function") return;
+      pcApi("/api/miniapp/prices").then(function(j){
+        if(!j || !j.ok || !j.crypto) return;
+        PLANS.forEach(function(p){ var v = Number(j.crypto[p.id]); if(v > 0) p.crypto = v; });
+        var s2 = Math.round((1 - PLANS[0].crypto / PLANS[0].card) * 100);
+        document.getElementById("payCryptoTag").textContent = s2 > 0 ? "−" + s2 + "%" : "";
+        document.getElementById("payCryptoTag").style.display = s2 > 0 ? "" : "none";
+        if(ov.classList.contains("open")) render();
+      }).catch(function(){});
+    }catch(e){}
+  }
+  loadPrices();
+  row.onclick = function(){ haptic(); render(); ov.classList.add("open"); document.body.style.overflow = "hidden"; loadPrices(); };
   function close(){ ov.classList.remove("open"); document.body.style.overflow = ""; }
   document.getElementById("payClose").onclick = close;
   ov.addEventListener("click", function(e){
