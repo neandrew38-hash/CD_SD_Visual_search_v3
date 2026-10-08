@@ -555,6 +555,8 @@
   .scRoute{flex-wrap:wrap;row-gap:0}
   .scRoute span{white-space:normal;overflow:visible}
   #tplDebug{display:none}
+.pill.siteOff{opacity:.45}
+.pill.siteOff.on{opacity:.7}
 </style>
 </head>
 <body>
@@ -1069,13 +1071,26 @@ function renderShipUi(){
   };
 })();
 
+// (2026-10-08) Platforms switched OFF in the owner's control panel: shown greyed with "· off" and can't be
+// newly ticked (an already ticked one can still be unticked). The bot sends the list along with each search.
+let SITES_OFF = [];
+try { SITES_OFF = JSON.parse(localStorage.getItem("sitesOff") || "[]") || []; } catch(e) { SITES_OFF = []; }
 function group(id, opts, single, onSet){
   const el = document.getElementById(id); el.innerHTML="";
   opts.forEach(([label,val])=>{
-    const b=document.createElement("div"); b.className="pill sm"; b.textContent=label;
+    const off = id === "sites" && SITES_OFF.includes(val);
+    const b=document.createElement("div"); b.className="pill sm" + (off ? " siteOff" : ""); b.textContent = off ? label + " · off" : label;
     const cur = single();
-    if (Array.isArray(cur) ? cur.includes(val) : cur===val) b.classList.add("on");
-    b.onclick=()=>{ onSet(val); group(id,opts,single,onSet); updateSaveSummary(); };
+    const isOn = Array.isArray(cur) ? cur.includes(val) : cur===val;
+    if (isOn) b.classList.add("on");
+    b.onclick=()=>{
+      if (off && !isOn) {
+        const msg = label + " is switched off for now - it isn't being searched. Pick another platform.";
+        if (tg && tg.showAlert) tg.showAlert(msg); else alert(msg);
+        return;
+      }
+      onSet(val); group(id,opts,single,onSet); updateSaveSummary();
+    };
     el.appendChild(b);
   });
 }
@@ -1134,17 +1149,20 @@ function renderVehicleSelects(){
   });
   paint();
 }
-function render(){
-  // Every site (CD/SD/Ship.Cars) now shares the exact same single Origin/Destination picker below
-  // (state.from/state.to) - sites are just a plain multi-select of where to run the same search.
-  // Ship.Cars additionally supports an optional pasted route link (shipLocBlock) as an alternative to
-  // the shared picker above, and ignores the "Search along route" toggle (CD/SD only) - see shipRouteWarn.
+function renderSitesGroup(){
   group("sites", [["Central Dispatch","cd"],["Super Dispatch","sd"],["Ship.Cars","ship"],["Autosled","as"]], ()=>state.sites, v=>{
     const i=state.sites.indexOf(v);
     if(i>=0) state.sites.splice(i,1); else state.sites.push(v);
     if(!state.sites.length) state.sites.push(v);
     updateSiteBlocks();
   });
+}
+function render(){
+  // Every site (CD/SD/Ship.Cars) now shares the exact same single Origin/Destination picker below
+  // (state.from/state.to) - sites are just a plain multi-select of where to run the same search.
+  // Ship.Cars additionally supports an optional pasted route link (shipLocBlock) as an alternative to
+  // the shared picker above, and ignores the "Search along route" toggle (CD/SD only) - see shipRouteWarn.
+  renderSitesGroup();
   updateSiteBlocks();
   group("status", [["Both","any"],["Operable","op"],["Inoperable","inop"]], ()=>state.status, v=>state.status=v);
   group("trailer", [["Both","any"],["Open","open"],["Enclosed","enc"]], ()=>state.trailer, v=>state.trailer=v);
@@ -2197,6 +2215,16 @@ async function refreshBackendState(){
   else if(st && st.role === "unregistered") document.getElementById("blockedList").innerHTML = '<div class="muted">Message the bot anything first (e.g. /start), then reopen the Mini App.</div>';
   const mySearchesNote = document.getElementById("mySearchesNote");
   lastSearches = st.searches || {};
+  // platforms switched off in the control panel (sent by the bot with every search record)
+  const anyRec = Object.values(lastSearches).find(r => r && Array.isArray(r.sitesOff));
+  if (anyRec) {
+    const nextOff = anyRec.sitesOff.slice().sort();
+    if (JSON.stringify(nextOff) !== JSON.stringify(SITES_OFF.slice().sort())) {
+      SITES_OFF = nextOff;
+      try { localStorage.setItem("sitesOff", JSON.stringify(SITES_OFF)); } catch(e) {}
+      if (document.getElementById("sites")) renderSitesGroup();
+    }
+  }
   if(document.getElementById("mySearchesView").style.display !== "none"){
     if(canUseTpl){
       mySearchesNote.style.display = "none";
