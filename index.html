@@ -558,6 +558,28 @@
   #tplDebug{display:none}
 .pill.siteOff{opacity:.45}
 .pill.siteOff.on{opacity:.7}
+  /* (2026-10-11) Alert style picker (More → Alert style) */
+  .styleOpts{display:flex;flex-direction:column;gap:12px;margin-top:6px}
+  .styleOpt{display:flex;flex-direction:column;gap:10px;width:100%;text-align:left;padding:14px;border-radius:14px;border:1.5px solid var(--line);background:var(--card);color:var(--fg);font:inherit;cursor:pointer}
+  .styleOpt.on{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-tint)}
+  .styleHead{display:flex;align-items:center;gap:10px}
+  .styleRadio{width:20px;height:20px;border-radius:10px;border:2px solid var(--track);flex-shrink:0;display:flex;align-items:center;justify-content:center}
+  .styleOpt.on .styleRadio{border-color:var(--accent)}
+  .styleOpt.on .styleRadio::after{content:"";width:10px;height:10px;border-radius:5px;background:var(--accent)}
+  .styleName{font-size:15.5px;font-weight:700}
+  .styleDesc{font-size:12.5px;color:var(--text3);margin-top:1px}
+  .stylePrev{background:#182533;color:#e9eef3;border-radius:12px 12px 12px 4px;padding:9px 11px;font-size:12.5px;line-height:1.4;font-family:-apple-system,system-ui,sans-serif}
+  .stylePrev a{color:#7cc0ff;text-decoration:none}
+  .stylePrev .q{border-left:3px solid #4fae6a;background:rgba(79,174,106,.14);border-radius:3px;padding:2px 7px;margin:4px 0;font-family:ui-monospace,Menlo,monospace;font-size:11.5px}
+  .stylePrev .dim{color:#9fb0c1}
+  .stylePrev .fold{border-left:3px solid #5d7a95;background:rgba(93,122,149,.16);border-radius:3px;padding:2px 7px;margin-top:4px;color:#c9d4de}
+  .cardPrev{position:relative;height:150px;border-radius:9px;overflow:hidden;background:#0b0f14 radial-gradient(circle,rgba(120,150,180,.22) 1px,transparent 1.5px);background-size:8px 8px;margin-bottom:6px}
+  .cardPrev .cp-l{position:absolute;left:10px;top:9px;font-weight:700;font-size:14px;color:#fff}
+  .cardPrev .cp-l small{display:block;font-weight:500;font-size:10px;color:#8fa3b5;font-family:ui-monospace,Menlo,monospace}
+  .cardPrev .cp-r{position:absolute;right:10px;top:7px;text-align:right;font-weight:800;font-size:22px;color:#f5a524;line-height:1}
+  .cardPrev .cp-r small{display:block;margin-top:4px;font-size:10.5px;font-weight:700;color:#7fe0a0;font-family:ui-monospace,Menlo,monospace}
+  .cardPrev .cp-s{position:absolute;left:0;right:0;bottom:0;height:22px;background:rgba(11,15,20,.94);border-top:1px solid #1d2a37;display:flex;justify-content:space-between;align-items:center;padding:0 10px;font-size:9.5px;color:#b6c5d3;font-family:ui-monospace,Menlo,monospace}
+  .cardPrev svg{position:absolute;left:0;top:0}
 </style>
 </head>
 <body>
@@ -792,6 +814,7 @@
     <div class="menuRow" id="subscriptionRow"><span class="mIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M3 10h18"/><path d="M7 15h3"/></svg></span><span class="mTxt">Subscription</span><span class="mVal">Plans</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
     <div class="menuRow" data-go="blocked"><span class="mIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M6 6l12 12"/></svg></span><span class="mTxt">Blocked companies</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
     <div class="menuRow" data-go="sms"><span class="mIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="13" rx="2.5"/><path d="M4 7l8 6 8-6"/></svg></span><span class="mTxt">SMS template</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
+    <div class="menuRow" data-go="style"><span class="mIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4" width="17" height="16" rx="2.5"/><path d="M7 9h10M7 13h6"/><circle cx="16.5" cy="15.5" r="1.6"/></svg></span><span class="mTxt">Alert style</span><span class="mVal" id="styleVal"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
     <div class="menuRow" data-go="help"><span class="mIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.5a2.5 2.5 0 014.8 1c0 1.6-2.4 2-2.4 3.5"/><path d="M12 17h.01"/></svg></span><span class="mTxt">Help</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
     <div class="menuRow" id="contactUsRow"><span class="mIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4L3 11l6.5 2.5M21 4l-3 16-8.5-6.5M21 4L9.5 13.5V19l3-3"/></svg></span><span class="mTxt">Contact us</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
     <div class="menuRow" id="controlPanelRow" style="display:none"><span class="mIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4" width="17" height="12" rx="2"/><path d="M8 20h8M12 16v4M7 12l3-3 2 2 4-4"/></svg></span><span class="mTxt">Control panel</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
@@ -824,6 +847,32 @@
   </div>
   <div id="tplBackendWarn" class="warn" style="display:none">Backend not connected (WORKER_URL is empty in this file) - this tab is view-only, saving from here won't work.</div>
   <div id="tplDebug" class="muted" style="font-size:11px;margin-top:16px"></div>
+</div>
+
+<!-- ======================= ALERT STYLE (personal, one per user) - 2026-10-11 ======================= -->
+<div class="tabpane" id="tab-style">
+  <div class="listHead"><div><div class="pageTitle">Alert style</div><div class="pageSub">How your load alerts look in this chat. Only yours.</div></div></div>
+  <div class="styleOpts">
+    <button class="styleOpt" data-style="a" onclick="pickStyle('a')">
+      <div class="styleHead"><span class="styleRadio"></span><div><div class="styleName">Classic</div><div class="styleDesc">Everything about the load, in full</div></div></div>
+      <div class="stylePrev"><b>Load ID:</b> <a>251294712-1</a><br>Vehicles:<br>1. <a>2021 Toyota Camry</a> | Type: Car<br><br>Route info:<br>Origin: <a>TX: Dallas, 75201</a><br>Destination: <a>AZ: Phoenix, 85004</a><br><br><b>💳 $1,150 | 1,065 mi | $1.08/mi</b><br><span class="dim">Pickup date: 10/13 · Open · Operable ✅ …</span></div>
+    </button>
+    <button class="styleOpt" data-style="b" onclick="pickStyle('b')">
+      <div class="styleHead"><span class="styleRadio"></span><div><div class="styleName">Compact</div><div class="styleDesc">Route and price first, details fold away</div></div></div>
+      <div class="stylePrev"><span class="dim">Central Dispatch · ⚡ 9s ago</span><br><b><a>Dallas, TX</a> → <a>Phoenix, AZ</a></b><br><b>$1,150</b> · 1,065 mi · <b>$1.08/mi</b><div class="q">💰 +14% vs market · avg $0.95/mi</div>🚗 <a>2021 Toyota Camry</a><br><span class="dim">Open · Operable ✅ · Pickup <b>10/13</b></span><br>🏢 <a>Shipper name</a><br><span class="dim">★ 4.8/5 · 212 reviews | Old System · 96%</span><div class="fold">📝 Load ID, payment, notes ▾</div></div>
+    </button>
+    <button class="styleOpt" data-style="c" onclick="pickStyle('c')">
+      <div class="styleHead"><span class="styleRadio"></span><div><div class="styleName">Card</div><div class="styleDesc">A picture with the route on a map, then the details</div></div></div>
+      <div class="stylePrev"><div class="cardPrev">
+        <svg width="100%" height="150" viewBox="0 0 300 150" preserveAspectRatio="none" aria-hidden="true"><path d="M190 96 Q140 50 88 84" fill="none" stroke="#f5a524" stroke-width="2" stroke-dasharray="1 5" stroke-linecap="round"/><circle cx="190" cy="96" r="4" fill="#f5a524"/><circle cx="88" cy="84" r="4" fill="#0b0f14" stroke="#e9eef3" stroke-width="2"/></svg>
+        <div class="cp-l">Toyota Camry<small>2021 · 1 VEHICLE</small></div>
+        <div class="cp-r">$1,150<small>$1.08/mi · +14%</small></div>
+        <div class="cp-s"><span>1,065 MI</span><span>OPEN</span><span>OPERABLE</span><span>PICKUP 10/13</span></div>
+      </div>🚗 <b><a>2021 Toyota Camry</a></b><br><a>Dallas, TX</a> → <a>Phoenix, AZ</a><br>🏢 <a>Shipper name</a> · <span class="dim">★ 4.8/5 | Old System · 96%</span></div>
+    </button>
+  </div>
+  <div class="tiny" style="margin:10px 2px 0;opacity:.75">Buttons under the alert stay the same. Card alerts may arrive about half a second later.</div>
+  <div id="styleNote" class="warn" style="display:none"></div>
 </div>
 
 <!-- ======================= TAB 3: HELP (static instructions, same for everyone) ======================= -->
@@ -1694,7 +1743,7 @@ const DEFAULT_TPL_PREVIEW =
   "Hi, is your {vehicle} ({origin} -> {dest}) still available? Load ID {loadId}. " +
   "We can pick up right away. Please call or text me back.";
 
-const MORE_PAGES = ["blocked","sms","help"];
+const MORE_PAGES = ["blocked","sms","style","help"];
 function switchTab(name){
   const main = MORE_PAGES.includes(name) ? "more" : name;
   document.querySelectorAll(".tabbtn").forEach(b=>b.classList.toggle("on", b.dataset.tab===main));
@@ -1860,6 +1909,26 @@ function resetTpl(){
 }
 document.getElementById("tplText").addEventListener("input", tplCount);
 loadTpl();
+
+// (2026-10-11) 🎨 Alert style - saved on the bot's computer (pcApi → /api/miniapp/style), one per person
+const STYLE_NAMES = { a: "Classic", b: "Compact", c: "Card" };
+function showStyle(st){
+  document.querySelectorAll(".styleOpt").forEach(b => b.classList.toggle("on", b.dataset.style === st));
+  const v = document.getElementById("styleVal"); if(v) v.textContent = STYLE_NAMES[st] || "";
+}
+async function loadStyle(){
+  try{ const j = await pcApi("/api/miniapp/style"); if(j && j.ok) showStyle(j.style || "a"); }catch(e){}
+}
+async function pickStyle(st){
+  const prev = (document.querySelector(".styleOpt.on") || {}).dataset;
+  showStyle(st);
+  try{
+    const j = await pcApi("/api/miniapp/style", { style: st });
+    if(j && j.ok){ showStyle(j.style); toast("Saved ✓ New alerts will look like " + STYLE_NAMES[j.style]); }
+    else { toast("Could not save" + (j && j.error ? " (" + j.error + ")" : "")); if(prev) showStyle(prev.style); }
+  }catch(e){ toast("Could not save - is the bot's computer on?"); if(prev) showStyle(prev.style); }
+}
+loadStyle();
 
 function tabIcon(t){
   if(t.active && t.pausedUntil && t.pausedUntil > Date.now()) return "⏸";
