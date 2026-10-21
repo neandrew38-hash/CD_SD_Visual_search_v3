@@ -1212,7 +1212,7 @@ function renderVehicleSelects(){
   paint();
 }
 function renderSitesGroup(){
-  group("sites", [["Central Dispatch","cd"],["Super Dispatch","sd"],["Ship.Cars","ship"],["Autosled","as"],["Carvana","cv"],["ACV","ac"]], ()=>state.sites, v=>{
+  group("sites", [["Central Dispatch","cd"],["Super Dispatch","sd"],["Ship.Cars","ship"],["Autosled","as"],["Carvana","cv"],["ACV","ac"],["V2 Dispatch","v2"]], ()=>state.sites, v=>{
     const i=state.sites.indexOf(v);
     if(i>=0) state.sites.splice(i,1); else state.sites.push(v);
     if(!state.sites.length) state.sites.push(v);
@@ -2058,8 +2058,8 @@ function placesText(list){
   const parts = list.map(p => p.st ? p.st : (p.c + (p.r ? " · " + p.r + " mi" : "")));
   return parts.length > 4 ? parts.slice(0,4).join(", ") + " +" + (parts.length-4) : parts.join(", ");
 }
-const SITE_SHORT = { cd:"CD", sd:"SD", ship:"Ship.Cars", as:"Autosled", cv:"Carvana", ac:"ACV" };
-const SITE_LONG = { cd:"Central Dispatch", sd:"Super Dispatch", ship:"Ship.Cars", as:"Autosled", cv:"Carvana", ac:"ACV" };
+const SITE_SHORT = { cd:"CD", sd:"SD", ship:"Ship.Cars", as:"Autosled", cv:"Carvana", ac:"ACV", v2:"V2" };
+const SITE_LONG = { cd:"Central Dispatch", sd:"Super Dispatch", ship:"Ship.Cars", as:"Autosled", cv:"Carvana", ac:"ACV", v2:"V2 Dispatch" };
 function searchChips(p){
   const out = [];
   if(p.rt) out.push("Along route");
@@ -2118,7 +2118,7 @@ function renderMySearches(list){
   if(sum) sum.textContent = [on + " active", paused ? paused + " paused" : "", off ? off + " off" : "", alertsToday + " alert" + (alertsToday===1?"":"s") + " today"].filter(Boolean).join(" · ");
 
   // platform filter: All + every platform these searches use
-  const used = ["cd","sd","ship","as","cv","ac"].filter(k => list.some(s => (s.sites||[]).includes(k)));
+  const used = ["cd","sd","ship","as","cv","ac","v2"].filter(k => list.some(s => (s.sites||[]).includes(k)));
   if(siteFilter && !used.includes(siteFilter)) siteFilter = "";
   if(bar){
     bar.innerHTML = "";
@@ -2524,7 +2524,7 @@ setInterval(refreshBackendState, 2000);
       <div class="ixArt"><img id="ixLogo" alt=""></div>
       <h1>Your eyes on <em>every load board</em></h1>
       <p class="ixLead">HaulHawk watches the load boards around the clock and pings you here in Telegram the second a load that fits your truck is posted - before everyone else calls.</p>
-      <div class="ixPlats"><span>Central Dispatch</span><span>Super Dispatch</span><span>Ship.Cars</span><span>Autosled</span><span>Carvana</span><span>ACV</span></div>
+      <div class="ixPlats"><span>Central Dispatch</span><span>Super Dispatch</span><span>Ship.Cars</span><span>Autosled</span><span>Carvana</span><span>ACV</span><span>V2 Dispatch</span></div>
     </div>
     <div class="ixSlide">
       <div class="ixArt"><span class="ixEmoji">🎯</span></div>
