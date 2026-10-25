@@ -2654,15 +2654,23 @@ setInterval(refreshBackendState, 2000);
   .payM .pmSoon{margin-left:auto;font-size:11px;font-weight:700;color:var(--fg);opacity:.75;background:var(--line);padding:4px 8px;border-radius:8px;white-space:nowrap}
   .payInfo{display:none;align-items:flex-start;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:11px 13px;margin-bottom:12px;font-size:12.5px;line-height:1.45}
   .payInfo.show{display:flex}
+  /* (2026-10-25) "subscription active until ..." + locked plans */
+  .payStatus{display:none;gap:10px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-left:4px solid #2e9e5b;border-radius:14px;padding:11px 13px;margin-bottom:12px;font-size:13px;line-height:1.45}
+  .payStatus.show{display:flex}
+  .payStatus .psI{font-size:18px;line-height:1.2}
+  .payStatus small{display:block;opacity:.7;font-size:12px;margin-top:2px}
+  .payPlans.locked .payP{opacity:.45;cursor:default}
   .payInfo .piI{font-size:17px;line-height:1.2}
   .payInfo a{color:var(--accent);font-weight:700;text-decoration:none;white-space:nowrap}
   .payM.shake{animation:payShake .3s}
+  .payStatus.shake{animation:payShake .3s}
   @keyframes payShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
 </style>
 <div class="sheetOverlay" id="paySheet">
   <div class="sheet">
     <div class="sheetGrab"></div>
     <div class="sheetTitle">Subscription</div>
+    <div class="payStatus" id="payStatus"></div>
     <div class="payInfo" id="payInfo"><span class="piI">ℹ️</span><span>Card payments are <b>temporarily unavailable</b>. Please pay with crypto (USDT) below, or <a href="#" id="paySupport">contact support</a> and we'll help you with the payment.</span></div>
     <div class="payMethods">
       <button type="button" class="payM on" data-pm="card"><span class="pmI">💳</span><span><b>Card · Apple Pay · Google Pay</b><small>Visa, Mastercard, PayPal · taxes included</small></span></button>
@@ -2715,13 +2723,15 @@ setInterval(refreshBackendState, 2000);
   function haptic(){ try{ if(w && w.HapticFeedback) w.HapticFeedback.impactOccurred("light"); }catch(e){} }
   function render(){
     ov.querySelectorAll(".payM").forEach(function(b){ b.classList.toggle("on", b.dataset.pm === method); });
-    var base = PLANS[0][method];
+    var full1 = PLANS[0].full || PLANS[0].card;   // real 1-month card price (the test $1 does not count)
+    var base = method === "card" ? full1 : PLANS[0].crypto;
     document.getElementById("payPlans").innerHTML = PLANS.map(function(p){
       var price = p[method], per = price / p.months, off = Math.round((1 - per / base) * 100);
       var sub = (p.months > 1 ? "$" + per.toFixed(2).replace(/\.00$/, "") + "/mo" : "per month") + (off > 0 ? " · save " + off + "%" : "");
       return '<button type="button" class="payP' + (p.best ? ' best' : '') + '" data-plan="' + p.id + '">' + (p.best ? '<span class="ppB">Best value</span>' : '') +
-        '<div class="ppL">' + p.label + '</div><div class="ppP">$' + price + (method === "crypto" ? '<s>$' + (p.full || p.card) + '</s>' : '') + '</div><div class="ppS">' + sub + '</div></button>';
+        '<div class="ppL">' + p.label + '</div><div class="ppP">$' + price + (method === "crypto" ? '<s>$' + (p.full || p.card) + '</s>' : (p.months > 1 ? '<s>$' + (full1 * p.months) + '</s>' : '')) + '</div><div class="ppS">' + sub + '</div></button>';
     }).join("");
+    renderAccess();
     document.getElementById("payNote").innerHTML = method === "card"
       ? "Opens secure checkout (Paddle). Prices include VAT / sales tax. Renews automatically - cancel any time. 14-day money-back guarantee."
       : "Paid in USDT on the TRON (TRC20) network. The bot shows the wallet address and your exact amount; access turns on automatically a few minutes after the payment arrives. One-time payment, no auto-renewal.";
@@ -2742,7 +2752,31 @@ setInterval(refreshBackendState, 2000);
     }catch(e){}
   }
   loadPrices();
-  row.onclick = function(){ haptic(); render(); ov.classList.add("open"); document.body.style.overflow = "hidden"; loadPrices(); };
+  // (2026-10-25) this person's plan from the bot: shows "active until ..." and locks the plans while it runs
+  var access = null;
+  function fmtD(t){ try{ return new Date(t).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }); }catch(e){ return ""; } }
+  function renderAccess(){
+    var box = document.getElementById("payStatus"), grid = document.getElementById("payPlans");
+    var a = access, html = "";
+    if(a && a.kind === "unlimited") html = '<span class="psI">✅</span><span><b>Unlimited access</b> - nothing to pay. Thank you!</span>';
+    else if(a && a.kind === "paid"){
+      var pl = (PLANS.filter(function(p){ return p.id === a.plan; })[0] || {}).label;
+      var how = a.renews ? "Renews automatically by card · cancel any time at paddle.net"
+        : (a.method === "card" ? "Cancelled - will not renew" : "Paid with crypto · no auto-renewal");
+      html = '<span class="psI">✅</span><span><b>Subscription active' + (pl ? ' · ' + pl : '') + '</b> until <b>' + fmtD(a.until) + '</b>. Thank you!'
+        + '<small>' + how + (!a.canBuy && a.canBuyFrom ? ' · you can extend it from ' + fmtD(a.canBuyFrom) : '') + '</small></span>';
+    }
+    else if(a && a.kind === "trial") html = '<span class="psI">🎁</span><span><b>Free trial</b> until <b>' + fmtD(a.until) + '</b>.<small>Choose a plan to keep your alerts after that.</small></span>';
+    box.innerHTML = html; box.classList.toggle("show", !!html);
+    grid.classList.toggle("locked", !!(a && a.canBuy === false));
+  }
+  function loadAccess(){
+    try{
+      if(typeof pcApi !== "function") return;
+      pcApi("/api/miniapp/access").then(function(j){ access = (j && j.ok && j.access) || null; if(ov.classList.contains("open")) renderAccess(); }).catch(function(){});
+    }catch(e){}
+  }
+  row.onclick = function(){ haptic(); render(); ov.classList.add("open"); document.body.style.overflow = "hidden"; loadPrices(); loadAccess(); };
   function close(){ ov.classList.remove("open"); document.body.style.overflow = ""; }
   document.getElementById("payClose").onclick = close;
   ov.addEventListener("click", function(e){
@@ -2756,6 +2790,12 @@ setInterval(refreshBackendState, 2000);
     }
     if(m){ method = m.dataset.pm; haptic(); render(); return; }
     var b = e.target.closest(".payP"); if(!b) return;
+    if(access && access.canBuy === false){
+      var st = document.getElementById("payStatus");
+      st.classList.remove("shake"); void st.offsetWidth; st.classList.add("shake");
+      try{ if(w && w.HapticFeedback) w.HapticFeedback.notificationOccurred("warning"); }catch(err){}
+      return;
+    }
     haptic();
     var plan = b.dataset.plan;
     if(method === "crypto"){
