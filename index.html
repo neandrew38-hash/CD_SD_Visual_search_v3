@@ -981,7 +981,7 @@ Vehicle status: Operable ✅
 
   <div class="helpSec">Subscription &amp; payment</div>
   <div class="card helpCard">
-    <div class="helpRow"><div>Open <b>More → Subscription</b>, pick <b>💎 Crypto (USDT)</b> and tap a plan: <b>1, 3, 6 or 12 months</b>. The longer the plan, the cheaper each month. Card payments are <b>temporarily unavailable</b>.</div></div>
+    <div class="helpRow"><div>Open <b>More → Subscription</b>, pick <b>💳 Card</b> (Visa, Mastercard, Apple Pay, Google Pay, PayPal) or <b>💎 Crypto (USDT)</b> and tap a plan: <b>1, 3, 6 or 12 months</b>. The longer the plan, the cheaper each month.</div></div>
     <div class="helpRow"><div>The bot opens and shows <b>your own amount</b> (for example <b>20.37 USDT</b>) and the wallet address. <b>Send exactly that amount</b> - the cents are how we recognise <b>your</b> payment. Tap the amount and the address to copy them.</div></div>
     <div class="helpRow"><div>Send it as <b>USDT on the TRON (TRC20) network</b> only - from Binance, Bybit, OKX, Trust Wallet or any other wallet. Choose <b>TRC20 / TRON</b> as the network when you withdraw. Other networks (ERC20, BEP20…) or other coins can be lost.</div></div>
     <div class="helpRow"><div>If your exchange takes a <b>withdrawal fee</b>, add it on top so that the full amount arrives on our wallet.</div></div>
@@ -2681,9 +2681,9 @@ setInterval(refreshBackendState, 2000);
 //     an "I've paid" button; the admin confirms and access turns on (lib/botCommands.js).
 // Keep these prices in sync with Paddle (card) and config.json "crypto.prices" (crypto).
 (function(){
-  var SITE = "https://omvstudio.dev/";
+  var SITE = "https://haulhawk.app/";
   var PLANS = [
-    { id: "m1",  label: "1 month",   months: 1,  card: 25,  crypto: 20 },
+    { id: "m1",  label: "1 month",   months: 1,  card: 1,   full: 25, crypto: 20 },   // TEST 25.10: card $1 (Paddle t1) - back to card: 25 after the test
     { id: "m3",  label: "3 months",  months: 3,  card: 69,  crypto: 55 },
     { id: "m6",  label: "6 months",  months: 6,  card: 129, crypto: 105, best: true },
     { id: "m12", label: "12 months", months: 12, card: 249, crypto: 199 },
@@ -2691,7 +2691,7 @@ setInterval(refreshBackendState, 2000);
   var row = document.getElementById("subscriptionRow"), ov = document.getElementById("paySheet");
   if(!row || !ov) return;
   // (2026-10-07) card payments (Paddle) are switched off for now - set to true to bring them back
-  var CARD_ENABLED = false;
+  var CARD_ENABLED = true;   // (2026-10-25) Paddle live
   var w = window.Telegram && Telegram.WebApp, method = CARD_ENABLED ? "card" : "crypto";
   var cardBtn = ov.querySelector('.payM[data-pm="card"]');
   if(!CARD_ENABLED && cardBtn){
@@ -2710,7 +2710,7 @@ setInterval(refreshBackendState, 2000);
   }
   var sup = document.getElementById("paySupport");
   if(sup) sup.onclick = function(e){ e.preventDefault(); haptic(); openSupport(); };
-  var save = Math.round((1 - PLANS[0].crypto / PLANS[0].card) * 100);
+  var save = Math.round((1 - PLANS[0].crypto / (PLANS[0].full || PLANS[0].card)) * 100);
   document.getElementById("payCryptoTag").textContent = "−" + save + "%";
   function haptic(){ try{ if(w && w.HapticFeedback) w.HapticFeedback.impactOccurred("light"); }catch(e){} }
   function render(){
@@ -2720,7 +2720,7 @@ setInterval(refreshBackendState, 2000);
       var price = p[method], per = price / p.months, off = Math.round((1 - per / base) * 100);
       var sub = (p.months > 1 ? "$" + per.toFixed(2).replace(/\.00$/, "") + "/mo" : "per month") + (off > 0 ? " · save " + off + "%" : "");
       return '<button type="button" class="payP' + (p.best ? ' best' : '') + '" data-plan="' + p.id + '">' + (p.best ? '<span class="ppB">Best value</span>' : '') +
-        '<div class="ppL">' + p.label + '</div><div class="ppP">$' + price + (method === "crypto" ? '<s>$' + p.card + '</s>' : '') + '</div><div class="ppS">' + sub + '</div></button>';
+        '<div class="ppL">' + p.label + '</div><div class="ppP">$' + price + (method === "crypto" ? '<s>$' + (p.full || p.card) + '</s>' : '') + '</div><div class="ppS">' + sub + '</div></button>';
     }).join("");
     document.getElementById("payNote").innerHTML = method === "card"
       ? "Opens secure checkout (Paddle). Prices include VAT / sales tax. Renews automatically - cancel any time. 14-day money-back guarantee."
@@ -2734,7 +2734,7 @@ setInterval(refreshBackendState, 2000);
       pcApi("/api/miniapp/prices").then(function(j){
         if(!j || !j.ok || !j.crypto) return;
         PLANS.forEach(function(p){ var v = Number(j.crypto[p.id]); if(v > 0) p.crypto = v; });
-        var s2 = Math.round((1 - PLANS[0].crypto / PLANS[0].card) * 100);
+        var s2 = Math.round((1 - PLANS[0].crypto / (PLANS[0].full || PLANS[0].card)) * 100);
         document.getElementById("payCryptoTag").textContent = s2 > 0 ? "−" + s2 + "%" : "";
         document.getElementById("payCryptoTag").style.display = s2 > 0 ? "" : "none";
         if(ov.classList.contains("open")) render();
