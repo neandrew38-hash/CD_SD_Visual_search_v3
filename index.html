@@ -1282,8 +1282,10 @@ function paintGrid(k){
   });
 }
 
+// (2026-10-31) radius: empty = 50, 0 = 5 mi (before 0 became 50), max 500 - the bot reads it the same way
+function radV(v){ const t=String(v==null?"":v).trim(); if(t==="") return 50; const n=Number(t); return isFinite(n)? Math.max(5, Math.min(500, n)) : 50; }
 function renderList(k){
-  // Origin / Destination as one box of chips: cities (with their radius) and whole states together.
+// Origin / Destination as one box of chips: cities (with their radius) and whole states together.
   CITY_LIST_IDS[k].forEach(lid=>{
     const list = document.getElementById(lid); if(!list) return;
     list.innerHTML="";
@@ -1296,7 +1298,7 @@ function renderList(k){
         chip.className = "pchip";
         chip.appendChild(document.createTextNode(p.c + ", " + p.stc));
         const r=document.createElement("input"); r.type="number"; r.value=p.r||50; r.title="radius, miles";
-        r.oninput=()=>{ p.r=Number(r.value)||50; updateSaveSummary(); };
+        r.oninput=()=>{ p.r=radV(r.value); updateSaveSummary(); };
         chip.appendChild(r);
         const mi=document.createElement("span"); mi.className="mi"; mi.textContent="mi"; chip.appendChild(mi);
       }
@@ -1458,7 +1460,7 @@ async function runSearch(k,q){
   const box = document.getElementById(k+"Suggest");
   await showCityOptions(box, q, o => {
     const rEl = document.getElementById(k+"R");
-    addCity(k, {c:o.c, stc:o.stc, zip:"", r:Number(rEl.value)||50});
+    addCity(k, {c:o.c, stc:o.stc, zip:"", r:radV(rEl.value)});
   });
   const st = stateFromQuery(q);
   if(st && box.style.display !== "none"){
@@ -1532,10 +1534,10 @@ async function manualAddWp(){
 async function manualAdd(k){
   const cityEl=document.getElementById(k+"City"), rEl=document.getElementById(k+"R");
   const raw=cityEl.value.trim(); if(!raw) return;
-  if(/^\d{5}$/.test(raw)){ const o = await firstCityFor(raw); if(o){ addCity(k, { c:o.c, stc:o.stc, zip:"", r:Number(rEl.value)||50 }); } else toast("Unknown ZIP"); return; }
+  if(/^\d{5}$/.test(raw)){ const o = await firstCityFor(raw); if(o){ addCity(k, { c:o.c, stc:o.stc, zip:"", r:radV(rEl.value) }); } else toast("Unknown ZIP"); return; }
   const m = raw.match(/^(.+?),\s*([A-Za-z]{2})$/);
   if(!m){ toast("Format: City, ST (e.g. Temecula, CA)"); return; }
-  addCity(k, { c: m[1].trim(), stc: m[2].toUpperCase(), zip:"", r: Number(rEl.value)||50 });
+  addCity(k, { c: m[1].trim(), stc: m[2].toUpperCase(), zip:"", r: radV(rEl.value) });
 }
 
 ["from","to"].forEach(k=>{
