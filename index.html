@@ -90,7 +90,8 @@
   .inlineSliderRow{display:flex;align-items:center;gap:8px;margin:18px 0 10px}
   .inlineLbl{font-size:13px;color:var(--text2);font-weight:600;flex:0 0 auto}
   .inlineVal{font-size:12px;font-weight:700;color:var(--accent);flex:0 0 auto;min-width:38px;text-align:right}
-  input.rangeSlider{-webkit-appearance:none;appearance:none;flex:1;width:auto;height:3px;border-radius:3px;background:var(--line);outline:none}
+  #readyLabel{min-width:62px}   /* (2026-11-06) room for "Tomorrow": the slider no longer jumps while dragging */
+  input.rangeSlider{-webkit-appearance:none;appearance:none;flex:1;width:auto;min-width:0;height:3px;border-radius:3px;background:var(--line);outline:none}
   input.rangeSlider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.2)}
   input.rangeSlider::-moz-range-thumb{width:18px;height:18px;border:0;border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.2)}
   .save{position:fixed;left:0;right:0;bottom:calc(62px + env(safe-area-inset-bottom,0px));padding:10px 12px;background:var(--card);border-top:1px solid var(--line);display:flex;flex-direction:column;gap:6px;max-width:520px;margin:0 auto;border-radius:14px 14px 0 0;box-shadow:0 -4px 14px var(--shadow)}
@@ -763,7 +764,7 @@
   </div>
   <div class="inlineSliderRow">
     <span class="inlineLbl">Ready to ship within</span>
-    <input type="range" id="readySlider" class="rangeSlider" min="0" max="11" step="1" value="0">
+    <input type="range" id="readySlider" class="rangeSlider" min="0" max="12" step="1" value="0">
     <span class="inlineVal" id="readyLabel">All</span>
   </div>
 </div>
@@ -1008,7 +1009,8 @@ const VEH_TYPES = ["ATV","Boat","Car","Heavy Equipment","Large Yacht","Mini-van"
 // arrays (rather than plain ids) so paintGrid()/renderList() below don't need special-casing.
 const STATE_GRID_IDS = { from: ["fromStates"], to: ["toStates"] };
 const CITY_LIST_IDS = { from: ["fromList"], to: ["toList"] };
-const READY = [["All",0],["Today",1],["2",2],["3",3],["4",4],["5",5],["6",6],["7",7],["8",8],["9",9],["10",10],["14",14]];
+// (2026-11-06, owner) Today = only today, Tomorrow = today or tomorrow (was "Today" = 1, which already meant today or tomorrow)
+const READY = [["All",0],["Today",-1],["Tomorrow",1],["2",2],["3",3],["4",4],["5",5],["6",6],["7",7],["8",8],["9",9],["10",10],["14",14]];
 
 // state[k] holds BOTH cities (with zip, r) and whole-state picks (st only).
 // Whole-state picks are shown only as a highlighted square in the grid below (that is their only
@@ -1163,7 +1165,7 @@ function group(id, opts, single, onSet){
 // INDEX into READY (0..READY.length-1, always contiguous) and we map that index to the real day-count.
 function readyLabelText(i){
   const l = READY[i][0];
-  return (l === "All" || l === "Today") ? l : l + "d";
+  return (l === "All" || l === "Today" || l === "Tomorrow") ? l : l + "d";
 }
 function renderReadySlider(){
   const slider = document.getElementById("readySlider");
@@ -2083,7 +2085,7 @@ function searchChips(p){
   if(p.vs === "op") out.push("Operable"); else if(p.vs === "inop") out.push("Inoperable");
   if((p.mn||1) > 1 || p.mx) out.push((p.mn||1) + "–" + (p.mx || "any") + " cars");
   if(Array.isArray(p.vt) && p.vt.length) out.push(p.vt.length <= 2 ? p.vt.join(", ") : p.vt.length + " vehicle types");
-  if(p.rd) out.push(p.rd === 1 ? "Ready today" : "Ready ≤ " + p.rd + "d");
+  if(p.rd) out.push(p.rd === -1 ? "Ready today" : p.rd === 1 ? "Ready by tomorrow" : "Ready ≤ " + p.rd + "d");
   return out;
 }
 let siteFilter = "", lastAlertBySearch = {}, lastAlertFetch = 0;
