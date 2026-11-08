@@ -2098,22 +2098,11 @@ function pendingNewLeft(){
   if(pendingNew.length !== n0) savePendingNew();
   return pendingNew;
 }
-function pendingCard(pn){
-  let p = {}; try{ p = b64urlDecode(pn.payload) || {}; }catch(e){}
-  const card = document.createElement("div"); card.className = "scard pendingNew";
-  card.innerHTML = `<div class="scTop"><div class="scMain"><div class="scName">${escapeHtml(pn.name || placeTitle(p.f))}</div>` +
-    `<div class="scRoute"><span>${escapeHtml(placeTitle(p.f))}</span> → <span>${escapeHtml(placeTitle(p.to))}</span></div></div></div>` +
-    `<div class="chips scChips">${(pn.sites||[]).map(x=>'<span class="chip">' + escapeHtml(SITE_SHORT[x]||x) + '</span>').join("")}</div>` +
-    `<div class="scFoot"><div class="scStat">⏳ Saving… it appears here in a few seconds</div></div>`;
-  return card;
-}
 function rerenderMySearches(){
-  renderMySearches(applyOverrides(Object.values(lastSearches)));
-  const left = pendingNewLeft(), wrap = document.getElementById("mySearches");
-  if(left.length && wrap){
-    if(!Object.keys(lastSearches).length) wrap.innerHTML = "";
-    left.slice().reverse().forEach(pn => wrap.insertBefore(pendingCard(pn), wrap.firstChild));
-  }
+  // a new search the bot has not got yet is shown as an ordinary, switched-on search (owner 08.11: no "saving" note)
+  const fakes = pendingNewLeft().map((pn, i) => ({ id: "pending:" + pn.ts + ":" + i, _pending: true, name: pn.name, payload: pn.payload, sites: pn.sites,
+    active: true, online: true, running: true, alertsToday: 0, updatedAt: pn.ts }));
+  renderMySearches(applyOverrides(Object.values(lastSearches)).concat(fakes));
 }
 
 function placesText(list){
@@ -2200,6 +2189,9 @@ function renderMySearches(list){
     let p = {}; try{ p = b64urlDecode(s.payload) || {}; }catch(e){}
     const pz = isPaused(s);
     const card = document.createElement("div"); card.className = "scard" + ((!s.active || pz) ? " off" : "");
+    if(s._pending){   // (2026-11-08 owner) a new search looks finished at once; until the bot has it, its buttons only say "one moment"
+      card.addEventListener("click", ev => { if(ev.target.closest("button, input, label, .scMain")){ ev.preventDefault(); ev.stopPropagation(); toast("One moment…"); } }, true);
+    }
 
     const top = document.createElement("div"); top.className = "scTop";
     const main = document.createElement("div"); main.className = "scMain";
