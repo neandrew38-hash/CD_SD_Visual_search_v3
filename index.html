@@ -1015,7 +1015,7 @@ const READY = [["All",0],["Today",-1],["Tomorrow",1],["2",2],["3",3],["4",4],["5
 // state[k] holds BOTH cities (with zip, r) and whole-state picks (st only).
 // Whole-state picks are shown only as a highlighted square in the grid below (that is their only
 // visual trace) so tapping a state never grows the list above the grid and pushes it down the page.
-const state = { sites:["cd"], status:"any", trailer:"any", minVeh:1, maxVeh:0, ready:0, vt:[], from:[], to:[], route:false, routeMiles:75, waypoints:[], excludeCo:[], shipOrigin:"", shipDest:"" };
+const state = { sites:[], status:"any", trailer:"any", minVeh:1, maxVeh:0, ready:0, vt:[], from:[], to:[], route:false, routeMiles:75, waypoints:[], excludeCo:[], shipOrigin:"", shipDest:"" };
 
 // "Exclude companies" - a plain list the person builds up themselves (no autocomplete/suggestions here,
 // unlike the city fields above - there's no list of companies to pick from anywhere, CD/SD don't expose
@@ -1586,7 +1586,7 @@ function showBuilder(){
 function cvGoneNote(t){ const n = document.getElementById("cvGoneNote"); if(n){ n.textContent = t; n.style.display = t ? "" : "none"; } }
 function newSearch(){
   cvGoneNote("");
-  state.sites=["cd"]; state.status="any"; state.trailer="any"; state.minVeh=1; state.maxVeh=0; state.ready=0;
+  state.sites=[]; state.status="any"; state.trailer="any"; state.minVeh=1; state.maxVeh=0; state.ready=0;
   state.vt=[]; state.from=[]; state.to=[]; state.route=false; state.routeMiles=75; state.waypoints=[]; state.excludeCo=[];
   state.shipOrigin=""; state.shipDest="";
   document.getElementById("pay").value="0";
@@ -1703,7 +1703,9 @@ function buildPayload(){
 async function save(andStart){
   // (2026-11-05) an old Carvana-only search opened for editing / duplicating has no platform: never saved like that
   // (an empty list would be read as Central) - the user picks one first
-  if(!state.sites.length){ toast("Choose a platform first - Carvana is no longer supported"); return; }
+  if(!state.sites.length){ toast("Choose a platform first"); return; }
+  // (2026-11-08 owner) a NEW search on a platform switched off in the panel is not saved (the bot refuses it too)
+  if(!editingId){ const offPicked = state.sites.filter(x => SITES_OFF.includes(x)); if(offPicked.length){ toast(offPicked.map(x => SITE_LONG[x] || x).join(", ") + " is switched off right now - pick another platform"); return; } }
   // Ship.Cars shares the exact same Origin/Destination arrays as Central Dispatch/Super Dispatch (see
   // updateSiteBlocks), so the normal "need at least one Origin and Destination" check already covers it too
   // when combined with cd/sd. The one exception: Ship.Cars picked ALONE with a pasted route link (which
