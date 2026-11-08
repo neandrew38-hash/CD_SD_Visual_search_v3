@@ -760,6 +760,15 @@
   .mkLane span{color:var(--text3);font-size:12.5px}
   .mkLane em{font-style:normal;font-weight:700;min-width:58px;text-align:right}
 
+
+  /* ===================== 2026-11-08 22:2x tab bar a bit lower; smaller on computer (owner "так" on the mockup) ===================== */
+  .tabbar{padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px) * .6)}
+  .tabbtn{gap:3px;font-size:11px}
+  .tabbtn .tbIcon{width:50px;height:28px;border-radius:14px}
+  .tabbtn .tbIcon svg{width:20px;height:20px}
+  .fab{bottom:calc(70px + env(safe-area-inset-bottom,0px) * .6)}
+  /* Telegram on Mac / PC / web: the whole app ~14% smaller (phones unchanged) */
+  html.desk{zoom:.86}
 </style>
 </head>
 <body>
@@ -809,6 +818,30 @@
       apply(next);
     });
   });
+})();
+</script>
+<script>
+// 2026-11-08: tell Telegram our colours, so its own strip under the tab bar (and the sheet behind) is not
+// left in Telegram's light colour; repaint on the 🌙/☀️ toggle. On computer Telegram, mark <html> "desk" (smaller app).
+(function(){
+  var tg = window.Telegram && window.Telegram.WebApp; if(!tg) return;
+  try{ if(/^(tdesktop|macos|weba|webk|unigram)$/.test(tg.platform || '')) document.documentElement.classList.add('desk'); }catch(e){}
+  function hex(v){ v = String(v || '').trim(); var m;
+    if(/^#[0-9a-f]{6}$/i.test(v)) return v;
+    if(/^#[0-9a-f]{3}$/i.test(v)) return '#' + v[1]+v[1] + v[2]+v[2] + v[3]+v[3];
+    if((m = v.match(/^rgba?\(\s*(\d+)[\s,]+(\d+)[\s,]+(\d+)/i))) return '#' + [m[1],m[2],m[3]].map(function(x){ return ('0' + Math.min(255, +x).toString(16)).slice(-2); }).join('');
+    return null; }
+  function paint(){
+    try{
+      var cs = getComputedStyle(document.documentElement);
+      var bar = hex(cs.getPropertyValue('--card')), bg = hex(cs.getPropertyValue('--bg'));
+      if(bar && tg.setBottomBarColor && tg.isVersionAtLeast && tg.isVersionAtLeast('7.10')) tg.setBottomBarColor(bar);
+      if(bg && tg.setBackgroundColor) tg.setBackgroundColor(bg);
+    }catch(e){}
+  }
+  paint();
+  try{ new MutationObserver(paint).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] }); }catch(e){}
+  document.addEventListener('DOMContentLoaded', paint);
 })();
 </script>
 <div class="toast" id="toast"></div>
