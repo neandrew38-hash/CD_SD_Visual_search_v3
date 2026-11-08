@@ -1725,10 +1725,13 @@ async function save(andStart){
     const nm = document.getElementById("searchName").value.trim();
     if(nm) body.name = nm;
     if(andStart === true) body.start = true;
+    const known = new Set(Object.keys(lastSearches)), wasNew = !editingId, sitesNow = state.sites.slice();
     const r = await apiAction(body);
     if(r && r.ok){
       toast(andStart === true ? "Saved and started!" : editingId ? "Saved! Updating your search..." : "Saved! Starting your search...");
+      if(wasNew){ pendingNew.push({ payload, name: nm, sites: sitesNow, ts: Date.now(), known }); savePendingNew(); }
       showList();
+      rerenderMySearches();
       // a brand-new search needs a moment to reach the userscript and get pushed back up - poll a
       // few times in quick succession right after Save instead of waiting for the regular 2s interval
       refreshBackendState();
@@ -2052,24 +2055,66 @@ function makePauseBtn(s, onDone){
 // Instead we remember what the person JUST did and keep showing that until the server confirms it (or
 // OVERRIDE_TTL passes as a safety net), so the UI reacts instantly and never flickers backwards.
 let lastSearches = {};
-const searchOverrides = {};   // id -> { active?:bool, deleted?:true, ts }
-const OVERRIDE_TTL = 15000;
+// (2026-11-08, owner) the way to the bot takes ~3-35 s: 15 s was too short (a deleted search came back, then went), and closing
+// the Mini App lost them (reopened = the old list until the bot caught up). Now: kept until the bot's list shows the change,
+// at most 3 min, and kept over closing / reopening (localStorage).
+const searchOverrides = (()=>{ try{ return JSON.parse(localStorage.getItem("searchOverrides") || "{}") || {}; }catch(e){ return {}; } })();
+const OVERRIDE_TTL = 180000;
+function saveOverrides(){ try{ localStorage.setItem("searchOverrides", JSON.stringify(searchOverrides)); }catch(e){} }
 
 function applyOverrides(list){
   const now = Date.now();
-  Object.keys(searchOverrides).forEach(id=>{ if(now - searchOverrides[id].ts > OVERRIDE_TTL) delete searchOverrides[id]; });
+  const before = JSON.stringify(searchOverrides);
+  const inList = new Set(list.map(s => s.id));
+  Object.keys(searchOverrides).forEach(id=>{
+    if(now - searchOverrides[id].ts > OVERRIDE_TTL) delete searchOverrides[id];
+    else if(searchOverrides[id].deleted && list.length && !inList.has(id)) delete searchOverrides[id];   // the bot has deleted it - done
+  });
+  if(JSON.stringify(searchOverrides) !== before) saveOverrides();
   return list.map(s=>{
     const o = searchOverrides[s.id];
     if(!o) return s;
     if(o.deleted) return null;
     if('active' in o){
-      if(o.active === s.active) { delete searchOverrides[s.id]; return s; }   // server caught up - override no longer needed
-      return { ...s, active: o.active, online:false, running:false };
+      if(o.active === s.active) { delete searchOverrides[s.id]; saveOverrides(); return s; }   // server caught up - override no longer needed
+      return { ...s, active: o.active, online: o.active, running: o.active };   // (2026-11-08 owner) switched on = shown working at once
     }
     return s;
   }).filter(Boolean);
 }
-function rerenderMySearches(){ renderMySearches(applyOverrides(Object.values(lastSearches))); }
+// (2026-11-08, owner) a NEW search shows at once as "⏳ Saving…" - the way to the bot (Worker queue) takes ~3-35 s. It goes away when
+// the bot's list has a new search with the same filters; after 2 min without it: a note to check the bot's message in Telegram
+// (the bot refuses e.g. a platform switched off and says why there).
+let pendingNew = (()=>{ try{ return (JSON.parse(localStorage.getItem("pendingNew") || "[]") || []).map(x => ({ ...x, known: new Set(x.known || []) })); }catch(e){ return []; } })();   // { payload, name, sites, ts, known:Set of ids that were there before }
+function savePendingNew(){ try{ localStorage.setItem("pendingNew", JSON.stringify(pendingNew.map(x => ({ ...x, known: Array.from(x.known) })))); }catch(e){} }
+function pendingNewLeft(){
+  const now = Date.now(), ids = Object.keys(lastSearches), n0 = pendingNew.length;
+  if(!ids.length && n0 && now - Math.min.apply(null, pendingNew.map(x => x.ts)) < 120000) return pendingNew;   // the bot's list is not here yet (just opened)
+  pendingNew = pendingNew.filter(pn => {
+    if(ids.some(id => !pn.known.has(id) && lastSearches[id] && lastSearches[id].payload === pn.payload)) return false;
+    if(now - pn.ts > 120000){ toast('"' + (pn.name || "New search") + '" was not confirmed by the bot - check its message in Telegram'); return false; }
+    return true;
+  });
+  if(pendingNew.length !== n0) savePendingNew();
+  return pendingNew;
+}
+function pendingCard(pn){
+  let p = {}; try{ p = b64urlDecode(pn.payload) || {}; }catch(e){}
+  const card = document.createElement("div"); card.className = "scard pendingNew";
+  card.innerHTML = `<div class="scTop"><div class="scMain"><div class="scName">${escapeHtml(pn.name || placeTitle(p.f))}</div>` +
+    `<div class="scRoute"><span>${escapeHtml(placeTitle(p.f))}</span> → <span>${escapeHtml(placeTitle(p.to))}</span></div></div></div>` +
+    `<div class="chips scChips">${(pn.sites||[]).map(x=>'<span class="chip">' + escapeHtml(SITE_SHORT[x]||x) + '</span>').join("")}</div>` +
+    `<div class="scFoot"><div class="scStat">⏳ Saving… it appears here in a few seconds</div></div>`;
+  return card;
+}
+function rerenderMySearches(){
+  renderMySearches(applyOverrides(Object.values(lastSearches)));
+  const left = pendingNewLeft(), wrap = document.getElementById("mySearches");
+  if(left.length && wrap){
+    if(!Object.keys(lastSearches).length) wrap.innerHTML = "";
+    left.slice().reverse().forEach(pn => wrap.insertBefore(pendingCard(pn), wrap.firstChild));
+  }
+}
 
 function placesText(list){
   if(!Array.isArray(list) || !list.length) return "Anywhere";
@@ -2169,11 +2214,11 @@ function renderMySearches(list){
     cb.setAttribute("aria-label", "Search on/off");
     cb.onchange = async ()=>{
       const want = cb.checked;
-      searchOverrides[s.id] = { active: want, ts: Date.now() };
+      searchOverrides[s.id] = { active: want, ts: Date.now() }; saveOverrides();
       rerenderMySearches();
       toast(want ? "Starting..." : "Stopping...");
       const r = await apiAction({ type: "toggle-search", id: s.id, active: want });
-      if(!r || !r.ok){ delete searchOverrides[s.id]; toast("Could not update"); rerenderMySearches(); }
+      if(!r || !r.ok){ delete searchOverrides[s.id]; saveOverrides(); toast("Could not update"); rerenderMySearches(); }
     };
     const sl = document.createElement("span"); sl.className = "slider";
     sw.appendChild(cb); sw.appendChild(sl);
@@ -2208,10 +2253,10 @@ function renderMySearches(list){
     const del = document.createElement("button"); del.className = "trash"; del.textContent = "🗑"; del.setAttribute("aria-label","Delete");
     del.onclick = async ()=>{
       if(!confirm(`Delete "${s.name||s.id}"?`)) return;
-      searchOverrides[s.id] = { deleted: true, ts: Date.now() };
+      searchOverrides[s.id] = { deleted: true, ts: Date.now() }; saveOverrides();
       rerenderMySearches();
       const r = await apiAction({ type: "delete-search", id: s.id });
-      if(!r || !r.ok){ delete searchOverrides[s.id]; toast("Could not delete"); rerenderMySearches(); }
+      if(!r || !r.ok){ delete searchOverrides[s.id]; saveOverrides(); toast("Could not delete"); rerenderMySearches(); }
     };
     acts.appendChild(del);
     right.appendChild(acts);
