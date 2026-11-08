@@ -583,6 +583,172 @@
   .cardPrev .cp-r small{display:block;margin-top:4px;font-size:10.5px;font-weight:700;color:#7fe0a0;font-family:ui-monospace,Menlo,monospace}
   .cardPrev .cp-s{position:absolute;left:0;right:0;bottom:0;height:22px;background:rgba(11,15,20,.94);border-top:1px solid #1d2a37;display:flex;justify-content:space-between;align-items:center;padding:0 10px;font-size:9.5px;color:#b6c5d3;font-family:ui-monospace,Menlo,monospace}
   .cardPrev svg{position:absolute;left:0;top:0}
+
+  /* ===================== 2026-11-08 📋 Board, 📈 Market, new More, raised tab bar (owner "так" on the mockup) ===================== */
+  :root{--cdc:#4f8cff;--sdc:#8f74ff;--acc:#16b3a3;--asc:#e39b1f;--v2c:#c9a227}
+  body{padding-bottom:190px}
+  /* tab bar: a bit higher, the open tab in an accent "pill" */
+  .tabbar{background:var(--card);border-top:1px solid var(--line);box-shadow:none;padding:8px 4px calc(8px + env(safe-area-inset-bottom,0px) * .6);gap:0}
+  .tabbtn{padding:0;gap:4px;font-size:11px;font-weight:600;color:var(--text4);background:none!important;box-shadow:none!important}
+  .tabbtn .tbIcon{width:54px;height:30px;border-radius:15px;display:flex;align-items:center;justify-content:center;transition:background .15s,color .15s}
+  .tabbtn .tbIcon svg{width:21px;height:21px}
+  .tabbtn.on{color:var(--fg)}
+  .tabbtn.on .tbIcon{background:var(--accent);color:var(--on-accent,#1a0f0a)}
+  .fab{bottom:calc(80px + env(safe-area-inset-bottom,0px) * .6)}
+  .save{bottom:calc(68px + env(safe-area-inset-bottom,0px) * .6)}
+
+  /* More */
+  .mHero{display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:16px;margin-bottom:6px;
+    background:linear-gradient(135deg,var(--accent-tint),var(--card));border:1px solid var(--line)}
+  .mHero .mhIcon{width:38px;height:38px;border-radius:11px;background:var(--accent);color:var(--on-accent,#1a0f0a);display:flex;align-items:center;justify-content:center;flex:none}
+  .mHero .mhIcon svg{width:20px;height:20px}
+  .mHero b{display:block;font-size:15px}
+  .mHero span{display:block;font-size:12px;color:var(--text3);margin-top:1px}
+  .mHero .mhPill{margin-left:auto;font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--success-bg);color:var(--success)}
+  .mSect{font-size:11px;font-weight:700;letter-spacing:.09em;color:var(--text4);margin:16px 2px 7px;text-transform:uppercase}
+  .menuRow{min-height:58px;gap:13px}
+  .menuRow .mIcon{width:34px;height:34px;border-radius:10px;background:var(--accent-tint);color:var(--accent);display:flex;align-items:center;justify-content:center;flex:none}
+  .menuRow .mIcon svg{width:18px;height:18px;color:var(--accent)}
+  .menuRow .mTxt{display:flex;flex-direction:column;gap:1px}
+  .menuRow .mTxt small{font-size:12px;font-weight:500;color:var(--text3)}
+  .mNew{display:inline-block;font-size:9.5px;font-weight:700;letter-spacing:.04em;padding:2px 6px;border-radius:5px;background:var(--accent);color:var(--on-accent,#1a0f0a);margin-left:6px;vertical-align:2px}
+
+  /* Board list */
+  .bdHead{display:flex;align-items:center;justify-content:space-between;margin:4px 0 10px}
+  .bdHead .iconBtn{position:relative}
+  .bdDot{position:absolute;top:6px;right:6px;width:8px;height:8px;border-radius:50%;background:var(--accent);display:none}
+  .bdChips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -12px 9px;padding:0 12px}
+  .bdChips::-webkit-scrollbar{display:none}
+  .bdChip{flex:none;height:32px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--text3);font:inherit;font-size:13px;font-weight:600;display:flex;align-items:center;gap:5px;cursor:pointer}
+  .bdChip small{font-size:11px;font-weight:500;opacity:.75}
+  .bdChip.on{background:var(--accent);border-color:var(--accent);color:var(--on-accent,#1a0f0a)}
+  .bdRow{display:flex;gap:8px;align-items:center}
+  .bdSeg{flex:1;display:flex;gap:3px;padding:3px;border-radius:12px;background:var(--card);border:1px solid var(--line)}
+  .bdSeg button{flex:1;height:32px;border:0;border-radius:9px;background:none;color:var(--text3);font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+  .bdSeg button.on{background:var(--accent-tint);color:var(--accent)}
+  .bdRow .iconBtn{width:40px;height:40px;flex:none}
+  .bdLive{display:flex;align-items:center;gap:7px;margin:11px 2px 4px;font-family:ui-monospace,"IBM Plex Mono",Menlo,monospace;font-size:11.5px;color:var(--text3)}
+  .bdLive .lvDot{width:7px;height:7px;border-radius:50%;background:var(--success);box-shadow:0 0 0 4px var(--success-bg);flex:none}
+  .bdLive .lvDot.off{background:var(--text4);box-shadow:none}
+  .bdLive button{border:0;background:none;color:var(--accent);font:inherit;font-weight:600;padding:0;cursor:pointer}
+  .bdCard{display:block;background:var(--card);border:1px solid var(--hairline);border-radius:16px;padding:12px 13px;margin-top:8px;cursor:pointer}
+  .bdCard:active{transform:scale(.99)}
+  .bdCard.old{opacity:.55}
+  .bdRt{font-size:15.5px;font-weight:700;letter-spacing:-.01em}
+  .bdRt i{font-style:normal;color:var(--text4);font-weight:500;margin:0 3px}
+  .bdMn{margin-top:3px;font-size:14.5px;font-weight:700}
+  .bdMn span{color:var(--text3);font-weight:500}
+  .bdMeta{margin-top:2px;font-size:12.5px;color:var(--text3)}
+  .bdFoot{margin-top:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .bdSrc{font-size:11px;font-weight:700;padding:3px 7px;border-radius:7px;letter-spacing:.02em;background:var(--accent-tint)}
+  .bdSrc.cd{color:var(--cdc);background:rgba(79,140,255,.13)}.bdSrc.sd{color:var(--sdc);background:rgba(143,116,255,.14)}
+  .bdSrc.ac{color:var(--acc);background:rgba(22,179,163,.14)}.bdSrc.as{color:var(--asc);background:rgba(227,155,31,.14)}.bdSrc.v2{color:var(--v2c);background:rgba(201,162,39,.15)}
+  .bdAgo{font-size:12px;color:var(--text4)}
+  .bdDeal{font-size:11px;font-weight:700;padding:3px 7px;border-radius:7px;background:var(--success-bg);color:var(--success)}
+  .bdDeal.lo{background:var(--danger-bg);color:var(--danger)}
+  .bdFit{font-size:11px;font-weight:700;padding:3px 7px;border-radius:7px;background:var(--accent-tint);color:var(--accent);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .bdCo{margin-left:auto;font-size:12px;color:var(--text3);max-width:46%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .bdMoreBtn{display:block;width:100%;margin-top:10px;height:42px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--fg);font:inherit;font-weight:600;cursor:pointer}
+  .bdEmpty{text-align:center;color:var(--text3);font-size:13.5px;padding:34px 10px;line-height:1.5}
+
+  /* Board filter sheet */
+  .bdSheetBg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:40;display:none}
+  .bdSheetBg.on{display:block}
+  .bdSheet{position:absolute;left:0;right:0;bottom:0;max-width:520px;margin:0 auto;max-height:88vh;overflow-y:auto;background:var(--card);border-radius:22px 22px 0 0;border-top:1px solid var(--line);padding:10px 16px calc(18px + env(safe-area-inset-bottom,0px))}
+  .bdGrab{width:38px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 10px}
+  .bdShTop{display:flex;align-items:center;justify-content:space-between}
+  .bdShTop b{font-size:19px}
+  .bdShTop button{border:0;background:none;color:var(--accent);font:inherit;font-weight:600;font-size:14px;cursor:pointer}
+  .bdLbl{font-size:12.5px;color:var(--text3);font-weight:600;margin:14px 2px 6px}
+  .bdIn{width:100%;height:42px;border-radius:11px;border:1px solid var(--line);background:var(--bg);color:var(--fg);font:inherit;font-size:14px;padding:0 12px;outline:none}
+  .bdIn:focus{border-color:var(--accent)}
+  .bdTwo{display:flex;gap:8px}
+  .bdTwo .bdIn{flex:1}
+  .bdPlaces{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+  .bdPlace{display:flex;align-items:center;gap:6px;height:30px;padding:0 6px 0 11px;border-radius:999px;background:var(--accent-tint);color:var(--accent);font-size:12.5px;font-weight:600}
+  .bdPlace input{width:44px;height:22px;border:0;border-radius:6px;background:var(--card);color:var(--fg);font:inherit;font-size:12px;text-align:center}
+  .bdPlace button{border:0;background:none;color:var(--accent);font-size:16px;line-height:1;cursor:pointer;padding:0 2px}
+  .bdSug{margin-top:4px;border:1px solid var(--line);border-radius:11px;overflow:hidden;display:none}
+  .bdSug div{padding:10px 12px;font-size:14px;border-top:1px solid var(--hairline);cursor:pointer}
+  .bdSug div:first-child{border-top:0}
+  .bdSug div:active{background:var(--accent-tint)}
+  .bdSwRow{display:flex;align-items:center;justify-content:space-between;margin-top:16px;font-size:14px;font-weight:600}
+  .bdSw{width:44px;height:26px;border-radius:13px;background:var(--line);position:relative;border:0;cursor:pointer;flex:none}
+  .bdSw:after{content:"";position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .15s}
+  .bdSw.on{background:var(--accent)}
+  .bdSw.on:after{left:21px}
+  .bdBig{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;height:48px;margin-top:16px;border-radius:13px;border:0;background:var(--accent);color:var(--on-accent,#1a0f0a);font:inherit;font-size:15px;font-weight:700;cursor:pointer}
+  .bdBig2{display:flex;align-items:center;justify-content:center;width:100%;height:44px;margin-top:8px;border-radius:13px;border:1px solid var(--line);background:var(--card);color:var(--fg);font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+
+  /* Load page */
+  .ldBack{display:inline-flex;align-items:center;gap:3px;border:0;background:none;color:var(--accent);font:inherit;font-size:15px;font-weight:600;padding:4px 0;margin:0 0 8px;cursor:pointer}
+  .ldBack svg{width:18px;height:18px}
+  .ldHero{background:linear-gradient(160deg,var(--accent-tint) 0%,var(--card) 65%);border:1px solid var(--line);border-radius:20px;padding:13px 14px}
+  .ldTop{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .ldAge{margin-left:auto;display:flex;align-items:center;gap:6px;font-family:ui-monospace,"IBM Plex Mono",Menlo,monospace;font-size:11.5px;color:var(--success)}
+  .ldAge.old{color:var(--text4)}
+  .ldPrice{font-size:32px;font-weight:700;letter-spacing:-.03em;line-height:1}
+  .ldDeal{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:10px;background:var(--success-bg);color:var(--success);font-size:12.5px;font-weight:700}
+  .ldDeal.lo{background:var(--danger-bg);color:var(--danger)}
+  .ldDeal.mid{background:var(--accent-tint);color:var(--text3)}
+  .ldTiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+  .ldTile{background:var(--bg);border-radius:12px;padding:7px 10px}
+  .ldTile b{display:block;font-size:15.5px}
+  .ldTile span{font-size:11.5px;color:var(--text3)}
+  .ldLid{display:flex;align-items:center;gap:8px;margin-top:11px;padding:8px 11px;border-radius:11px;border:0;background:var(--bg);color:var(--fg);font:inherit;cursor:pointer;max-width:100%}
+  .ldLid span{font-size:10.5px;font-weight:700;letter-spacing:.09em;color:var(--text4);flex:none}
+  .ldLid b{font-family:ui-monospace,"IBM Plex Mono",Menlo,monospace;font-size:17px;font-weight:600;letter-spacing:.02em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ldLid svg{width:16px;height:16px;color:var(--accent);flex:none}
+  .ldPRow{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
+  .ldAvg{font-size:11.5px;color:var(--text4);margin-top:5px}
+  .ldPlain{padding:14px 4px 0}
+  .ldRt{position:relative;padding-left:18px}
+  .ldRl{position:absolute;left:4px;top:9px;height:24px;width:2px;background:repeating-linear-gradient(var(--line) 0 4px,transparent 4px 7px)}
+  .ldR1{position:relative;font-size:14px;color:var(--text3);line-height:1.25}
+  .ldR1+.ldR1{margin-top:9px}
+  .ldR1 b{color:var(--fg);font-weight:600}
+  .ldPd{position:absolute;left:-18px;top:4px;width:10px;height:10px;border-radius:50%;border:2.5px solid var(--accent);box-sizing:border-box}
+  .ldPd.f{background:var(--accent)}
+  .ldDt{display:block;font-size:11.5px;color:var(--text4);margin-top:1px}
+  .ldMap{position:absolute;right:0;top:0;border:0;background:none;color:var(--accent);font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;padding:0}
+  .ldHr{height:1px;background:var(--hairline);margin:13px 0}
+  .ldSl{font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--text4);text-transform:uppercase;margin-bottom:5px}
+  .ldVl{font-size:14px;line-height:1.6}
+  .ldVl i{font-style:normal;color:var(--text4);font-size:12.5px}
+  .ldVl i.inop{color:var(--danger)}
+  .ldCr{display:flex;align-items:center;gap:10px}
+  .ldCr div{flex:1;min-width:0}
+  .ldCr b{display:block;font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ldCr span{font-size:12.5px;color:var(--text3)}
+  .ldBlk{border:0;background:none;font-size:17px;cursor:pointer;padding:4px;flex:none}
+  .ldNt{font-size:12.5px;color:var(--text3);line-height:1.45;white-space:pre-wrap;word-break:break-word}
+  .ldDock{position:fixed;left:12px;right:12px;max-width:496px;margin:0 auto;bottom:calc(74px + env(safe-area-inset-bottom,0px) * .6);z-index:8;display:none;gap:8px;padding:8px;
+    background:color-mix(in srgb,var(--card) 92%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:18px}
+  .ldDock.on{display:flex}
+  .ldDock button{height:46px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--fg);font:inherit;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer;min-width:0}
+  .ldDock button svg{width:18px;height:18px;flex:none}
+  .ldDock .ldCall{flex:1;background:var(--accent);border-color:var(--accent);color:var(--on-accent,#1a0f0a);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+  .ldDock .ldIc{width:46px;flex:none}
+  .ldDock .ldIc.done{color:var(--accent)}
+
+  /* Market stats */
+  .mkTiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+  .mkTile{background:var(--card);border:1px solid var(--hairline);border-radius:14px;padding:10px 11px}
+  .mkTile b{display:block;font-size:17px}
+  .mkTile span{font-size:11.5px;color:var(--text3)}
+  .mkTile em{font-style:normal;font-size:11.5px;font-weight:700}
+  .mkChart{margin-top:10px;background:var(--card);border:1px solid var(--hairline);border-radius:16px;padding:12px 12px 8px}
+  .mkBars{display:flex;align-items:flex-end;gap:2px;height:96px}
+  .mkBars div{flex:1;background:var(--accent);border-radius:3px 3px 0 0;min-height:2px;opacity:.85}
+  .mkBars div.off{background:var(--line);opacity:1}
+  .mkAx{display:flex;justify-content:space-between;font-size:10.5px;color:var(--text4);margin-top:5px}
+  .mkList{background:var(--card);border:1px solid var(--hairline);border-radius:16px;overflow:hidden}
+  .mkLane{display:flex;align-items:center;gap:10px;padding:10px 13px;border-top:1px solid var(--hairline);font-size:13.5px}
+  .mkLane:first-child{border-top:0}
+  .mkLane b{flex:1;font-weight:600}
+  .mkLane span{color:var(--text3);font-size:12.5px}
+  .mkLane em{font-style:normal;font-weight:700;min-width:58px;text-align:right}
+
 </style>
 </head>
 <body>
@@ -638,6 +804,7 @@
 
 <div class="tabbar">
   <div class="tabbtn on" data-tab="search"><span class="tbIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></span><span class="tbLabel">Searches</span></div>
+  <div class="tabbtn" data-tab="board"><span class="tbIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg></span><span class="tbLabel">Board</span></div>
   <div class="tabbtn" data-tab="saved"><span class="tbIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg></span><span class="tbLabel">Saved</span></div>
   <div class="tabbtn" data-tab="more"><span class="tbIcon"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></span><span class="tbLabel">More</span></div>
 </div>
@@ -814,15 +981,82 @@
 <!-- ======================= SAVED LOADS (⭐ Save under an alert; read from the office computer) ======================= -->
 <div class="tabpane" id="tab-more">
   <div class="listHead"><div><div class="pageTitle">More</div></div></div>
+  <div class="mHero"><span class="mhIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5z"/></svg></span><div><b>HaulHawk</b><span>Board and alerts — all load boards</span></div><span class="mhPill">Free</span></div>
+  <div class="menuRow" id="subscriptionRow" style="display:none"><span class="mIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M3 10h18"/><path d="M7 15h3"/></svg></span><span class="mTxt">Subscription</span><span class="mVal">Plans</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
+  <div class="mSect">Alerts</div>
   <div class="menuList">
-    <div class="menuRow" id="subscriptionRow"><span class="mIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M3 10h18"/><path d="M7 15h3"/></svg></span><span class="mTxt">Subscription</span><span class="mVal">Plans</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
-    <div class="menuRow" data-go="blocked"><span class="mIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M6 6l12 12"/></svg></span><span class="mTxt">Blocked companies</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
-    <div class="menuRow" data-go="sms"><span class="mIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="13" rx="2.5"/><path d="M4 7l8 6 8-6"/></svg></span><span class="mTxt">SMS template</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
-    <div class="menuRow" data-go="style"><span class="mIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4" width="17" height="16" rx="2.5"/><path d="M7 9h10M7 13h6"/><circle cx="16.5" cy="15.5" r="1.6"/></svg></span><span class="mTxt">Alert style</span><span class="mVal" id="styleVal"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
-    <div class="menuRow" data-go="help"><span class="mIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.5a2.5 2.5 0 014.8 1c0 1.6-2.4 2-2.4 3.5"/><path d="M12 17h.01"/></svg></span><span class="mTxt">Help</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
-    <div class="menuRow" id="contactUsRow"><span class="mIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4L3 11l6.5 2.5M21 4l-3 16-8.5-6.5M21 4L9.5 13.5V19l3-3"/></svg></span><span class="mTxt">Contact us</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
-    <div class="menuRow" id="controlPanelRow" style="display:none"><span class="mIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4" width="17" height="12" rx="2"/><path d="M8 20h8M12 16v4M7 12l3-3 2 2 4-4"/></svg></span><span class="mTxt">Control panel</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
+    <div class="menuRow" data-go="style"><span class="mIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4" width="17" height="16" rx="2.5"/><path d="M7 9h10M7 13h6"/><circle cx="16.5" cy="15.5" r="1.6"/></svg></span><span class="mTxt">Alert style<small>What an alert in the chat shows</small></span><span class="mVal" id="styleVal"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
+    <div class="menuRow" data-go="sms"><span class="mIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="13" rx="2.5"/><path d="M4 7l8 6 8-6"/></svg></span><span class="mTxt">SMS template<small>Ready text for the broker</small></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
+    <div class="menuRow" data-go="blocked"><span class="mIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M6 6l12 12"/></svg></span><span class="mTxt">Blocked companies<small>Never in alerts or on the Board</small></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
   </div>
+  <div class="mSect">Market</div>
+  <div class="menuList">
+    <div class="menuRow" data-go="market"><span class="mIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg></span><span class="mTxt"><span>Market stats<span class="mNew">NEW</span></span><small>Loads and $/mi by hour and lane</small></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
+  </div>
+  <div class="mSect">Help</div>
+  <div class="menuList">
+    <div class="menuRow" data-go="help"><span class="mIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.5a2.5 2.5 0 014.8 1c0 1.6-2.4 2-2.4 3.5"/><path d="M12 17h.01"/></svg></span><span class="mTxt">Help<small>How alerts and the Board work</small></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
+    <div class="menuRow" id="contactUsRow"><span class="mIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4L3 11l6.5 2.5M21 4l-3 16-8.5-6.5M21 4L9.5 13.5V19l3-3"/></svg></span><span class="mTxt">Contact us<small>A person answers in the chat</small></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
+    <div class="menuRow" id="controlPanelRow" style="display:none"><span class="mIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4" width="17" height="12" rx="2"/><path d="M8 20h8M12 16v4M7 12l3-3 2 2 4-4"/></svg></span><span class="mTxt">Control panel<small>Admin only</small></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
+  </div>
+</div>
+
+<!-- ======================= 📋 BOARD (2026-11-08): every load the bot sees, last 1 h / 3 h / 24 h ======================= -->
+<div class="tabpane" id="tab-board">
+  <div class="bdHead">
+    <div><div class="pageTitle">Board</div></div>
+    <button type="button" class="iconBtn" id="bdFilterBtn" aria-label="Filters" title="Filters"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg><span class="bdDot" id="bdFDot"></span></button>
+  </div>
+  <div class="bdChips" id="bdSites"></div>
+  <div class="bdRow">
+    <div class="bdSeg" id="bdSort"><button type="button" data-s="new" class="on">Newest</button><button type="button" data-s="price">Price</button><button type="button" data-s="rate">$/mi</button></div>
+    <button type="button" class="iconBtn" id="bdRefresh" aria-label="Refresh" title="Refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M20 11a8 8 0 10-2.3 5.7M20 5v6h-6"/></svg></button>
+  </div>
+  <div class="bdLive" id="bdLive"><span class="lvDot off"></span><span>Loading…</span></div>
+  <div id="bdList"></div>
+  <button type="button" class="bdMoreBtn" id="bdMore" style="display:none">Show more</button>
+</div>
+
+<!-- ======================= 📋 one load from the Board ======================= -->
+<div class="tabpane" id="tab-load"><div id="ldBody"></div></div>
+
+<!-- ======================= 📈 MARKET STATS (More → Market stats) ======================= -->
+<div class="tabpane" id="tab-market">
+  <div class="listHead"><div><div class="pageTitle">Market stats</div><div class="pageSub">Every new load the bot saw today, by hour and by lane</div></div></div>
+  <div class="bdChips" id="mkSites"></div>
+  <div id="mkBody"><div class="muted">Loading...</div></div>
+</div>
+
+<!-- Board filter sheet -->
+<div class="bdSheetBg" id="bdSheetBg">
+  <div class="bdSheet" id="bdSheet">
+    <div class="bdGrab"></div>
+    <div class="bdShTop"><b>Filters</b><button type="button" id="bdClear">Clear</button></div>
+    <div class="bdLbl">Pickup</div>
+    <input class="bdIn" id="bdFromIn" placeholder="City, ZIP or state (TX)" autocomplete="off">
+    <div class="bdSug" id="bdFromSug"></div>
+    <div class="bdPlaces" id="bdFromList"></div>
+    <div class="bdLbl">Delivery</div>
+    <input class="bdIn" id="bdToIn" placeholder="City, ZIP or state (FL)" autocomplete="off">
+    <div class="bdSug" id="bdToSug"></div>
+    <div class="bdPlaces" id="bdToList"></div>
+    <div class="bdLbl">Min $/mi · Min price</div>
+    <div class="bdTwo"><input class="bdIn" id="bdRpm" inputmode="decimal" placeholder="$/mi any"><input class="bdIn" id="bdPay" inputmode="numeric" placeholder="$ any"></div>
+    <div class="bdLbl">Trailer</div>
+    <div class="bdSeg" id="bdTr"><button type="button" data-v="any" class="on">Any</button><button type="button" data-v="open">Open</button><button type="button" data-v="enc">Enclosed</button></div>
+    <div class="bdLbl">Condition</div>
+    <div class="bdSeg" id="bdVs"><button type="button" data-v="any" class="on">Any</button><button type="button" data-v="op">Operable</button><button type="button" data-v="inop">Inop</button></div>
+    <div class="bdSwRow">Hide blocked companies<button type="button" class="bdSw on" id="bdHideBlk" aria-label="Hide blocked companies"></button></div>
+    <button type="button" class="bdBig" id="bdApply">Show loads</button>
+    <button type="button" class="bdBig2" id="bdAsSearch">Save as a search → alerts in chat</button>
+  </div>
+</div>
+<!-- the load page's action bar (stays under the thumb while the page scrolls) -->
+<div class="ldDock" id="ldDock">
+  <button type="button" class="ldCall" id="ldCall"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2"/></svg><span id="ldCallTxt">Call</span></button>
+  <button type="button" class="ldIc" id="ldSms" aria-label="Copy SMS" title="Copy SMS"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H8l-4 4z"/></svg></button>
+  <button type="button" class="ldIc" id="ldOpen" aria-label="Open on the load board" title="Open on the load board"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1h5"/></svg></button>
+  <button type="button" class="ldIc" id="ldSave" aria-label="Save" title="Save"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg></button>
 </div>
 
 <div class="tabpane" id="tab-saved">
@@ -1777,13 +2011,14 @@ const DEFAULT_TPL_PREVIEW =
   "Hi, is your {vehicle} ({origin} -> {dest}) still available? Load ID {loadId}. " +
   "We can pick up right away. Please call or text me back.";
 
-const MORE_PAGES = ["blocked","sms","style","help"];
+const MORE_PAGES = ["blocked","sms","style","help","market"];
 function switchTab(name){
-  const main = MORE_PAGES.includes(name) ? "more" : name;
+  const main = MORE_PAGES.includes(name) ? "more" : name === "load" ? "board" : name;   // (2026-11-08) a load page belongs to the Board tab
   document.querySelectorAll(".tabbtn").forEach(b=>b.classList.toggle("on", b.dataset.tab===main));
   document.querySelectorAll(".tabpane").forEach(p=>p.classList.toggle("on", p.id==="tab-"+name));
   window.scrollTo(0, 0);
   if(name==="saved") loadSaved();
+  try { if(window.hhBoard) window.hhBoard.onTab(name); } catch(e) {}   // (2026-11-08) 📋 Board / 📈 Market stats
 }
 // ---- ⭐ Saved loads (2026-09-30) ----
 // Saved loads live on the office computer (the bot's data folder), so this tab reads them straight from
@@ -2894,6 +3129,264 @@ setInterval(refreshBackendState, 2000);
     if(w && w.openLink) w.openLink(url); else window.open(url, "_blank");
     close();
   });
+})();
+</script>
+<script>
+// ======================= 2026-11-08 📋 Board · 📈 Market stats (owner "так" on the mockup) =======================
+// The Board reads the office computer (pcApi -> /api/miniapp/board): every load the bot's scanners already saw - the bot
+// asks nothing new from any load board for it. Filters mean exactly what a saved search means (same payload, same matcher).
+(function(){
+  const $ = id => document.getElementById(id);
+  const E = s => escapeHtml(s);
+  const SN = { cd:"Central", sd:"Super", ac:"ACV", as:"Autosled", v2:"V2" };
+  const SITE_ORDER = ["cd","sd","ac","as","v2"];
+  const OLD_MS = 2 * 3600000;   // older than this: greyed, "may be taken" (the bot can't see when a load is taken - owner 08.11)
+  const SINCE = [[60,"last 1 h"],[180,"last 3 h"],[1440,"last 24 h"]];
+  const LS = "hhBoardV1";
+  let saved = {}; try { saved = JSON.parse(localStorage.getItem(LS) || "{}") || {}; } catch(e) { saved = {}; }
+  const B = {
+    site: saved.site || "", sort: saved.sort || "new", since: [60,180,1440].includes(saved.since) ? saved.since : 60,
+    f: Object.assign({ from:[], to:[], p:0, pm:0, tr:"any", vs:"any" }, saved.f || {}), hideBlk: saved.hideBlk !== false,
+    items: [], total: 0, counts: {}, loading: false, loaded: false, err: "", openK: null, scrollY: 0, timer: null, reqNo: 0,
+  };
+  const keep = () => { try { localStorage.setItem(LS, JSON.stringify({ site:B.site, sort:B.sort, since:B.since, f:B.f, hideBlk:B.hideBlk })); } catch(e){} };
+  const money = n => "$" + Math.round(Number(n)||0).toLocaleString("en-US");
+  const ago = ms => { const s = Math.round(ms/1000); if(s < 60) return s + " s ago"; const m = Math.round(s/60); if(m < 60) return m + " min ago"; const h = Math.floor(m/60), r = m % 60; return h + " h" + (r ? " " + r + " min" : "") + " ago"; };
+  const place = p => [p && p.city, p && p.st].filter(Boolean).join(", ") || "—";
+  const day = s => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(s||"")); if(!m) return String(s||""); return new Date(+m[1], +m[2]-1, +m[3]).toLocaleDateString("en-US",{month:"short",day:"numeric"}); };
+  const hasFilter = () => !!(B.f.from.length || B.f.to.length || B.f.p || B.f.pm || B.f.tr !== "any" || B.f.vs !== "any");
+  const filterPayload = () => hasFilter() ? b64urlEncode({ s:["cd"], f:B.f.from, to:B.f.to, p:B.f.p, pm:B.f.pm, tr:B.f.tr, vs:B.f.vs }) : "";
+  function openUrl(u){ if(!u) return; if(tg && tg.openLink) tg.openLink(u); else window.open(u, "_blank"); }
+  async function copyText(t){
+    try { if(navigator.clipboard && navigator.clipboard.writeText){ await navigator.clipboard.writeText(t); return true; } } catch(e){}
+    try { const a = document.createElement("textarea"); a.value = t; a.setAttribute("readonly",""); a.style.position = "fixed"; a.style.opacity = "0"; document.body.appendChild(a); a.select(); const ok = document.execCommand("copy"); a.remove(); return ok; } catch(e){ return false; }
+  }
+
+  // ---------- list ----------
+  function renderSites(){
+    const box = $("bdSites"); if(!box) return;
+    const all = SITE_ORDER.reduce((n,s)=> n + (B.counts[s]||0), 0);
+    const chips = [["", "All", all]].concat(SITE_ORDER.map(s => [s, SN[s], B.counts[s]||0]));
+    box.innerHTML = chips.map(([s,label,n]) => '<button type="button" class="bdChip' + (B.site === s ? " on" : "") + '" data-site="' + s + '">' + label + (B.loaded ? '<small>' + (n >= 1000 ? (n/1000).toFixed(n >= 10000 ? 0 : 1) + "k" : n) + '</small>' : '') + '</button>').join("");
+    box.querySelectorAll(".bdChip").forEach(b => b.onclick = () => { B.site = b.dataset.site; keep(); renderSites(); load(true); });
+  }
+  function renderLive(){
+    const el = $("bdLive"); if(!el) return;
+    const sl = (SINCE.find(x => x[0] === B.since) || SINCE[0])[1];
+    if(B.err){ el.innerHTML = '<span class="lvDot off"></span><span>' + E(B.err) + '</span>'; return; }
+    el.innerHTML = '<span class="lvDot' + (B.loaded ? "" : " off") + '"></span><span>' + (B.loaded ? "Live · " + B.total.toLocaleString("en-US") + " loads · " : "") + '</span><button type="button" id="bdSince">' + sl + ' ▾</button><span>· free</span>';
+    $("bdSince").onclick = () => { const i = SINCE.findIndex(x => x[0] === B.since); B.since = SINCE[(i+1) % SINCE.length][0]; keep(); load(true); };
+  }
+  function cardHtml(it){
+    const old = it.ago > OLD_MS;
+    const meta = [it.pickup ? day(it.pickup) : "", it.cars ? it.cars + (it.cars === 1 ? " car" : " cars") : "", it.trailer, it.inop ? "Inop" : ""].filter(Boolean).join(" · ");
+    const deal = it.deal && (it.deal.pct >= 10 || it.deal.pct <= -10) ? '<span class="bdDeal' + (it.deal.pct < 0 ? " lo" : "") + '">' + (it.deal.pct > 0 ? "+" : "−") + Math.abs(it.deal.pct) + '% vs lane</span>' : "";
+    const fits = (it.fits || []).slice(0,1).map(n => '<span class="bdFit">' + E(n) + '</span>').join("");
+    const co = !old && it.company ? '<span class="bdCo">' + E(it.company) + (it.rating ? " · " + E(String(it.rating).split(" ")[0]) : "") + '</span>' : "";
+    return '<div class="bdCard' + (old ? " old" : "") + '" data-k="' + E(it.k) + '">' +
+      '<div class="bdRt">' + E(place(it.o)) + '<i>→</i>' + E(place(it.d)) + '</div>' +
+      '<div class="bdMn">' + money(it.price) + ' · <span>' + (it.rate ? "$" + it.rate.toFixed(2) + "/mi · " : "") + (it.miles ? (it.milesApprox ? "~" : "") + Number(it.miles).toLocaleString("en-US") + " mi" : "") + '</span></div>' +
+      (meta ? '<div class="bdMeta">' + E(meta) + '</div>' : "") +
+      '<div class="bdFoot"><span class="bdSrc ' + it.site + '">' + E((SN[it.site]||it.site).toUpperCase()) + '</span><span class="bdAgo">' + ago(it.ago) + (old ? " · may be taken" : "") + '</span>' + deal + fits + co + '</div></div>';
+  }
+  function renderList(){
+    const box = $("bdList"); if(!box) return;
+    renderSites(); renderLive();
+    $("bdFDot").style.display = hasFilter() ? "block" : "none";
+    if(!B.items.length){
+      box.innerHTML = '<div class="bdEmpty">' + (B.loading ? "Loading…" : B.err ? "" : hasFilter() ? "No loads match these filters in this time.<br>Widen the filter or pick “last 24 h”." : "The board is filling up — new loads appear here the moment the bot sees them.") + '</div>';
+    } else box.innerHTML = B.items.map(cardHtml).join("");
+    box.querySelectorAll(".bdCard").forEach(c => c.onclick = () => openLoad(c.dataset.k));
+    $("bdMore").style.display = B.items.length && B.items.length < B.total ? "" : "none";
+  }
+  async function load(reset, quiet){
+    if(!(tg && tg.initData)){ B.err = "Open this app from the bot chat to see the board."; renderList(); return; }
+    const no = ++B.reqNo;
+    if(reset && !quiet){ B.items = []; B.loading = true; renderList(); }
+    try{
+      const j = await pcApi("/api/miniapp/board", { sites: B.site ? [B.site] : null, since: B.since, sort: B.sort, filter: filterPayload(), showBlocked: !B.hideBlk, offset: reset ? 0 : B.items.length, limit: 30 });
+      if(no !== B.reqNo) return;   // a newer request is on its way
+      if(!j.ok) throw new Error(j.error || "error");
+      B.err = ""; B.loaded = true; B.total = j.total || 0; B.counts = j.counts || {};
+      B.items = reset ? (j.items || []) : B.items.concat(j.items || []);
+    }catch(e){
+      if(no !== B.reqNo) return;
+      B.err = /fetch|network|load failed/i.test(String(e.message)) ? "Couldn't reach the office computer (it may be off or restarting)." : String(e.message || e);
+    }finally{ if(no === B.reqNo){ B.loading = false; if(document.getElementById("tab-board").classList.contains("on")) renderList(); } }
+  }
+  // fresh loads every 20 s while the Board is open, at the top of the list and the app is in front
+  function tick(){
+    clearTimeout(B.timer);
+    B.timer = setTimeout(() => {
+      const on = document.getElementById("tab-board").classList.contains("on");
+      if(on && document.visibilityState === "visible" && window.scrollY < 300 && !B.loading && !$("bdSheetBg").classList.contains("on")) load(true, true);
+      tick();
+    }, 20000);
+  }
+
+  // ---------- one load ----------
+  function curItem(){ return B.items.find(x => x.k === B.openK) || null; }
+  function openLoad(k){
+    B.openK = k; B.scrollY = window.scrollY;
+    const it = curItem(); if(!it) return;
+    const old = it.ago > OLD_MS;
+    const tiles = [[it.rate ? "$" + it.rate.toFixed(2) : "—", "per mile"], [it.miles ? (it.milesApprox ? "~" : "") + Number(it.miles).toLocaleString("en-US") : "—", "miles"], [(it.cars||1) + (it.cars === 1 ? " car" : " cars"), it.trailer || "—"]];
+    const coName = it.company || (it.site === "ac" ? "ACV Transport" : it.site === "as" ? "Autosled" : it.site === "v2" ? "Shipper not shown on V2" : "Company hidden by the shipper");
+    const coSub = [it.rating ? "★ " + String(it.rating).split(" ")[0] : "", it.payment].filter(Boolean).join(" · ");
+    const lid = it.loadId ? '<button type="button" class="ldLid" id="ldLid"><span>LOAD ID</span><b>' + E(it.loadId) + '</b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2"/></svg></button>' : '';
+    const dealShort = it.deal ? (it.deal.pct >= 3 ? '<div class="ldDeal">▲ ' + it.deal.pct + '% vs lane</div>' : it.deal.pct <= -3 ? '<div class="ldDeal lo">▼ ' + Math.abs(it.deal.pct) + '% vs lane</div>' : '<div class="ldDeal mid">≈ lane average</div>') : '';
+    const vehRows = (it.vehicles && it.vehicles.length ? it.vehicles : [(it.cars || 1) + " vehicle(s)"]).map(v => '<div class="ldVl">' + E(v) + ' <i class="' + (it.inop ? "inop" : "") + '">· ' + (it.inop ? "inop" : "operable") + '</i></div>').join("");
+    $("ldBody").innerHTML =
+      '<button type="button" class="ldBack" id="ldBackBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 6l-6 6 6 6"/></svg>Board</button>' +
+      '<div class="ldHero"><div class="ldTop"><span class="bdSrc ' + it.site + '">' + E((SN[it.site]||it.site).toUpperCase()) + '</span>' + (it.fits||[]).slice(0,2).map(n => '<span class="bdFit">' + E(n) + '</span>').join("") +
+        '<span class="ldAge' + (old ? " old" : "") + '"><span class="lvDot' + (old ? " off" : "") + '"></span>' + ago(it.ago) + (old ? " · may be taken" : "") + '</span></div>' +
+        lid +
+        '<div class="ldPRow"><div class="ldPrice">' + money(it.price) + '</div>' + dealShort + '</div>' +
+        (it.deal ? '<div class="ldAvg">lane avg $' + Number(it.deal.avg).toFixed(2) + '/mi · ' + it.deal.n + ' loads, 7 days</div>' : '') +
+        '<div class="ldTiles">' + tiles.map(t => '<div class="ldTile"><b>' + E(t[0]) + '</b><span>' + E(t[1]) + '</span></div>').join("") + '</div></div>' +
+      '<div class="ldPlain">' +
+        '<div class="ldRt"><div class="ldRl"></div>' + (it.routeUrl ? '<button type="button" class="ldMap" id="ldMap">Map ↗</button>' : '') +
+          '<div class="ldR1"><span class="ldPd"></span><b>' + E(place(it.o)) + '</b> ' + E((it.o && it.o.zip) || "") + '<span class="ldDt">Pickup' + (it.pickup ? " · " + E(day(it.pickup)) : "") + '</span></div>' +
+          '<div class="ldR1"><span class="ldPd f"></span><b>' + E(place(it.d)) + '</b> ' + E((it.d && it.d.zip) || "") + '<span class="ldDt">Delivery</span></div></div>' +
+        '<div class="ldHr"></div><div class="ldSl">Vehicles</div>' + vehRows +
+        '<div class="ldHr"></div><div class="ldCr"><div><b>' + E(coName) + '</b><span>' + E(coSub || " ") + '</span></div>' + (it.company ? '<button type="button" class="ldBlk" id="ldBlk" aria-label="Block this company" title="Block this company">🚫</button>' : '') + '</div>' +
+        (it.notes ? '<div class="ldHr"></div><div class="ldNt">' + E(it.notes) + '</div>' : '') +
+      '</div>';
+    if($("ldLid")) $("ldLid").onclick = async () => { const ok = await copyText(it.loadId); toast(ok ? "Load ID copied: " + it.loadId : it.loadId); };
+    $("ldBackBtn").onclick = closeLoad;
+    if($("ldMap")) $("ldMap").onclick = () => openUrl(it.routeUrl);
+    if($("ldBlk")) { let armed = false; $("ldBlk").onclick = async () => {
+      if(!armed){ armed = true; toast("Tap 🚫 again to block " + it.company); setTimeout(() => armed = false, 3500); return; }
+      try { const j = await pcApi("/api/miniapp/board/action", { k: it.k, act: "block" }); if(!j.ok) throw new Error(j.error); toast("🚫 Blocked " + j.company + " — no alerts or board loads from them"); B.items = B.items.filter(x => x.company !== it.company || !B.hideBlk); closeLoad(); }
+      catch(e){ toast(String(e.message || "Not done - try again")); }
+    }; }
+    // dock
+    $("ldCallTxt").textContent = it.phone ? "Call " + it.phone : (it.url ? "Open on " + (SN[it.site]||"site") : "No phone");
+    $("ldCall").onclick = async () => {
+      if(it.callUrl) return openUrl(it.callUrl);
+      if(it.phone){ const ok = await copyText(it.phone); toast(ok ? "Phone copied: " + it.phone : it.phone); return; }
+      if(it.url) openUrl(it.url);
+    };
+    $("ldSms").style.display = it.sms ? "" : "none";
+    $("ldSms").onclick = async () => { const ok = await copyText(it.sms); toast(ok ? "SMS text copied" : "Copy did not work here"); };
+    $("ldOpen").style.display = it.url && it.phone ? "" : "none";   // no phone: the big button itself opens the load
+    $("ldOpen").onclick = () => openUrl(it.url);
+    $("ldSave").classList.remove("done");
+    $("ldSave").onclick = async () => {
+      try { const j = await pcApi("/api/miniapp/board/action", { k: it.k, act: "save" }); if(!j.ok) throw new Error(j.error); $("ldSave").classList.add("done"); toast("⭐ Saved — find it in Saved"); }
+      catch(e){ toast(String(e.message || "Not saved - try again")); }
+    };
+    switchTab("load");
+  }
+  function closeLoad(){ B.openK = null; switchTab("board"); renderList(); window.scrollTo(0, B.scrollY || 0); }
+
+  // ---------- filter sheet ----------
+  const STATES = Object.values(STATE_NAME_TO_ABBR);
+  function placesHtml(list, k){
+    return list.map((p,i) => '<span class="bdPlace">' + (p.st ? "Whole " + E(p.st) : E(p.c + ", " + p.stc) + ' <input inputmode="numeric" data-k="' + k + '" data-i="' + i + '" value="' + (p.r || 50) + '" aria-label="radius, miles">mi') + '<button type="button" data-k="' + k + '" data-i="' + i + '" aria-label="remove">×</button></span>').join("");
+  }
+  function sheetPaint(){
+    $("bdFromList").innerHTML = placesHtml(B.tmp.from, "from"); $("bdToList").innerHTML = placesHtml(B.tmp.to, "to");
+    document.querySelectorAll(".bdPlace button").forEach(b => b.onclick = () => { B.tmp[b.dataset.k].splice(+b.dataset.i, 1); sheetPaint(); });
+    document.querySelectorAll(".bdPlace input").forEach(inp => inp.onchange = () => { const v = Math.max(5, Math.min(500, parseInt(inp.value, 10) || 50)); inp.value = v; B.tmp[inp.dataset.k][+inp.dataset.i].r = v; });
+    document.querySelectorAll("#bdTr button").forEach(b => b.classList.toggle("on", b.dataset.v === B.tmp.tr));
+    document.querySelectorAll("#bdVs button").forEach(b => b.classList.toggle("on", b.dataset.v === B.tmp.vs));
+    $("bdHideBlk").classList.toggle("on", !!B.tmp.hideBlk);
+  }
+  function wireCity(inId, sugId, k){
+    const inp = $(inId), sug = $(sugId);
+    const pick = p => { if(B.tmp[k].length >= 10) return toast("Up to 10 places"); if(p.st){ if(!B.tmp[k].some(x => x.st === p.st)) B.tmp[k].push({ st:p.st }); } else if(!B.tmp[k].some(x => x.c === p.c && x.stc === p.stc)) B.tmp[k].push({ c:p.c, stc:p.stc, r:50 }); inp.value = ""; sug.style.display = "none"; sheetPaint(); };
+    inp.oninput = async () => {
+      const q = inp.value.trim(); if(!q){ sug.style.display = "none"; return; }
+      const opts = [];
+      const up = q.toUpperCase();
+      if(/^[A-Za-z]{2}$/.test(q) && STATES.includes(up)) opts.push({ st: up, label: "Whole state: " + up });
+      const nm = STATE_NAME_TO_ABBR[q.toLowerCase()]; if(nm && !opts.length) opts.push({ st: nm, label: "Whole state: " + nm });
+      try { const r = await findCities(q); (r.opts || []).slice(0, 6).forEach(o => opts.push({ c:o.c, stc:o.stc, label: o.c + ", " + o.stc + (o.zip ? " " + o.zip : "") })); } catch(e){}
+      if(inp.value.trim() !== q) return;
+      sug.innerHTML = opts.length ? opts.map((o,i) => '<div data-i="' + i + '">' + E(o.label) + '</div>').join("") : '<div style="color:var(--text3)">Nothing found - try “City, ST” or a ZIP</div>';
+      sug.style.display = "block";
+      sug.querySelectorAll("div[data-i]").forEach(d => d.onclick = () => pick(opts[+d.dataset.i]));
+    };
+  }
+  function openSheet(){
+    B.tmp = { from: B.f.from.map(p => Object.assign({}, p)), to: B.f.to.map(p => Object.assign({}, p)), tr: B.f.tr, vs: B.f.vs, hideBlk: B.hideBlk };
+    $("bdRpm").value = B.f.pm || ""; $("bdPay").value = B.f.p || ""; $("bdFromIn").value = ""; $("bdToIn").value = "";
+    $("bdFromSug").style.display = "none"; $("bdToSug").style.display = "none";
+    sheetPaint(); $("bdSheetBg").classList.add("on");
+  }
+  function closeSheet(){ $("bdSheetBg").classList.remove("on"); }
+  function takeSheet(){
+    B.f = { from: B.tmp.from, to: B.tmp.to, tr: B.tmp.tr, vs: B.tmp.vs,
+      pm: Math.max(0, Math.min(50, Math.round((parseFloat($("bdRpm").value) || 0) * 100) / 100)), p: Math.max(0, Math.min(999999, parseInt($("bdPay").value, 10) || 0)) };
+    B.hideBlk = !!B.tmp.hideBlk; keep();
+  }
+
+  // ---------- 📈 market ----------
+  let MK = { site: "all", lanes: "today" };
+  async function loadMarket(){
+    const box = $("mkBody");
+    const chips = [["all","All"]].concat(SITE_ORDER.map(s => [s, SN[s]]));
+    $("mkSites").innerHTML = chips.map(([s,l]) => '<button type="button" class="bdChip' + (MK.site === s ? " on" : "") + '" data-s="' + s + '">' + l + '</button>').join("");
+    $("mkSites").querySelectorAll(".bdChip").forEach(b => b.onclick = () => { MK.site = b.dataset.s; loadMarket(); });
+    if(!(tg && tg.initData)){ box.innerHTML = '<div class="muted">Open this app from the bot chat to see market stats.</div>'; return; }
+    try{
+      const j = await pcApi("/api/miniapp/market", { site: MK.site, lanes: MK.lanes });
+      if(!j.ok) throw new Error(j.error);
+      const T = j.today || {}, Y = j.yesterdaySameTime || {};
+      const vs = T.n != null && Y.n ? Math.round((T.n - Y.n) / Y.n * 100) : null;
+      const ser = j.series || [], mx = Math.max(1, ...ser.map(s => s.n || 0));
+      const lane = l => { const [a,b] = String(l.lane).split("-"); return '<div class="mkLane"><b>' + E(a) + ' → ' + E(b) + '</b><span>' + l.n + ' loads' + (l.miles ? " · " + l.miles + " mi" : "") + '</span><em>' + (l.rate ? "$" + Number(l.rate).toFixed(2) : "—") + '</em></div>'; };
+      box.innerHTML =
+        '<div class="mkTiles"><div class="mkTile"><b>' + (T.n || 0).toLocaleString("en-US") + '</b><span>loads today</span></div>' +
+        '<div class="mkTile"><b>' + (T.rate ? "$" + Number(T.rate).toFixed(2) : "—") + '</b><span>avg per mile</span></div>' +
+        '<div class="mkTile"><b>' + (vs == null ? "—" : '<em style="color:var(' + (vs >= 0 ? "--success" : "--danger") + ')">' + (vs >= 0 ? "+" : "−") + Math.abs(vs) + "%</em>") + '</b><span>vs yesterday</span></div></div>' +
+        '<div class="mkChart"><div class="mkBars">' + ser.map(s => '<div class="' + (s.n == null ? "off" : "") + '" style="height:' + Math.round(((s.n || 0) / mx) * 100) + '%" title="' + E(s.label + ": " + (s.n == null ? "no data" : s.n + " loads")) + '"></div>').join("") + '</div>' +
+          '<div class="mkAx"><span>' + E((ser[0]||{}).label || "") + '</span><span>new loads per hour, last 24 h</span><span>now</span></div></div>' +
+        '<div class="bdRow" style="margin-top:12px"><div class="bdSeg" id="mkLanes">' + [["today","Today"],["yesterday","Yesterday"],["7d","7 days"]].map(([v,l]) => '<button type="button" data-v="' + v + '" class="' + (MK.lanes === v ? "on" : "") + '">' + l + '</button>').join("") + '</div></div>' +
+        '<div class="mSect">Busiest lanes</div><div class="mkList">' + ((j.busiest || []).map(lane).join("") || '<div class="mkLane"><span>No data yet</span></div>') + '</div>' +
+        '<div class="mSect">Best $/mi (200+ mi)</div><div class="mkList">' + ((j.bestPaying || []).map(lane).join("") || '<div class="mkLane"><span>Not enough loads yet</span></div>') + '</div>';
+      box.querySelectorAll("#mkLanes button").forEach(b => b.onclick = () => { MK.lanes = b.dataset.v; loadMarket(); });
+    }catch(e){ box.innerHTML = '<div class="warn">Couldn\'t reach the office computer right now. Try again in a minute.</div>'; }
+  }
+
+  // ---------- wiring ----------
+  function init(){
+    if(!$("tab-board")) return;
+    $("bdFilterBtn").onclick = openSheet;
+    $("bdRefresh").onclick = () => load(true);
+    $("bdMore").onclick = () => load(false);
+    document.querySelectorAll("#bdSort button").forEach(b => { b.classList.toggle("on", b.dataset.s === B.sort); b.onclick = () => { B.sort = b.dataset.s; keep(); document.querySelectorAll("#bdSort button").forEach(x => x.classList.toggle("on", x === b)); load(true); }; });
+    $("bdSheetBg").onclick = e => { if(e.target === $("bdSheetBg")) closeSheet(); };
+    document.querySelectorAll("#bdTr button").forEach(b => b.onclick = () => { B.tmp.tr = b.dataset.v; sheetPaint(); });
+    document.querySelectorAll("#bdVs button").forEach(b => b.onclick = () => { B.tmp.vs = b.dataset.v; sheetPaint(); });
+    $("bdHideBlk").onclick = () => { B.tmp.hideBlk = !B.tmp.hideBlk; sheetPaint(); };
+    $("bdClear").onclick = () => { B.tmp = { from:[], to:[], tr:"any", vs:"any", hideBlk:true }; $("bdRpm").value = ""; $("bdPay").value = ""; sheetPaint(); };
+    $("bdApply").onclick = () => { takeSheet(); closeSheet(); load(true); };
+    $("bdAsSearch").onclick = () => {
+      takeSheet(); closeSheet();
+      if(!B.f.from.length || !B.f.to.length){ toast("Add a pickup and a delivery first (a state or a city)"); openSheet(); return; }
+      newSearch();
+      state.sites = B.site ? [B.site] : ["cd","sd"];
+      state.from = B.f.from.map(p => Object.assign({}, p)); state.to = B.f.to.map(p => Object.assign({}, p));
+      state.trailer = B.f.tr; state.status = B.f.vs;
+      $("pay").value = B.f.p || 0; $("rpm").value = B.f.pm || 0;
+      render(); updateSaveSummary(); switchTab("search"); showBuilder();
+      toast("Check the platforms and tap Save");
+    };
+    wireCity("bdFromIn", "bdFromSug", "from"); wireCity("bdToIn", "bdToSug", "to");
+    document.querySelectorAll("[data-back]").forEach(b => b.onclick = () => switchTab(b.dataset.back));
+    renderList(); tick();
+  }
+  window.hhBoard = {
+    onTab(name){
+      $("ldDock").classList.toggle("on", name === "load");
+      if(name === "board" && !B.loaded && !B.loading) load(true);
+      if(name === "market") loadMarket();
+    },
+    load, _B: B,
+  };
+  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
 })();
 </script>
 </body>
