@@ -770,6 +770,8 @@
   .fab{bottom:calc(70px + env(safe-area-inset-bottom,0px) * .6)}
   /* Telegram on Mac / PC / web: the whole app ~14% smaller (phones unchanged) */
   html.desk{zoom:.86}
+  /* (2026-11-08 owner "1") ...but the search cards keep their size as before (name, route, filter chips, stats): 1/.86 */
+  html.desk .scard{zoom:1.1628}
 </style>
 </head>
 <body>
