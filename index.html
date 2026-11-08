@@ -1730,6 +1730,7 @@ async function save(andStart){
     if(r && r.ok){
       toast(andStart === true ? "Saved and started!" : editingId ? "Saved! Updating your search..." : "Saved! Starting your search...");
       if(wasNew){ pendingNew.push({ payload, name: nm, sites: sitesNow, ts: Date.now(), known }); savePendingNew(); }
+      else overrideSet(body.id, Object.assign({ edit: { payload, name: nm, sites: sitesNow } }, andStart === true ? { active: true } : {}));
       showList();
       rerenderMySearches();
       // a brand-new search needs a moment to reach the userscript and get pushed back up - poll a
@@ -2017,7 +2018,9 @@ function openPauseModal(s, onDone){
     b.onclick = async ()=>{
       closePauseModal();
       toast("Pausing...");
-      await apiAction({ type: "pause-search", id: s.id, hours });
+      if(s.id !== "all"){ overrideSet(s.id, { paused: Date.now() + hours * 3600e3 }); rerenderMySearches(); }
+      const r = await apiAction({ type: "pause-search", id: s.id, hours });
+      if(!r || !r.ok){ if(searchOverrides[s.id]) { delete searchOverrides[s.id].paused; saveOverrides(); } toast("Could not pause"); rerenderMySearches(); }
       if(onDone) onDone();
     };
     opts.appendChild(b);
@@ -2038,7 +2041,9 @@ function makePauseBtn(s, onDone){
     e.stopPropagation();
     if(isPaused){
       toast("Resuming...");
-      await apiAction({ type: "resume-search", id: s.id });
+      overrideSet(s.id, { paused: 0 }); rerenderMySearches();
+      const r = await apiAction({ type: "resume-search", id: s.id });
+      if(!r || !r.ok){ if(searchOverrides[s.id]) { delete searchOverrides[s.id].paused; saveOverrides(); } toast("Could not resume"); rerenderMySearches(); }
       if(onDone) onDone();
     } else {
       openPauseModal(s, onDone);
@@ -2060,6 +2065,7 @@ let lastSearches = {};
 // at most 3 min, and kept over closing / reopening (localStorage).
 const searchOverrides = (()=>{ try{ return JSON.parse(localStorage.getItem("searchOverrides") || "{}") || {}; }catch(e){ return {}; } })();
 const OVERRIDE_TTL = 180000;
+function overrideSet(id, part){ searchOverrides[id] = Object.assign({}, searchOverrides[id], part, { ts: Date.now() }); saveOverrides(); }
 function saveOverrides(){ try{ localStorage.setItem("searchOverrides", JSON.stringify(searchOverrides)); }catch(e){} }
 
 function applyOverrides(list){
@@ -2071,16 +2077,30 @@ function applyOverrides(list){
     else if(searchOverrides[id].deleted && list.length && !inList.has(id)) delete searchOverrides[id];   // the bot has deleted it - done
   });
   if(JSON.stringify(searchOverrides) !== before) saveOverrides();
-  return list.map(s=>{
+  let changed = false;
+  const out = list.map(s=>{
     const o = searchOverrides[s.id];
     if(!o) return s;
     if(o.deleted) return null;
+    let r = s;
     if('active' in o){
-      if(o.active === s.active) { delete searchOverrides[s.id]; saveOverrides(); return s; }   // server caught up - override no longer needed
-      return { ...s, active: o.active, online: o.active, running: o.active };   // (2026-11-08 owner) switched on = shown working at once
+      if(o.active === s.active) { delete o.active; changed = true; }   // server caught up
+      else r = { ...r, active: o.active, online: o.active, running: o.active };   // (2026-11-08 owner) switched on = shown working at once
     }
-    return s;
+    if('paused' in o){   // (2026-11-08) pause / resume shown at once
+      const want = o.paused > now, has = !!(s.pausedUntil && s.pausedUntil > now);
+      if(want === has) { delete o.paused; changed = true; }
+      else { r = { ...r, pausedUntil: want ? o.paused : 0 }; }
+    }
+    if(o.edit){   // (2026-11-08) an edit shown at once (name / filters / platforms)
+      if(s.payload === o.edit.payload && (!o.edit.name || s.name === o.edit.name)) { delete o.edit; changed = true; }
+      else r = { ...r, payload: o.edit.payload, name: o.edit.name || r.name, sites: o.edit.sites || r.sites };
+    }
+    if(!('active' in o) && !('paused' in o) && !o.edit && !o.deleted) { delete searchOverrides[s.id]; changed = true; }
+    return r;
   }).filter(Boolean);
+  if(changed) saveOverrides();
+  return out;
 }
 // (2026-11-08, owner) a NEW search shows at once as "⏳ Saving…" - the way to the bot (Worker queue) takes ~3-35 s. It goes away when
 // the bot's list has a new search with the same filters; after 2 min without it: a note to check the bot's message in Telegram
@@ -2270,13 +2290,17 @@ function escapeHtml(s){
 // The list comes from the bot (via the Worker); changes go back as actions and the bot applies them within
 // a few seconds. Until the bot's next update arrives, pending changes are shown right away (optimistic).
 let blockedLast = [];
-const blockedPendingRemove = {};   // hid -> time tapped
-const blockedPendingAdd = {};      // lower-case name -> { name, t }
+// (2026-11-08) kept over closing the Mini App and up to 3 min (the way to the bot takes ~3-35 s); a new block looks done at once
+const blockedPendingRemove = (()=>{ try{ return JSON.parse(localStorage.getItem("blkRemove") || "{}") || {}; }catch(e){ return {}; } })();   // hid -> time tapped
+const blockedPendingAdd = (()=>{ try{ return JSON.parse(localStorage.getItem("blkAdd") || "{}") || {}; }catch(e){ return {}; } })();         // lower-case name -> { name, t }
+function saveBlkPending(){ try{ localStorage.setItem("blkRemove", JSON.stringify(blockedPendingRemove)); localStorage.setItem("blkAdd", JSON.stringify(blockedPendingAdd)); }catch(e){} }
 function renderBlocked(list){
   blockedLast = Array.isArray(list) ? list : [];
   const now = Date.now();
-  for (const k of Object.keys(blockedPendingRemove)) if (now - blockedPendingRemove[k] > 60000 || !blockedLast.some(x => x.hid === k)) delete blockedPendingRemove[k];
-  for (const k of Object.keys(blockedPendingAdd)) if (now - blockedPendingAdd[k].t > 60000 || blockedLast.some(x => String(x.name).toLowerCase() === k)) delete blockedPendingAdd[k];
+  const haveList = Array.isArray(list);
+  for (const k of Object.keys(blockedPendingRemove)) if (now - blockedPendingRemove[k] > 180000 || (haveList && blockedLast.length && !blockedLast.some(x => x.hid === k))) delete blockedPendingRemove[k];
+  for (const k of Object.keys(blockedPendingAdd)) if (now - blockedPendingAdd[k].t > 180000 || blockedLast.some(x => String(x.name).toLowerCase() === k)) delete blockedPendingAdd[k];
+  saveBlkPending();
   const shown = blockedLast.filter(x => !blockedPendingRemove[x.hid]);
   const adding = Object.values(blockedPendingAdd);
   const box = document.getElementById("blockedList");
@@ -2284,7 +2308,9 @@ function renderBlocked(list){
   box.innerHTML = "";
   adding.forEach(a => {
     const row = document.createElement("div"); row.className = "blkRow";
-    row.innerHTML = '<div class="name">' + escapeHtml(a.name) + ' <span class="zip">saving...</span></div>';
+    const d = new Date(a.t);
+    row.innerHTML = '<div class="name">' + escapeHtml(a.name) + ' <span class="zip">· ' + (d.getMonth()+1) + '/' + d.getDate() + '</span></div>';
+    const b = document.createElement("button"); b.className = "ghostBtn"; b.textContent = "Unblock"; b.onclick = () => toast("One moment…"); row.appendChild(b);
     box.appendChild(row);
   });
   shown.forEach(x => {
@@ -2299,7 +2325,7 @@ function renderBlocked(list){
   });
 }
 async function unblockCompany(hid, name){
-  blockedPendingRemove[hid] = Date.now();
+  blockedPendingRemove[hid] = Date.now(); saveBlkPending();
   renderBlocked(blockedLast);
   const r = await apiAction({ type: "unblock-company", hid });
   if (r && r.ok) toast("Unblocked: " + name);
@@ -2309,7 +2335,7 @@ async function blockCompanyByName(){
   const el = document.getElementById("blockInput");
   const name = el.value.trim();
   if (name.length < 2) { toast("Type the company name"); return; }
-  blockedPendingAdd[name.toLowerCase()] = { name, t: Date.now() };
+  blockedPendingAdd[name.toLowerCase()] = { name, t: Date.now() }; saveBlkPending();
   el.value = "";
   renderBlocked(blockedLast);
   const r = await apiAction({ type: "block-company", name });
@@ -2450,6 +2476,7 @@ document.getElementById("pauseAllBtn").onclick = ()=>{
   if(!running.length && pausedOnes.length){
     if(!confirm("Resume all paused searches now?")) return;
     toast("Resuming...");
+    pausedOnes.forEach(s => overrideSet(s.id, { paused: 0 })); rerenderMySearches();
     Promise.all(pausedOnes.map(s => apiAction({ type: "resume-search", id: s.id }))).then(rerenderMySearches);
     return;
   }
@@ -2460,6 +2487,7 @@ document.getElementById("pauseAllBtn").onclick = ()=>{
     const hours = [1,2,4,8,24][i];
     b.onclick = async ()=>{
       closePauseModal(); toast("Pausing...");
+      running.forEach(s => overrideSet(s.id, { paused: Date.now() + hours * 3600e3 })); rerenderMySearches();
       await Promise.all(running.map(s => apiAction({ type: "pause-search", id: s.id, hours })));
       rerenderMySearches();
     };
