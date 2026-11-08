@@ -585,7 +585,7 @@
   .cardPrev svg{position:absolute;left:0;top:0}
 
   /* ===================== 2026-11-08 📋 Board, 📈 Market, new More, raised tab bar (owner "так" on the mockup) ===================== */
-  :root{--cdc:#4f8cff;--sdc:#8f74ff;--acc:#16b3a3;--asc:#e39b1f;--v2c:#c9a227}
+  :root{--cdc:#4f8cff;--sdc:#8f74ff;--acc:#16b3a3;--asc:#e39b1f;--v2c:#c9a227;--shc:#2fa36b}
   body{padding-bottom:190px}
   /* tab bar: a bit higher, the open tab in an accent "pill" */
   .tabbar{background:var(--card);border-top:1px solid var(--line);box-shadow:none;padding:8px 4px calc(8px + env(safe-area-inset-bottom,0px) * .6);gap:0}
@@ -654,6 +654,7 @@
   .bdSrc{font-size:11px;font-weight:700;padding:3px 7px;border-radius:7px;letter-spacing:.02em;background:var(--accent-tint)}
   .bdSrc.cd{color:var(--cdc);background:rgba(79,140,255,.13)}.bdSrc.sd{color:var(--sdc);background:rgba(143,116,255,.14)}
   .bdSrc.ac{color:var(--acc);background:rgba(22,179,163,.14)}.bdSrc.as{color:var(--asc);background:rgba(227,155,31,.14)}.bdSrc.v2{color:var(--v2c);background:rgba(201,162,39,.15)}
+  .bdSrc.ship{color:var(--shc);background:rgba(47,163,107,.14)}
   .bdAgo{font-size:12px;color:var(--text4)}
   .bdDeal{font-size:11px;font-weight:700;padding:3px 7px;border-radius:7px;background:var(--success-bg);color:var(--success)}
   .bdDeal.lo{background:var(--danger-bg);color:var(--danger)}
@@ -3181,8 +3182,9 @@ setInterval(refreshBackendState, 2000);
 (function(){
   const $ = id => document.getElementById(id);
   const E = s => escapeHtml(s);
-  const SN = { cd:"Central", sd:"Super", ac:"ACV", as:"Autosled", v2:"V2" };
-  const SITE_ORDER = ["cd","sd","ac","as","v2"];
+  const SN = { cd:"Central", sd:"Super", ship:"Ship.Cars", ac:"ACV", as:"Autosled", v2:"V2" };
+  const SITE_ORDER = ["cd","sd","ship","ac","as","v2"];   // (2026-11-08) + Ship.Cars on the Board
+  const MARKET_ORDER = ["cd","sd","ac","as","v2"];   // Market stats: no Ship.Cars data yet
   const OLD_MS = 2 * 3600000;   // older than this: greyed, "may be taken" (the bot can't see when a load is taken - owner 08.11)
   const SINCE = [[60,"last 1 h"],[180,"last 3 h"],[1440,"last 24 h"]];
   const LS = "hhBoardV1";
@@ -3274,7 +3276,7 @@ setInterval(refreshBackendState, 2000);
     const it = curItem(); if(!it) return;
     const old = it.ago > OLD_MS;
     const tiles = [[it.rate ? "$" + it.rate.toFixed(2) : "—", "per mile"], [it.miles ? (it.milesApprox ? "~" : "") + Number(it.miles).toLocaleString("en-US") : "—", "miles"], [(it.cars||1) + (it.cars === 1 ? " car" : " cars"), it.trailer || "—"]];
-    const coName = it.company || (it.site === "ac" ? "ACV Transport" : it.site === "as" ? "Autosled" : it.site === "v2" ? "Shipper not shown on V2" : "Company hidden by the shipper");
+    const coName = it.company || (it.site === "ac" ? "ACV Transport" : it.site === "as" ? "Autosled" : it.site === "v2" ? "Shipper not shown on V2" : it.site === "ship" && it.hidCo ? "Company hidden by Ship.Cars (~30 min)" : "Company hidden by the shipper");
     const coSub = [it.rating ? "★ " + String(it.rating).split(" ")[0] : "", it.payment].filter(Boolean).join(" · ");
     const lid = it.loadId ? '<button type="button" class="ldLid" id="ldLid"><span>LOAD ID</span><b>' + E(it.loadId) + '</b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2"/></svg></button>' : '';
     const dealShort = it.deal ? (it.deal.pct >= 3 ? '<div class="ldDeal">▲ ' + it.deal.pct + '% vs lane</div>' : it.deal.pct <= -3 ? '<div class="ldDeal lo">▼ ' + Math.abs(it.deal.pct) + '% vs lane</div>' : '<div class="ldDeal mid">≈ lane average</div>') : '';
@@ -3369,7 +3371,7 @@ setInterval(refreshBackendState, 2000);
   let MK = { site: "all", lanes: "today" };
   async function loadMarket(){
     const box = $("mkBody");
-    const chips = [["all","All"]].concat(SITE_ORDER.map(s => [s, SN[s]]));
+    const chips = [["all","All"]].concat(MARKET_ORDER.map(s => [s, SN[s]]));
     $("mkSites").innerHTML = chips.map(([s,l]) => '<button type="button" class="bdChip' + (MK.site === s ? " on" : "") + '" data-s="' + s + '">' + l + '</button>').join("");
     $("mkSites").querySelectorAll(".bdChip").forEach(b => b.onclick = () => { MK.site = b.dataset.s; loadMarket(); });
     if(!(tg && tg.initData)){ box.innerHTML = '<div class="muted">Open this app from the bot chat to see market stats.</div>'; return; }
