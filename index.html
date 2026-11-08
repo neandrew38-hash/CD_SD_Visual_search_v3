@@ -613,6 +613,11 @@
   .menuRow .mTxt small{font-size:12px;font-weight:500;color:var(--text3)}
   .mNew{display:inline-block;font-size:9.5px;font-weight:700;letter-spacing:.04em;padding:2px 6px;border-radius:5px;background:var(--accent);color:var(--on-accent,#1a0f0a);margin-left:6px;vertical-align:2px}
 
+  .mHero{cursor:pointer}
+  .mHero:active{transform:scale(.99)}
+  .mHero .mhChev{width:16px;height:16px;color:var(--text4);flex:none;margin-left:2px}
+  .mHero .mhPill.trial{background:var(--accent-tint);color:var(--accent)}
+  .mHero .mhPill.plans{background:var(--accent);color:var(--on-accent,#1a0f0a)}
   /* Board list */
   .bdHead{display:flex;align-items:center;justify-content:space-between;margin:4px 0 10px}
   .bdHead .iconBtn{position:relative}
@@ -981,8 +986,7 @@
 <!-- ======================= SAVED LOADS (⭐ Save under an alert; read from the office computer) ======================= -->
 <div class="tabpane" id="tab-more">
   <div class="listHead"><div><div class="pageTitle">More</div></div></div>
-  <div class="mHero"><span class="mhIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5z"/></svg></span><div><b>HaulHawk</b><span>Board and alerts — all load boards</span></div><span class="mhPill">Free</span></div>
-  <div class="menuRow" id="subscriptionRow" style="display:none"><span class="mIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M3 10h18"/><path d="M7 15h3"/></svg></span><span class="mTxt">Subscription</span><span class="mVal">Plans</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
+  <div class="mHero" id="subscriptionRow" role="button" tabindex="0"><span class="mhIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M3 10h18"/><path d="M7 15h3"/></svg></span><div><b>Subscription</b><span id="subSub">Plans and payment</span></div><span class="mhPill" id="subPill">Plans</span><svg class="mhChev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
   <div class="mSect">Alerts</div>
   <div class="menuList">
     <div class="menuRow" data-go="style"><span class="mIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4" width="17" height="16" rx="2.5"/><path d="M7 9h10M7 13h6"/><circle cx="16.5" cy="15.5" r="1.6"/></svg></span><span class="mTxt">Alert style<small>What an alert in the chat shows</small></span><span class="mVal" id="styleVal"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
@@ -3387,6 +3391,29 @@ setInterval(refreshBackendState, 2000);
     load, _B: B,
   };
   if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
+})();
+</script>
+<script>
+// (2026-11-08) More → the Subscription card shows the person's plan (same /api/miniapp/access the plans sheet reads)
+(function(){
+  function fd(ms){ try { return new Date(ms).toLocaleDateString("en-US",{month:"short",day:"numeric"}); } catch(e){ return ""; } }
+  function paint(a){
+    var sub = document.getElementById("subSub"), pill = document.getElementById("subPill"); if(!sub || !pill) return;
+    pill.className = "mhPill";
+    if(a && a.kind === "unlimited"){ sub.textContent = "Unlimited access"; pill.textContent = "Active"; }
+    else if(a && a.kind === "paid"){ sub.textContent = "Active until " + fd(a.until) + (a.renews ? " · renews" : ""); pill.textContent = "Active"; }
+    else if(a && a.kind === "trial"){ var d = Math.max(0, Math.ceil((a.until - Date.now()) / 86400000)); sub.textContent = "Free trial until " + fd(a.until); pill.textContent = d + (d === 1 ? " day left" : " days left"); pill.classList.add("trial"); }
+    else { sub.textContent = "Plans and payment"; pill.textContent = "Plans"; pill.classList.add("plans"); }
+  }
+  var busy = false, at = 0;
+  function load(){
+    if(busy || Date.now() - at < 60000 || typeof pcApi !== "function" || !(tg && tg.initData)) return;
+    busy = true;
+    pcApi("/api/miniapp/access").then(function(j){ at = Date.now(); paint((j && j.ok && j.access) || null); }).catch(function(){}).then(function(){ busy = false; });
+  }
+  paint(null);
+  var b = document.querySelector('.tabbtn[data-tab="more"]'); if(b) b.addEventListener("click", load);
+  window.hhSubPaint = paint;
 })();
 </script>
 </body>
