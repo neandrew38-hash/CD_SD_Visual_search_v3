@@ -624,6 +624,10 @@
   #tab-more.hhIn .menuList .menuRow{animation-name:hhRowIn2}
   @keyframes hhRowIn2{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
   @media (prefers-reduced-motion: reduce){#tab-more.hhIn .mHero,#tab-more.hhIn .mSect,#tab-more.hhIn .menuList,#tab-more.hhIn .menuRow{animation:none}}
+  /* (2026-11-09 owner) every screen of the Mini App: its rows come in one after another WHEN THE SCREEN OPENS (~0.5 s).
+     Auto-refreshes (searches every 2 s, Board every 20 s) build new rows without .hhA - nothing blinks. */
+  .hhA{animation:hhRowIn .32s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--i,0) * 38ms)}
+  @media (prefers-reduced-motion: reduce){.hhA{animation:none}}
   /* Board list */
   .bdHead{display:flex;align-items:center;justify-content:space-between;margin:4px 0 10px}
   .bdHead .iconBtn{position:relative}
@@ -655,6 +659,24 @@
   .bdSrc.cd{color:var(--cdc);background:rgba(79,140,255,.13)}.bdSrc.sd{color:var(--sdc);background:rgba(143,116,255,.14)}
   .bdSrc.ac{color:var(--acc);background:rgba(22,179,163,.14)}.bdSrc.as{color:var(--asc);background:rgba(227,155,31,.14)}.bdSrc.v2{color:var(--v2c);background:rgba(201,162,39,.15)}
   .bdSrc.ship{color:var(--shc);background:rgba(47,163,107,.14)}
+  /* (2026-11-08 owner) rating its own badge (was cut off at the end of the company name); Map above the route line; time 1h/3h/24h; my search; stale */
+  .bdRate{font-size:11px;font-weight:700;padding:3px 7px;border-radius:7px;background:var(--success-bg);color:var(--success);white-space:nowrap}
+  .ldMap{z-index:2}
+  /* (2026-11-09 owner: less space) sort + hours in one row, refresh up next to filters */
+  .bdHBtns{display:flex;gap:6px}
+  .bdRowC{justify-content:space-between}
+  .bdRowC .bdSegC{flex:0 0 auto}
+  .bdRowC .bdSegC button{flex:0 0 auto;padding:0 11px;height:30px}
+  .bdMineTag{display:inline-flex;align-items:center;gap:4px;border:0;border-radius:999px;padding:2px 9px;background:var(--accent-tint);color:var(--accent);font-family:-apple-system,Segoe UI,Roboto,sans-serif;font-size:12px;font-weight:700;cursor:pointer}
+  .bdMine{width:100%;height:42px;margin:0;border-radius:11px;border:1px solid var(--line);background:var(--card);color:var(--fg);font:inherit;font-size:13.5px;font-weight:600;padding:0 10px}
+  .bdMine.on{border-color:var(--accent);color:var(--accent)}
+  .bdChip .stDot{width:7px;height:7px;border-radius:50%;background:#E0A100;display:inline-block}
+  .bdLock{text-align:center;padding:28px 14px;background:var(--card);border:1px solid var(--line);border-radius:16px;margin-top:10px}
+  .bdLock b{display:block;font-size:16px}.bdLock span{display:block;margin-top:6px;color:var(--text3);font-size:13px;line-height:1.45}
+  .bdLock button{margin-top:14px;height:42px;padding:0 20px;border:0;border-radius:12px;background:var(--accent);color:var(--on-accent,#1a0f0a);font:inherit;font-weight:700;cursor:pointer}
+  .tagRow code{cursor:pointer}
+  .tplPrevLbl{margin:12px 2px 6px;font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--text4);text-transform:uppercase}
+  .tplPrev{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:14px;line-height:1.45;white-space:pre-wrap;word-break:break-word}
   .bdAgo{font-size:12px;color:var(--text4)}
   .bdDeal{font-size:11px;font-weight:700;padding:3px 7px;border-radius:7px;background:var(--success-bg);color:var(--success)}
   .bdDeal.lo{background:var(--danger-bg);color:var(--danger)}
@@ -1037,7 +1059,7 @@
   </div>
   <div class="mSect">Market</div>
   <div class="menuList">
-    <div class="menuRow" data-go="market"><span class="mIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg></span><span class="mTxt"><span>Market stats<span class="mNew">NEW</span></span><small>Loads and $/mi by hour and lane</small></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
+    <div class="menuRow" data-go="market"><span class="mIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg></span><span class="mTxt"><span>Market stats</span><small>Loads and $/mi by hour and lane</small></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
   </div>
   <div class="mSect">Help</div>
   <div class="menuList">
@@ -1051,12 +1073,12 @@
 <div class="tabpane" id="tab-board">
   <div class="bdHead">
     <div><div class="pageTitle">Board</div></div>
-    <button type="button" class="iconBtn" id="bdFilterBtn" aria-label="Filters" title="Filters"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg><span class="bdDot" id="bdFDot"></span></button>
+    <div class="bdHBtns"><button type="button" class="iconBtn" id="bdRefresh" aria-label="Refresh" title="Refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M20 11a8 8 0 10-2.3 5.7M20 5v6h-6"/></svg></button><button type="button" class="iconBtn" id="bdFilterBtn" aria-label="Filters" title="Filters"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg><span class="bdDot" id="bdFDot"></span></button></div>
   </div>
   <div class="bdChips" id="bdSites"></div>
-  <div class="bdRow">
-    <div class="bdSeg" id="bdSort"><button type="button" data-s="new" class="on">Newest</button><button type="button" data-s="price">Price</button><button type="button" data-s="rate">$/mi</button></div>
-    <button type="button" class="iconBtn" id="bdRefresh" aria-label="Refresh" title="Refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M20 11a8 8 0 10-2.3 5.7M20 5v6h-6"/></svg></button>
+  <div class="bdRow bdRowC" id="bdRowC">
+    <div class="bdSeg bdSegC" id="bdSort"><button type="button" data-s="new" class="on">Newest</button><button type="button" data-s="price">Price</button><button type="button" data-s="rate">$/mi</button></div>
+    <div class="bdSeg bdSegC" id="bdTime"><button type="button" data-v="60">1h</button><button type="button" data-v="180">3h</button><button type="button" data-v="1440">24h</button></div>
   </div>
   <div class="bdLive" id="bdLive"><span class="lvDot off"></span><span>Loading…</span></div>
   <div id="bdList"></div>
@@ -1078,6 +1100,8 @@
   <div class="bdSheet" id="bdSheet">
     <div class="bdGrab"></div>
     <div class="bdShTop"><b>Filters</b><button type="button" id="bdClear">Clear</button></div>
+    <div class="bdLbl" id="bdMineLbl">My search</div>
+    <select class="bdMine" id="bdMine" aria-label="Show loads for one of my searches"><option value="">All loads · my filters</option></select>
     <div class="bdLbl">Pickup</div>
     <input class="bdIn" id="bdFromIn" placeholder="City, ZIP or state (TX)" autocomplete="off">
     <div class="bdSug" id="bdFromSug"></div>
@@ -1123,7 +1147,9 @@
   <div class="listHead"><div><div class="pageTitle">SMS template</div><div class="pageSub">The message 📋 SMS copies under an alert. Only yours.</div></div></div>
   <textarea class="field" id="tplText" placeholder="Loading..."></textarea>
   <div id="tplCount" class="tiny" style="text-align:right;margin:4px 2px 0;opacity:.6">0 / 256</div>
-  <div class="tagRow"><span class="tiny">Tags:</span><code>{vehicle}</code><code>{origin}</code><code>{dest}</code><code>{price}</code><code>{company}</code><code>{loadId}</code><code>{pickup}</code></div>
+  <div class="tagRow" id="tplTags"><span class="tiny">Tap to add:</span><code>{vehicle}</code><code>{origin}</code><code>{dest}</code><code>{price}</code><code>{company}</code><code>{loadId}</code><code>{pickup}</code></div>
+  <div class="tplPrevLbl">Preview · example load</div>
+  <div class="tplPrev" id="tplPrev"></div>
   <div id="tplNote" class="warn" style="display:none"></div>
   <div class="tplBtns">
     <button id="tplSaveBtn" class="primaryBtn" onclick="saveTpl()">Save for me</button>
@@ -1864,6 +1890,14 @@ function showBuilder(){
 }
 // (2026-11-05) the "Carvana is no longer supported" note above the platforms ("" = hidden)
 function cvGoneNote(t){ const n = document.getElementById("cvGoneNote"); if(n){ n.textContent = t; n.style.display = t ? "" : "none"; } }
+// (2026-11-08 owner) at most 15 searches per person (the bot checks it too); the admin has no limit
+const SEARCH_LIMIT = 15;
+function atSearchLimit(){
+  if(window.__hhRole === "admin") return false;
+  let n = 0; try { n = Object.keys(lastSearches || {}).length + pendingNewLeft().length; } catch(e){}
+  if(n >= SEARCH_LIMIT){ toast("Limit " + SEARCH_LIMIT + " searches - delete one you don't need first"); return true; }
+  return false;
+}
 function newSearch(){
   cvGoneNote("");
   state.sites=[]; state.status="any"; state.trailer="any"; state.minVeh=1; state.maxVeh=0; state.ready=0;
@@ -1919,6 +1953,7 @@ function setSaveStartVisible(on){
   const b = document.getElementById("saveStartBtn"); if(b) b.style.display = "";
 }
 function duplicateSearch(s){
+  if(atSearchLimit()) return;
   editSearch(s);
   editingId = null;
   setSaveStartVisible(false);
@@ -1926,7 +1961,7 @@ function duplicateSearch(s){
   document.getElementById("builderTitle").textContent = "New search (copy)";
   toast("Duplicated - review and tap Save to create it as a new search");
 }
-document.getElementById("newSearchBtn").addEventListener("click", newSearch);
+document.getElementById("newSearchBtn").addEventListener("click", () => { if(!atSearchLimit()) newSearch(); });
 document.getElementById("backToListBtn").addEventListener("click", showList);
 document.getElementById("swapBtn").addEventListener("click", ()=>{
   const tmp = state.from; state.from = state.to; state.to = tmp;
@@ -2058,6 +2093,35 @@ const DEFAULT_TPL_PREVIEW =
   "We can pick up right away. Please call or text me back.";
 
 const MORE_PAGES = ["blocked","sms","style","help","market"];
+// (2026-11-09 owner) ✨ rows come in one after another when a screen opens. Only the first 14 rows on screen; only at the opening
+// moment (and for rows that arrive within 0.8 s of it - a list loaded from the bot right after opening). Any later re-render
+// (auto-refresh) makes plain rows. Taps work at once (only opacity / position move). "Reduce motion" on the phone: off.
+const HH_ROWS = ".scard,.bdCard,.bdLock,.menuRow,.mHero,.mSect,.helpRow,.styleOpt,.mkTiles,.mkTile,.mkChart,.mkLane,.savedItem,#blockedList > *,.ldHero,.ldPlain > *,.tplPrev,#tplText,.tagRow,.tplBtns";
+const hhOpen = { id: "tab-search", t: Date.now(), win: 4000 };   // the app opening: its searches come from the bot a bit later (4 s window)
+const hhReduced = (() => { try { return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch(e){ return false; } })();
+function hhAnimate(pane, start){
+  if(!pane || hhReduced || pane.id === "tab-more") return;   // More keeps its own (2026-11-08)
+  const vis = el => el.offsetParent !== null && el.getBoundingClientRect().top < (window.innerHeight || 900) + 40;
+  const rows = [...pane.querySelectorAll(HH_ROWS)].filter(el => vis(el) && !el.__hhDone);
+  const heads = start ? [...pane.children].filter(c => vis(c) && !c.__hhDone && !rows.includes(c) && !rows.some(r => c.contains(r))) : [];
+  const all = heads.concat(rows).sort((a, b) => (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING) ? -1 : 1).slice(0, 14);
+  all.forEach((el, i) => { el.__hhDone = true; el.style.setProperty("--i", i); el.classList.add("hhA"); });
+  setTimeout(() => all.forEach(el => el.classList.remove("hhA")), 1300);
+}
+// called after a screen's rows were (re)built: animates only within 0.8 s of that screen opening
+function hhAnimMaybe(paneId){
+  if(hhOpen.id !== paneId || Date.now() - hhOpen.t > (hhOpen.win || 800)) return;
+  hhAnimate(document.getElementById(paneId), false);
+}
+// rows built right after a screen opened (loaded from the bot / the computer) join the animation; later re-renders do not
+try {
+  const hhMo = new MutationObserver(muts => {
+    const ids = new Set(); for (const m of muts) { const p = m.target && m.target.closest ? m.target.closest(".tabpane") : null; if (p) ids.add(p.id); }
+    ids.forEach(id => { if (id === hhOpen.id) requestAnimationFrame(() => hhAnimMaybe(id)); });
+  });
+  document.addEventListener("DOMContentLoaded", () => document.querySelectorAll(".tabpane").forEach(p => hhMo.observe(p, { childList: true, subtree: true })));
+  if (document.readyState !== "loading") document.querySelectorAll(".tabpane").forEach(p => hhMo.observe(p, { childList: true, subtree: true }));
+} catch(e) {}
 function switchTab(name){
   const main = MORE_PAGES.includes(name) ? "more" : name === "load" ? "board" : name;   // (2026-11-08) a load page belongs to the Board tab
   document.querySelectorAll(".tabbtn").forEach(b=>b.classList.toggle("on", b.dataset.tab===main));
@@ -2065,6 +2129,7 @@ function switchTab(name){
   window.scrollTo(0, 0);
   if(name==="saved") loadSaved();
   try { if(window.hhBoard) window.hhBoard.onTab(name); } catch(e) {}   // (2026-11-08) 📋 Board / 📈 Market stats
+  try { hhOpen.id = "tab-" + name; hhOpen.t = Date.now(); hhOpen.win = 800; const pane = document.getElementById("tab-" + name); if(pane){ pane.querySelectorAll(".hhA").forEach(el => el.classList.remove("hhA")); [...pane.querySelectorAll("*")].forEach(el => { el.__hhDone = false; }); hhAnimate(pane, true); } } catch(e) {}   // (2026-11-09) ✨
 }
 // ---- ⭐ Saved loads (2026-09-30) ----
 // Saved loads live on the office computer (the bot's data folder), so this tab reads them straight from
@@ -2223,6 +2288,24 @@ function resetTpl(){
   toast("Now press \"Save for me\" to apply it");
 }
 document.getElementById("tplText").addEventListener("input", tplCount);
+// (2026-11-08 owner) live preview with an example load + tap a tag to put it where the cursor is (the bot fills the same tags)
+const TPL_SAMPLE = { vehicle: "2011 BMW 3 Series", origin: "Glen Cove, NY", dest: "Watsonville, CA", price: "$1,500", company: "Montway Auto Transport", loadId: "3485787", pickup: "Nov 9" };
+function tplPreview(){
+  const el = document.getElementById("tplPrev"); if(!el) return;
+  const v = document.getElementById("tplText").value || "";
+  el.textContent = v.replace(/\{(\w+)\}/g, (m, k) => (k in TPL_SAMPLE ? TPL_SAMPLE[k] : m)).replace(/[ \t]{2,}/g, " ").trim() || "—";
+}
+document.getElementById("tplText").addEventListener("input", tplPreview);
+document.querySelectorAll("#tplTags code").forEach(c => c.addEventListener("click", () => {
+  const ta = document.getElementById("tplText"); if(ta.readOnly || ta.disabled) return;
+  const tag = c.textContent, s = ta.selectionStart != null ? ta.selectionStart : ta.value.length, e = ta.selectionEnd != null ? ta.selectionEnd : s;
+  const before = ta.value.slice(0, s), sp = before && !/\s$/.test(before) ? " " : "";
+  if((ta.value.length + tag.length + sp.length) > (Number(ta.getAttribute("maxlength")) || 256)){ toast("The message is at its 256-letter limit"); return; }
+  ta.value = before + sp + tag + ta.value.slice(e); const pos = s + sp.length + tag.length;
+  ta.focus(); try{ ta.setSelectionRange(pos, pos); }catch(err){}
+  ta.dispatchEvent(new Event("input", { bubbles: true }));
+}));
+setInterval(() => { const el = document.getElementById("tplPrev"); if(el && document.getElementById("tab-sms") && document.getElementById("tab-sms").classList.contains("on")) tplPreview(); }, 1500);
 loadTpl();
 
 // (2026-10-11) 🎨 Alert style - saved on the bot's computer (pcApi → /api/miniapp/style), one per person
@@ -2468,7 +2551,9 @@ function renderMySearches(list){
   let on = 0, paused = 0, alertsToday = 0;
   list.forEach(s=>{ if(s.active && !isPaused(s)) on++; else if(s.active) paused++; if(s.alertsDay === today) alertsToday += (s.alertsToday||0); });
   const off = list.length - on - paused;
-  if(sum) sum.textContent = [on + " active", paused ? paused + " paused" : "", off ? off + " off" : "", alertsToday + " alert" + (alertsToday===1?"":"s") + " today"].filter(Boolean).join(" · ");
+  // (2026-11-08 owner) the search limit on the main screen: "2/15" (the admin has no limit)
+  const limTxt = window.__hhRole === "admin" ? list.length + " searches" : list.length + "/" + SEARCH_LIMIT + " searches";
+  if(sum) sum.textContent = [limTxt, on + " active", paused ? paused + " paused" : "", off ? off + " off" : "", alertsToday + " alert" + (alertsToday===1?"":"s") + " today"].filter(Boolean).join(" · ");
 
   // platform filter: All + every platform these searches use
   const used = ["cd","sd","ship","as","ac","v2"].filter(k => list.some(s => (s.sites||[]).includes(k)));
@@ -2636,6 +2721,7 @@ async function refreshBackendState(){
   const dbgEl = document.getElementById("tplDebug"); if(dbgEl) dbgEl.textContent = dbg;
 
   const isAdmin = !!(st && st.role === "admin");
+  if(st && st.role && window.__hhRole !== st.role){ window.__hhRole = st.role; try{ rerenderMySearches(); }catch(e){} }   // (2026-11-08) "N/15" vs no limit
   const canUseTpl = !!(st && (st.role === "admin" || st.role === "member"));
   document.getElementById("controlPanelRow").style.display = isAdmin ? "" : "none";
 
@@ -3186,7 +3272,7 @@ setInterval(refreshBackendState, 2000);
   const E = s => escapeHtml(s);
   const SN = { cd:"Central", sd:"Super", ship:"Ship.Cars", ac:"ACV", as:"Autosled", v2:"V2" };
   const SITE_ORDER = ["cd","sd","ship","ac","as","v2"];   // (2026-11-08) + Ship.Cars on the Board
-  const MARKET_ORDER = ["cd","sd","ac","as","v2"];   // Market stats: no Ship.Cars data yet
+  const MARKET_ORDER = ["cd","sd","ship","ac","as","v2"];   // (2026-11-08) + Ship.Cars (counted from its board reads)
   const OLD_MS = 2 * 3600000;   // older than this: greyed, "may be taken" (the bot can't see when a load is taken - owner 08.11)
   const SINCE = [[60,"last 1 h"],[180,"last 3 h"],[1440,"last 24 h"]];
   const LS = "hhBoardV1";
@@ -3195,14 +3281,16 @@ setInterval(refreshBackendState, 2000);
     site: saved.site || "", sort: saved.sort || "new", since: [60,180,1440].includes(saved.since) ? saved.since : 60,
     f: Object.assign({ from:[], to:[], p:0, pm:0, tr:"any", vs:"any" }, saved.f || {}), hideBlk: saved.hideBlk !== false,
     items: [], total: 0, counts: {}, loading: false, loaded: false, err: "", openK: null, scrollY: 0, timer: null, reqNo: 0,
+    mine: saved.mine || "", fresh: {}, locked: false,
   };
-  const keep = () => { try { localStorage.setItem(LS, JSON.stringify({ site:B.site, sort:B.sort, since:B.since, f:B.f, hideBlk:B.hideBlk })); } catch(e){} };
+  const keep = () => { try { localStorage.setItem(LS, JSON.stringify({ site:B.site, sort:B.sort, since:B.since, f:B.f, hideBlk:B.hideBlk, mine:B.mine })); } catch(e){} };
   const money = n => "$" + Math.round(Number(n)||0).toLocaleString("en-US");
   const ago = ms => { const s = Math.round(ms/1000); if(s < 60) return s + " s ago"; const m = Math.round(s/60); if(m < 60) return m + " min ago"; const h = Math.floor(m/60), r = m % 60; return h + " h" + (r ? " " + r + " min" : "") + " ago"; };
   const place = p => [p && p.city, p && p.st].filter(Boolean).join(", ") || "—";
   const day = s => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(s||"")); if(!m) return String(s||""); return new Date(+m[1], +m[2]-1, +m[3]).toLocaleDateString("en-US",{month:"short",day:"numeric"}); };
-  const hasFilter = () => !!(B.f.from.length || B.f.to.length || B.f.p || B.f.pm || B.f.tr !== "any" || B.f.vs !== "any");
-  const filterPayload = () => hasFilter() ? b64urlEncode({ s:["cd"], f:B.f.from, to:B.f.to, p:B.f.p, pm:B.f.pm, tr:B.f.tr, vs:B.f.vs }) : "";
+  const hasFilter = () => !!(B.mine || B.f.from.length || B.f.to.length || B.f.p || B.f.pm || B.f.tr !== "any" || B.f.vs !== "any");
+  const hasOwnFilter = () => !!(B.f.from.length || B.f.to.length || B.f.p || B.f.pm || B.f.tr !== "any" || B.f.vs !== "any");
+  const filterPayload = () => hasOwnFilter() ? b64urlEncode({ s:["cd"], f:B.f.from, to:B.f.to, p:B.f.p, pm:B.f.pm, tr:B.f.tr, vs:B.f.vs }) : "";
   function openUrl(u){ if(!u) return; if(tg && tg.openLink) tg.openLink(u); else window.open(u, "_blank"); }
   async function copyText(t){
     try { if(navigator.clipboard && navigator.clipboard.writeText){ await navigator.clipboard.writeText(t); return true; } } catch(e){}
@@ -3214,22 +3302,40 @@ setInterval(refreshBackendState, 2000);
     const box = $("bdSites"); if(!box) return;
     const all = SITE_ORDER.reduce((n,s)=> n + (B.counts[s]||0), 0);
     const chips = [["", "All", all]].concat(SITE_ORDER.map(s => [s, SN[s], B.counts[s]||0]));
-    box.innerHTML = chips.map(([s,label,n]) => '<button type="button" class="bdChip' + (B.site === s ? " on" : "") + '" data-site="' + s + '">' + label + (B.loaded ? '<small>' + (n >= 1000 ? (n/1000).toFixed(n >= 10000 ? 0 : 1) + "k" : n) + '</small>' : '') + '</button>').join("");
-    box.querySelectorAll(".bdChip").forEach(b => b.onclick = () => { B.site = b.dataset.site; keep(); renderSites(); load(true); });
+    const st = s => s && B.fresh && B.fresh[s] && B.fresh[s].stale;
+    box.innerHTML = chips.map(([s,label,n]) => '<button type="button" class="bdChip' + (B.site === s ? " on" : "") + '" data-site="' + s + '"' + (st(s) ? ' title="' + E(label + ": " + B.fresh[s].why) + '"' : '') + '>' + (st(s) ? '<span class="stDot"></span>' : '') + label + (B.loaded ? '<small>' + (n >= 1000 ? (n/1000).toFixed(n >= 10000 ? 0 : 1) + "k" : n) + '</small>' : '') + '</button>').join("");
+    // (2026-11-09 owner) a platform not updated: only a yellow dot; tapping that chip says why for a few seconds
+    box.querySelectorAll(".bdChip").forEach(b => b.onclick = () => { const s = b.dataset.site; if(st(s)) toast(SN[s] + ": " + B.fresh[s].why + " — showing what the bot saw before"); B.site = s; keep(); renderSites(); load(true); });
+    document.querySelectorAll("#bdTime button").forEach(b => b.classList.toggle("on", Number(b.dataset.v) === B.since));
+    renderMine();
+  }
+  // (2026-11-08 owner) "My search": the Board through one of my own searches (its filters and platforms)
+  function renderMine(){
+    const sel = $("bdMine"); if(!sel) return;
+    let mineList = []; try { mineList = Object.values(lastSearches || {}).filter(s => s && s.id && !String(s.id).startsWith("pending:")); } catch(e){}
+    if(B.mine && !mineList.some(s => String(s.id) === String(B.mine))) mineList.push({ id: B.mine, name: B.mineName || "My search" });
+    const html = '<option value="">All loads · my filters</option>' + mineList.sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""))).map(s => '<option value="' + E(s.id) + '">My search: ' + E(s.name || "search") + '</option>').join("");
+    if(sel.__h !== html){ sel.innerHTML = html; sel.__h = html; }
+    sel.value = B.mine || "";
+    sel.classList.toggle("on", !!B.mine);
+    sel.style.display = mineList.length ? "" : "none";
+    const lb = $("bdMineLbl"); if(lb) lb.style.display = mineList.length ? "" : "none";
   }
   function renderLive(){
     const el = $("bdLive"); if(!el) return;
     const sl = (SINCE.find(x => x[0] === B.since) || SINCE[0])[1];
     if(B.err){ el.innerHTML = '<span class="lvDot off"></span><span>' + E(B.err) + '</span>'; return; }
-    el.innerHTML = '<span class="lvDot' + (B.loaded ? "" : " off") + '"></span><span>' + (B.loaded ? "Live · " + B.total.toLocaleString("en-US") + " loads · " : "") + '</span><button type="button" id="bdSince">' + sl + ' ▾</button><span>· free</span>';
-    $("bdSince").onclick = () => { const i = SINCE.findIndex(x => x[0] === B.since); B.since = SINCE[(i+1) % SINCE.length][0]; keep(); load(true); };
+    if(B.locked){ el.innerHTML = ""; return; }
+    el.innerHTML = '<span class="lvDot' + (B.loaded ? "" : " off") + '"></span><span>' + (B.loaded ? "Live · " + B.total.toLocaleString("en-US") + " loads" : "Loading…") + '</span>' + (B.mine ? '<button type="button" class="bdMineTag" id="bdMineX" title="Show all loads">' + E(B.mineName || "My search") + ' ✕</button>' : '');
+    const mx = $("bdMineX"); if(mx) mx.onclick = () => { B.mine = ""; keep(); renderSites(); load(true); };
   }
   function cardHtml(it){
     const old = it.ago > OLD_MS;
     const meta = [it.pickup ? day(it.pickup) : "", it.cars ? it.cars + (it.cars === 1 ? " car" : " cars") : "", it.trailer, it.inop ? "Inop" : ""].filter(Boolean).join(" · ");
     const deal = it.deal && (it.deal.pct >= 10 || it.deal.pct <= -10) ? '<span class="bdDeal' + (it.deal.pct < 0 ? " lo" : "") + '">' + (it.deal.pct > 0 ? "+" : "−") + Math.abs(it.deal.pct) + '% vs lane</span>' : "";
     const fits = (it.fits || []).slice(0,1).map(n => '<span class="bdFit">' + E(n) + '</span>').join("");
-    const co = !old && it.company ? '<span class="bdCo">' + E(it.company) + (it.rating ? " · " + E(String(it.rating).split(" ")[0]) : "") + '</span>' : "";
+    const rate = !old && it.rating ? '<span class="bdRate">★ ' + E(String(it.rating).split(" ")[0]) + '</span>' : "";
+    const co = rate + (!old && it.company ? '<span class="bdCo">' + E(it.company) + '</span>' : "");
     return '<div class="bdCard' + (old ? " old" : "") + '" data-k="' + E(it.k) + '">' +
       '<div class="bdRt">' + E(place(it.o)) + '<i>→</i>' + E(place(it.d)) + '</div>' +
       '<div class="bdMn">' + money(it.price) + ' · <span>' + (it.rate ? "$" + it.rate.toFixed(2) + "/mi · " : "") + (it.miles ? (it.milesApprox ? "~" : "") + Number(it.miles).toLocaleString("en-US") + " mi" : "") + '</span></div>' +
@@ -3240,8 +3346,14 @@ setInterval(refreshBackendState, 2000);
     const box = $("bdList"); if(!box) return;
     renderSites(); renderLive();
     $("bdFDot").style.display = hasFilter() ? "block" : "none";
+    { const rw = $("bdRowC"); if(rw) rw.style.display = B.locked ? "none" : ""; }
+    if(B.locked){
+      box.innerHTML = '<div class="bdLock"><b>The Board is for subscribers</b><span>Every new load from all the load boards, live — included in the free trial and in every plan.</span><button type="button" id="bdPlans">See plans</button></div>';
+      const pb = $("bdPlans"); if(pb) pb.onclick = () => { const r = $("subscriptionRow"); if(r) r.click(); else switchTab("more"); };
+      $("bdMore").style.display = "none"; return;
+    }
     if(!B.items.length){
-      box.innerHTML = '<div class="bdEmpty">' + (B.loading ? "Loading…" : B.err ? "" : hasFilter() ? "No loads match these filters in this time.<br>Widen the filter or pick “last 24 h”." : "The board is filling up — new loads appear here the moment the bot sees them.") + '</div>';
+      box.innerHTML = '<div class="bdEmpty">' + (B.loading ? "Loading…" : B.err ? "" : hasFilter() ? "No loads match " + (B.mine ? "this search" : "these filters") + " in this time.<br>Widen the filter or pick “24 h”." : "The board is filling up — new loads appear here the moment the bot sees them.") + '</div>';
     } else box.innerHTML = B.items.map(cardHtml).join("");
     box.querySelectorAll(".bdCard").forEach(c => c.onclick = () => openLoad(c.dataset.k));
     $("bdMore").style.display = B.items.length && B.items.length < B.total ? "" : "none";
@@ -3251,9 +3363,11 @@ setInterval(refreshBackendState, 2000);
     const no = ++B.reqNo;
     if(reset && !quiet){ B.items = []; B.loading = true; renderList(); }
     try{
-      const j = await pcApi("/api/miniapp/board", { sites: B.site ? [B.site] : null, since: B.since, sort: B.sort, filter: filterPayload(), showBlocked: !B.hideBlk, offset: reset ? 0 : B.items.length, limit: 30 });
+      const j = await pcApi("/api/miniapp/board", { sites: B.site ? [B.site] : null, since: B.since, sort: B.sort, filter: B.mine ? "" : filterPayload(), searchId: B.mine || null, showBlocked: !B.hideBlk, offset: reset ? 0 : B.items.length, limit: 30 });
       if(no !== B.reqNo) return;   // a newer request is on its way
+      if(!j.ok && B.mine && /not yours|gone|could not be read/i.test(String(j.error||""))){ B.mine = ""; keep(); return load(reset, quiet); }   // that search is gone: back to all loads
       if(!j.ok) throw new Error(j.error || "error");
+      B.locked = !!j.locked; B.fresh = j.fresh || {}; if(j.mine) B.mineName = j.mine;
       B.err = ""; B.loaded = true; B.total = j.total || 0; B.counts = j.counts || {};
       B.items = reset ? (j.items || []) : B.items.concat(j.items || []);
     }catch(e){
@@ -3402,6 +3516,8 @@ setInterval(refreshBackendState, 2000);
     if(!$("tab-board")) return;
     $("bdFilterBtn").onclick = openSheet;
     $("bdRefresh").onclick = () => load(true);
+    document.querySelectorAll("#bdTime button").forEach(b => b.onclick = () => { B.since = Number(b.dataset.v); keep(); renderSites(); load(true); });
+    $("bdMine").onchange = () => { B.mine = $("bdMine").value; if(B.mine){ const o = $("bdMine").selectedOptions[0]; B.mineName = o ? o.textContent.replace(/^My search: /, "") : ""; } keep(); closeSheet(); renderSites(); load(true); };
     $("bdMore").onclick = () => load(false);
     document.querySelectorAll("#bdSort button").forEach(b => { b.classList.toggle("on", b.dataset.s === B.sort); b.onclick = () => { B.sort = b.dataset.s; keep(); document.querySelectorAll("#bdSort button").forEach(x => x.classList.toggle("on", x === b)); load(true); }; });
     $("bdSheetBg").onclick = e => { if(e.target === $("bdSheetBg")) closeSheet(); };
@@ -3428,6 +3544,7 @@ setInterval(refreshBackendState, 2000);
   window.hhBoard = {
     onTab(name){
       $("ldDock").classList.toggle("on", name === "load");
+      if(name === "board") renderMine();
       if(name === "board" && !B.loaded && !B.loading) load(true);
       if(name === "market") loadMarket();
     },
