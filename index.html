@@ -318,8 +318,10 @@
   .seg .pill{border:0;background:none;color:var(--text3);height:34px;display:flex;align-items:center;justify-content:center;padding:0;border-radius:8px;font-size:13px;min-width:0}
   .seg .pill.on{background:var(--card);color:var(--fg);box-shadow:0 1px 3px var(--shadow)}
   .seg.sizePresets .pill{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 4px}
-  .seg.sizeMode{grid-auto-columns:unset;grid-auto-flow:unset;grid-template-columns:repeat(3,minmax(0,1fr))}
-  .seg.sizeMode .pill{height:auto;min-height:42px;white-space:normal;line-height:1.2;padding:4px 6px;text-align:center}
+  .seg.sizeMode{grid-auto-columns:unset;grid-auto-flow:unset;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .sizeGrid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .sizeGrid3 .field{padding-left:10px;padding-right:24px;font-size:14px;min-width:0}
+  .sizeGrid3 .unit{right:9px}
   .unitWrap{position:relative}
   .unitWrap .field{padding-right:34px}
   #sizeBody.off{opacity:.38;pointer-events:none;transition:opacity .15s}
@@ -1062,13 +1064,14 @@
   <div class="fieldLbl">📏 Car size up to <span class="tiny" style="font-weight:400">(optional)</span></div>
   <div class="seg sizeMode" id="sizeMode"></div>
   <div id="sizeBody">
-  <div class="fieldGrid2" style="margin-top:8px">
+  <div class="sizeGrid3" style="margin-top:8px">
     <div class="unitWrap"><input class="field" id="maxLenIn" type="number" inputmode="numeric" min="0" step="1" placeholder="Length"><span class="unit">in</span></div>
     <div class="unitWrap"><input class="field" id="maxLb" type="number" inputmode="numeric" min="0" step="10" placeholder="Curb weight"><span class="unit">lb</span></div>
+    <div class="unitWrap"><input class="field" id="maxHIn" type="number" inputmode="numeric" min="0" step="1" placeholder="Height"><span class="unit">in</span></div>
   </div>
   <div class="seg sizePresets" id="sizePresets" style="margin-top:8px"></div>
   </div>
-  <div class="tiny" id="sizeNote" style="text-align:center;margin:6px 0 8px">Off - every alert comes with sound, as always.</div>
+  <div class="tiny" id="sizeNote" style="text-align:center;margin:6px 0 8px">Off - every alert comes, as always.</div>
   <div class="fieldLbl">Condition</div>
   <div class="seg" id="status"></div>
   <div class="fieldLbl">Trailer</div>
@@ -1407,7 +1410,7 @@ const READY = [["All",0],["Today",-1],["Tomorrow",1],["2",2],["3",3],["4",4],["5
 // state[k] holds BOTH cities (with zip, r) and whole-state picks (st only).
 // Whole-state picks are shown only as a highlighted square in the grid below (that is their only
 // visual trace) so tapping a state never grows the list above the grid and pushes it down the page.
-const state = { sites:[], status:"any", trailer:"any", minVeh:1, maxVeh:0, ready:0, maxLenIn:0, maxLb:0, sizeMode:"off", vt:[], from:[], to:[], route:false, routeMiles:75, waypoints:[], excludeCo:[], shipOrigin:"", shipDest:"" };
+const state = { sites:[], status:"any", trailer:"any", minVeh:1, maxVeh:0, ready:0, maxLenIn:0, maxLb:0, maxHIn:0, sizeMode:"off", vt:[], from:[], to:[], route:false, routeMiles:75, waypoints:[], excludeCo:[], shipOrigin:"", shipDest:"" };
 
 // "Exclude companies" - a plain list the person builds up themselves (no autocomplete/suggestions here,
 // unlike the city fields above - there's no list of companies to pick from anywhere, CD/SD don't expose
@@ -1608,24 +1611,25 @@ function renderVehicleSelects(){
 }
 // (2026-11-12, owner) 🔔 sound only for cars up to a length (in) / weight (lb); 0 / empty = no limit. Presets = that model's
 // longest / heaviest version in the bot's table (lib/vehicleSize.js), rounded up, so that car itself always fits.
-const SIZE_PRESETS = [["Civic", 187, 3520], ["Camry", 196, 4040], ["911", 182, 4190], ["Tahoe", 213, 6200]];
+const SIZE_PRESETS = [["Civic", 187, 3520, 60], ["Camry", 197, 4040, 60], ["911", 182, 4190, 54], ["Tahoe", 213, 6200, 78]];
 function renderSizeLimits(){
-  const L = document.getElementById("maxLenIn"), W = document.getElementById("maxLb"), P = document.getElementById("sizePresets");
-  if(!L || !W || !P) return;
-  const SIZE_NOTE = { off: "Off - every alert comes with sound, as always.", sound: "All alerts come. Sound only if the car fits. Hidden or unknown models always ring.", only: "Only cars that fit are sent. Hidden or unknown models still come, with sound." };
+  const L = document.getElementById("maxLenIn"), W = document.getElementById("maxLb"), H = document.getElementById("maxHIn"), P = document.getElementById("sizePresets");
+  if(!L || !W || !H || !P) return;
+  const SIZE_NOTE = { off: "Off - every alert comes, as always.", on: "Only cars that fit are sent. Hidden or unknown models still come; machinery, RVs, boats and trailers don't." };
   const paintMode = ()=>{ const m = state.sizeMode || "off"; const B = document.getElementById("sizeBody"), N = document.getElementById("sizeNote");
-    if (B) { B.classList.toggle("off", m === "off"); [L, W].forEach(x => { x.disabled = m === "off"; }); } if (N) N.textContent = SIZE_NOTE[m] || SIZE_NOTE.off; };
-  group("sizeMode", [["Off", "off"], ["All\u00a0cars\u00a0· sound\u00a0if\u00a0it\u00a0fits", "sound"], ["Only cars that fit", "only"]], ()=>state.sizeMode || "off", v=>{ state.sizeMode = v; paintMode(); });
+    if (B) { B.classList.toggle("off", m === "off"); [L, W, H].forEach(x => { x.disabled = m === "off"; }); } if (N) N.textContent = SIZE_NOTE[m] || SIZE_NOTE.off; };
+  group("sizeMode", [["Off", "off"], ["On", "on"]], ()=>state.sizeMode || "off", v=>{ state.sizeMode = v; paintMode(); });
   const clean = v => { const n = Math.round(Number(v)); return n > 0 ? Math.min(n, 30000) : 0; };
-  const mark = ()=>{ [...P.children].forEach(b=>{ const l = Number(b.dataset.l), w = Number(b.dataset.w); b.classList.toggle("on", l > 0 && state.maxLenIn === l && state.maxLb === w); }); };
-  L.value = state.maxLenIn ? String(state.maxLenIn) : ""; W.value = state.maxLb ? String(state.maxLb) : "";
+  const mark = ()=>{ [...P.children].forEach(b=>{ const l = Number(b.dataset.l), w = Number(b.dataset.w), h = Number(b.dataset.h); b.classList.toggle("on", l > 0 && state.maxLenIn === l && state.maxLb === w && state.maxHIn === h); }); };
+  L.value = state.maxLenIn ? String(state.maxLenIn) : ""; W.value = state.maxLb ? String(state.maxLb) : ""; H.value = state.maxHIn ? String(state.maxHIn) : "";
   L.oninput = ()=>{ state.maxLenIn = Math.min(clean(L.value), 600); mark(); updateSaveSummary(); };
   W.oninput = ()=>{ state.maxLb = clean(W.value); mark(); updateSaveSummary(); };
+  H.oninput = ()=>{ state.maxHIn = Math.min(clean(H.value), 300); mark(); updateSaveSummary(); };
   P.innerHTML = "";
-  SIZE_PRESETS.concat([["Clear", 0, 0]]).forEach(([t, l, w])=>{
-    const b = document.createElement("div"); b.className = "pill sm"; b.textContent = t; b.dataset.l = l; b.dataset.w = w;
-    b.title = l ? ("≤ " + l + " in · ≤ " + w.toLocaleString("en-US") + " lb") : "No size limit";
-    b.onclick = ()=>{ state.maxLenIn = l; state.maxLb = w; L.value = l ? String(l) : ""; W.value = w ? String(w) : ""; mark(); updateSaveSummary(); };
+  SIZE_PRESETS.concat([["Clear", 0, 0, 0]]).forEach(([t, l, w, h])=>{
+    const b = document.createElement("div"); b.className = "pill sm"; b.textContent = t; b.dataset.l = l; b.dataset.w = w; b.dataset.h = h;
+    b.title = l ? ("≤ " + l + " in long · ≤ " + w.toLocaleString("en-US") + " lb · ≤ " + h + " in tall") : "No size limit";
+    b.onclick = ()=>{ state.maxLenIn = l; state.maxLb = w; state.maxHIn = h; L.value = l ? String(l) : ""; W.value = w ? String(w) : ""; H.value = h ? String(h) : ""; mark(); updateSaveSummary(); };
     P.appendChild(b);
   });
   mark(); paintMode();
@@ -1659,7 +1663,7 @@ function render(){
   document.getElementById("vtClear").onclick=()=>{
     state.status="any"; state.trailer="any"; state.minVeh=1; state.maxVeh=0; state.ready=0;
     state.vt=[]; state.from=[]; state.to=[]; state.route=false; state.routeMiles=75; state.waypoints=[]; state.excludeCo=[];
-    state.shipOrigin=""; state.shipDest=""; state.maxLenIn=0; state.maxLb=0; state.sizeMode="off";
+    state.shipOrigin=""; state.shipDest=""; state.maxLenIn=0; state.maxLb=0; state.maxHIn=0; state.sizeMode="off";
     document.getElementById("pay").value="0";
     document.getElementById("rpm").value="0";
     document.getElementById("excludeCoInput").value="";
@@ -2013,7 +2017,7 @@ function newSearch(){
   cvGoneNote("");
   state.sites=[]; state.status="any"; state.trailer="any"; state.minVeh=1; state.maxVeh=0; state.ready=0;
   state.vt=[]; state.from=[]; state.to=[]; state.route=false; state.routeMiles=75; state.waypoints=[]; state.excludeCo=[];
-  state.shipOrigin=""; state.shipDest=""; state.maxLenIn=0; state.maxLb=0; state.sizeMode="off";
+  state.shipOrigin=""; state.shipDest=""; state.maxLenIn=0; state.maxLb=0; state.maxHIn=0; state.sizeMode="off";
   document.getElementById("pay").value="0";
   document.getElementById("rpm").value="0";
   document.getElementById("excludeCoInput").value="";
@@ -2039,7 +2043,7 @@ function editSearch(s){
     state.maxVeh = Number(payload.mx)||0;
     state.ready = Number(payload.rd)||0;
     state.vt = Array.isArray(payload.vt) ? payload.vt.slice() : [];
-    state.maxLenIn = Math.max(0, Math.round(Number(payload.ln)||0)); state.maxLb = Math.max(0, Math.round(Number(payload.lb)||0)); state.sizeMode = (state.maxLenIn > 0 || state.maxLb > 0) ? (Number(payload.lm) === 1 ? "only" : "sound") : "off";
+    state.maxLenIn = Math.max(0, Math.round(Number(payload.ln)||0)); state.maxLb = Math.max(0, Math.round(Number(payload.lb)||0)); state.maxHIn = Math.max(0, Math.round(Number(payload.ht)||0)); state.sizeMode = (state.maxLenIn > 0 || state.maxLb > 0 || state.maxHIn > 0) ? "on" : "off";
     state.from = Array.isArray(payload.f) ? payload.f.slice() : [];
     state.to = Array.isArray(payload.to) ? payload.to.slice() : [];
     state.route = !!payload.rt;
@@ -2115,7 +2119,7 @@ function buildPayload(){
     pm: Math.round((Number(document.getElementById("rpm").value)||0) * 100) / 100,
     tr: state.trailer, vs: state.status, rd: state.ready,
     mn: state.minVeh, mx: state.maxVeh, vt: state.vt,
-    ...(state.sizeMode !== "off" && state.maxLenIn > 0 ? { ln: state.maxLenIn } : {}), ...(state.sizeMode !== "off" && state.maxLb > 0 ? { lb: state.maxLb } : {}), ...(state.sizeMode === "only" && (state.maxLenIn > 0 || state.maxLb > 0) ? { lm: 1 } : {}),
+    ...(state.sizeMode === "on" && state.maxLenIn > 0 ? { ln: state.maxLenIn } : {}), ...(state.sizeMode === "on" && state.maxLb > 0 ? { lb: state.maxLb } : {}), ...(state.sizeMode === "on" && state.maxHIn > 0 ? { ht: state.maxHIn } : {}), ...(state.sizeMode === "on" && (state.maxLenIn > 0 || state.maxLb > 0 || state.maxHIn > 0) ? { lm: 1 } : {}),
     xc: state.excludeCo.slice(0,10),
   };
   if(state.route && isRouteEligible()){
@@ -2144,7 +2148,7 @@ async function save(andStart){
     if(!state.from.length || !state.to.length){ toast("Add at least one Origin and Destination (state or city)"); return; }
     if(state.route && !isRouteEligible()){ toast("Search along route needs exactly one Origin city and one Destination city (not a whole state)"); return; }
   }
-  if(state.sizeMode && state.sizeMode !== "off" && !(state.maxLenIn > 0) && !(state.maxLb > 0)){ toast("Car size: enter length or weight, or switch it Off"); return; }
+  if(state.sizeMode === "on" && !(state.maxLenIn > 0) && !(state.maxLb > 0) && !(state.maxHIn > 0)){ toast("Car size: enter length, weight or height, or switch it Off"); return; }
   const payload = buildPayload();
 
   // Preferred path: go through the Worker so this stays a SAVED, editable search in "My Searches"
@@ -2620,7 +2624,7 @@ function searchChips(p){
   if(p.vs === "op") out.push("Operable"); else if(p.vs === "inop") out.push("Inoperable");
   if((p.mn||1) > 1 || p.mx) out.push((p.mn||1) + "–" + (p.mx || "any") + " cars");
   if(Array.isArray(p.vt) && p.vt.length) out.push(p.vt.length <= 2 ? p.vt.join(", ") : p.vt.length + " vehicle types");
-  if(p.ln || p.lb) out.push((Number(p.lm) === 1 ? "📏 only ≤ " : "🔔 ≤ ") + [p.ln ? p.ln + " in" : "", p.lb ? Number(p.lb).toLocaleString("en-US") + " lb" : ""].filter(Boolean).join(" · "));
+  if(p.ln || p.lb || p.ht) out.push("📏 only ≤ " + [p.ln ? p.ln + " in" : "", p.lb ? Number(p.lb).toLocaleString("en-US") + " lb" : "", p.ht ? p.ht + " in tall" : ""].filter(Boolean).join(" · "));
   if(p.rd) out.push(p.rd === -1 ? "Ready today" : p.rd === 1 ? "Ready by tomorrow" : "Ready ≤ " + p.rd + "d");
   return out;
 }
