@@ -125,7 +125,7 @@
   .save button:active{transform:scale(.98)}
   .save .alt{background:var(--hairline);color:var(--text2);font-size:13px;padding:9px;font-weight:600}
   .save button:disabled{opacity:.5}
-  .toast{position:fixed;left:12px;right:12px;top:12px;background:var(--accent);color:#fff;padding:10px 14px;border-radius:8px;font-size:14px;text-align:center;display:none;z-index:10}
+  .toast{position:fixed;left:12px;right:12px;top:12px;background:var(--accent);color:#fff;padding:10px 14px;border-radius:8px;font-size:14px;text-align:center;display:none;z-index:60}   /* (2026-11-13) above the Subscription sheet (40) and modals (50) */
   .tabbar{position:fixed;left:0;right:0;bottom:0;background:var(--card);display:flex;gap:4px;border-top:1px solid var(--line);z-index:7;max-width:520px;margin:0 auto;padding:8px 6px calc(8px + env(safe-area-inset-bottom,0px))}
   .tabbtn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-align:center;padding:6px 2px;font-size:11px;font-weight:700;color:var(--text4);cursor:pointer;border-radius:10px;transition:background .15s,color .15s,box-shadow .15s;line-height:1.2}
   .tabbtn .tbIcon{font-size:18px;line-height:1}
@@ -1990,9 +1990,9 @@ async function manualAdd(k){
   cityEl.addEventListener("blur", ()=>setTimeout(()=>hideSuggest(k),150));
 });
 
-function toast(msg){
+function toast(msg, ms){
   const t=document.getElementById("toast"); t.textContent=msg; t.style.display="block";
-  clearTimeout(toast._h); toast._h=setTimeout(()=>t.style.display="none", 2600);
+  clearTimeout(toast._h); toast._h=setTimeout(()=>t.style.display="none", ms || 2600);
 }
 
 function b64urlEncode(obj){
@@ -3039,11 +3039,37 @@ const BOT_USERNAME = "central0217bot";
     }, 1500);
   }catch(e){}
 })();
-document.getElementById("contactUsRow").onclick = ()=>{
-  const link = "https://t.me/" + BOT_USERNAME + "?start=contact";
-  if(tg && tg.openTelegramLink){ tg.openTelegramLink(link); try{ tg.close(); }catch(e){} }
-  else window.open(link, "_blank");
-};
+// (2026-11-13, owner: "Contact us just disappears") Telegram does not send "/start contact" when the bot chat is already
+// open, so the old link only closed the app. Now the bot computer is asked directly (Telegram login checked there) and the
+// bot writes the Contact message into this chat; then the app closes so the person sees it. If the bot computer can't be
+// reached, the app stays open and says to send /contact.
+// askBot(path, extra, okMsg): one call to the bot computer; on success the app closes so the person sees the bot's message.
+let askBotBusy = false;
+async function askBot(path, extra, okMsg){
+  if(askBotBusy) return false; askBotBusy = true;
+  toast("Sending…", 9000);
+  let j = null;
+  try{
+    const ctl = (typeof AbortController === "function") ? new AbortController() : null;
+    const tm = setTimeout(()=>{ try{ ctl && ctl.abort(); }catch(e){} }, 8000);
+    const r = await fetch(PC_URL + path, { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(Object.assign({ initData: (tg && tg.initData) || "" }, extra || {})), signal: ctl ? ctl.signal : undefined });
+    clearTimeout(tm);
+    j = await r.json().catch(()=>null);
+  }catch(e){ j = null; }
+  askBotBusy = false; askBot.lastError = (j && !j.ok && j.error) ? String(j.error) : "";
+  if(j && j.ok){
+    toast(okMsg, 4000);
+    setTimeout(()=>{ try{ if(tg && tg.close) tg.close(); }catch(e){} }, 2200);
+    return true;
+  }
+  return false;
+}
+function contactUs(){
+  return askBot("/api/miniapp/contact", null, "✅ We sent you a message in the bot chat - tap “Write to us” there.").then(ok=>{
+    if(ok === false && !askBotBusy) toast(askBot.lastError || "Couldn't reach us right now - send /contact to the bot.", 6000);
+  });
+}
+document.getElementById("contactUsRow").onclick = ()=>{ contactUs(); };
 document.querySelectorAll(".menuRow[data-go]").forEach(r=> r.onclick = ()=> switchTab(r.dataset.go));
 // "‹ More" link at the top of each page that lives under More
 MORE_PAGES.forEach(name=>{
@@ -3294,10 +3320,7 @@ setInterval(refreshBackendState, 2000);
     // crypto first
     cardBtn.parentNode.appendChild(cardBtn);
   }
-  function openSupport(){
-    var link = "https://t.me/" + BOT_USERNAME + "?start=contact";
-    if(w && w.openTelegramLink){ w.openTelegramLink(link); try{ w.close(); }catch(e){} } else window.open(link, "_blank");
-  }
+  function openSupport(){ contactUs(); }   // (2026-11-13) same as More → Contact us (the t.me ?start link did nothing in an open chat)
   var sup = document.getElementById("paySupport");
   if(sup) sup.onclick = function(e){ e.preventDefault(); haptic(); openSupport(); };
   var save = Math.round((1 - PLANS[0].crypto / (PLANS[0].full || PLANS[0].card)) * 100);
@@ -3381,8 +3404,10 @@ setInterval(refreshBackendState, 2000);
     haptic();
     var plan = b.dataset.plan;
     if(method === "crypto"){
-      var link = "https://t.me/" + BOT_USERNAME + "?start=crypto_" + plan;
-      if(w && w.openTelegramLink){ w.openTelegramLink(link); try{ w.close(); }catch(e){} } else window.open(link, "_blank");
+      // (2026-11-13) the bot writes the crypto payment details into the chat (the t.me ?start=crypto_ link did nothing in an open chat)
+      askBot("/api/miniapp/crypto", { plan: plan }, "✅ Payment details sent to the bot chat.").then(function(ok){
+        if(ok === false && !askBotBusy) toast(askBot.lastError || "Couldn't reach us right now - send /crypto to the bot.", 6000);
+      });
       return;
     }
     var u = (w && w.initDataUnsafe && w.initDataUnsafe.user) || {};
