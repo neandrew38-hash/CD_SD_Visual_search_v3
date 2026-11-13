@@ -698,7 +698,10 @@
   .bdRt{margin-top:2px;font-size:14.5px;font-weight:500;color:var(--text2);letter-spacing:-.01em}
   .bdRt i{font-style:normal;color:var(--text4);font-weight:500;margin:0 3px}
   .bdMn{margin-top:3px;font-size:14.5px;font-weight:700}
-  .bdMn span{color:var(--text3);font-weight:500}
+  .bdMn span{color:var(--text3);font-weight:500;font-size:13.5px}   /* (2026-11-13 owner) details one size smaller than the price */
+  .bdCoRow{margin-top:5px;display:flex;align-items:center;gap:8px;font-size:14px;min-width:0}   /* company + its rating on one line */
+  .bdCoRow b{font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+  .bdCoRow em{font-style:normal;flex:none;font-weight:600;color:var(--success);white-space:nowrap}
   .bdMeta{margin-top:2px;font-size:12.5px;color:var(--text3)}
   .bdFoot{margin-top:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
   .bdSrc{font-size:11px;font-weight:700;padding:3px 7px;border-radius:7px;letter-spacing:.02em;background:var(--accent-tint)}
@@ -739,7 +742,7 @@
   .tplPrevLbl{margin:12px 2px 6px;font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--text4);text-transform:uppercase}
   .tplPrev{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:14px;line-height:1.45;white-space:pre-wrap;word-break:break-word}
   .bdAgo{font-size:12px;color:var(--text4)}
-  .bdDeal{font-size:11px;font-weight:700;padding:3px 7px;border-radius:7px;background:var(--success-bg);color:var(--success)}
+  .bdDeal{font-size:10.5px;font-weight:600;padding:2px 6px;border-radius:6px;background:var(--success-bg);color:var(--success);opacity:.6}   /* (2026-11-13 owner) smaller, softer */
   .bdDeal.lo{background:var(--danger-bg);color:var(--danger)}
   .bdFit{font-size:11px;font-weight:700;padding:3px 7px;border-radius:7px;background:var(--accent-tint);color:var(--accent);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .bdCo{margin-left:auto;font-size:12px;color:var(--text3);max-width:46%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -3523,13 +3526,14 @@ setInterval(refreshBackendState, 2000);
     const more = [it.rate ? "$" + it.rate.toFixed(2) + "/mi" : "", it.miles ? (it.milesApprox ? "~" : "") + Number(it.miles).toLocaleString("en-US") + " mi" : "", it.trailer, it.inop ? "Inop" : "", it.pickup ? day(it.pickup) : ""].filter(Boolean).map(x => String(x).replace(/ /g, "\u00a0")).join(" · ");   // a line breaks only between pieces ("Nov 12" stays whole)
     const deal = it.deal && (it.deal.pct >= 10 || it.deal.pct <= -10) ? '<span class="bdDeal' + (it.deal.pct < 0 ? " lo" : "") + '">' + (it.deal.pct > 0 ? "+" : "−") + Math.abs(it.deal.pct) + '% vs lane</span>' : "";
     const fits = (it.fits || []).slice(0,1).map(n => '<span class="bdFit">' + E(n) + '</span>').join("");
-    const rate = !old && it.rating ? '<span class="bdRate">★ ' + E(String(it.rating).split(" ")[0]) + '</span>' : "";
-    const co = rate + (!old && it.company ? '<span class="bdCo">' + E(it.company) + '</span>' : "");
+    // (2026-11-13 owner) the company and its ★ rating on one line under the price (was: grey name on the right of the tag row)
+    const rate = !old && it.rating ? '<em>★ ' + E(String(it.rating).split(" ")[0]) + '</em>' : "";
+    const coRow = !old && (it.company || rate) ? '<div class="bdCoRow">' + (it.company ? '<b>' + E(it.company) + '</b>' : "") + rate + '</div>' : "";
     return '<div class="bdCard' + (old ? " old" : "") + '" data-k="' + E(it.k) + '">' +
       '<div class="bdVeh">' + E(carsTxt(it)) + '</div>' +
       '<div class="bdRt">' + E(place(it.o)) + '<i>→</i>' + E(place(it.d)) + '</div>' +
-      '<div class="bdMn">' + money(it.price) + (more ? ' · <span>' + E(more) + '</span>' : "") + '</div>' +
-      '<div class="bdFoot"><span class="bdSrc ' + it.site + '">' + E((SN[it.site]||it.site).toUpperCase()) + '</span><span class="bdAgo">' + ago(agoOf(it)) + (old ? " · may be taken" : "") + '</span>' + deal + fits + co + '</div></div>';
+      '<div class="bdMn">' + money(it.price) + (more ? ' · <span>' + E(more) + '</span>' : "") + '</div>' + coRow +
+      '<div class="bdFoot"><span class="bdSrc ' + it.site + '">' + E((SN[it.site]||it.site).toUpperCase()) + '</span><span class="bdAgo">' + ago(agoOf(it)) + (old ? " · may be taken" : "") + '</span>' + deal + fits + '</div></div>';
   }
   function renderList(){
     const box = $("bdList"); if(!box) return;
