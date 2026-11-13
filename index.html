@@ -320,12 +320,16 @@
   .seg.sizePresets .pill{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 4px}
   .seg.sizeMode{grid-auto-columns:unset;grid-auto-flow:unset;grid-template-columns:repeat(2,minmax(0,1fr))}
   .sizeGrid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-  .sizeGrid3 .field{padding-left:10px;padding-right:24px;font-size:14px;min-width:0}
-  .sizeGrid3 .unit{right:9px}
+  .sizeGrid3 .field{padding-left:9px;padding-right:22px;font-size:14px;min-width:0}
+  .sizeGrid3 .field::placeholder{font-size:13px}
+  .sizeGrid3 .unit{right:8px;font-size:12px}
+  .sizeGrid3 .field:placeholder-shown{padding-right:9px;text-align:center}
+  .sizeGrid3 .field:placeholder-shown + .unit{display:none}
   .unitWrap{position:relative}
   .unitWrap .field{padding-right:34px}
   #sizeBody.off{opacity:.38;pointer-events:none;transition:opacity .15s}
   #sizeBody{transition:opacity .15s}
+  .sizeSub{font-size:12px;font-weight:600;color:var(--text2);text-align:center;margin:10px 0 6px}
   .unitWrap .field::placeholder{color:var(--text4,#a4a4a4);opacity:1}
   .unitWrap .unit{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--text3);pointer-events:none}
   .fieldGrid2 .fieldLbl{margin-top:0}
@@ -1061,10 +1065,17 @@
   <div id="vtypesSection"><div class="vtGrid" id="vtypes"></div></div>
   <div class="fieldLbl">Number of vehicles</div>
   <div class="stepGrid"><div class="stepper"><div class="stepLbl">Min</div><div class="stepRow"><button type="button" class="stepBtn" aria-label="Decrease" data-step="minVeh:-1">−</button><span class="stepVal" id="minVehVal">1</span><button type="button" class="stepBtn" aria-label="Increase" data-step="minVeh:1">+</button></div></div><div class="stepper"><div class="stepLbl">Max</div><div class="stepRow"><button type="button" class="stepBtn" aria-label="Decrease" data-step="maxVeh:-1">−</button><span class="stepVal" id="maxVehVal">1</span><button type="button" class="stepBtn" aria-label="Increase" data-step="maxVeh:1">+</button></div></div></div>
-  <div class="fieldLbl">📏 Car size up to <span class="tiny" style="font-weight:400">(optional)</span></div>
+  <div class="fieldLbl">📏 Car size <span class="tiny" style="font-weight:400">(optional)</span></div>
   <div class="seg sizeMode" id="sizeMode"></div>
   <div id="sizeBody">
-  <div class="sizeGrid3" style="margin-top:8px">
+  <div class="sizeSub">From (at least)</div>
+  <div class="sizeGrid3">
+    <div class="unitWrap"><input class="field" id="minLenIn" type="number" inputmode="numeric" min="0" step="1" placeholder="Length"><span class="unit">in</span></div>
+    <div class="unitWrap"><input class="field" id="minLb" type="number" inputmode="numeric" min="0" step="10" placeholder="Curb weight"><span class="unit">lb</span></div>
+    <div class="unitWrap"><input class="field" id="minHIn" type="number" inputmode="numeric" min="0" step="1" placeholder="Height"><span class="unit">in</span></div>
+  </div>
+  <div class="sizeSub">Up to</div>
+  <div class="sizeGrid3">
     <div class="unitWrap"><input class="field" id="maxLenIn" type="number" inputmode="numeric" min="0" step="1" placeholder="Length"><span class="unit">in</span></div>
     <div class="unitWrap"><input class="field" id="maxLb" type="number" inputmode="numeric" min="0" step="10" placeholder="Curb weight"><span class="unit">lb</span></div>
     <div class="unitWrap"><input class="field" id="maxHIn" type="number" inputmode="numeric" min="0" step="1" placeholder="Height"><span class="unit">in</span></div>
@@ -1410,7 +1421,7 @@ const READY = [["All",0],["Today",-1],["Tomorrow",1],["2",2],["3",3],["4",4],["5
 // state[k] holds BOTH cities (with zip, r) and whole-state picks (st only).
 // Whole-state picks are shown only as a highlighted square in the grid below (that is their only
 // visual trace) so tapping a state never grows the list above the grid and pushes it down the page.
-const state = { sites:[], status:"any", trailer:"any", minVeh:1, maxVeh:0, ready:0, maxLenIn:0, maxLb:0, maxHIn:0, sizeMode:"off", vt:[], from:[], to:[], route:false, routeMiles:75, waypoints:[], excludeCo:[], shipOrigin:"", shipDest:"" };
+const state = { sites:[], status:"any", trailer:"any", minVeh:1, maxVeh:0, ready:0, maxLenIn:0, maxLb:0, maxHIn:0, minLenIn:0, minLb:0, minHIn:0, sizeMode:"off", vt:[], from:[], to:[], route:false, routeMiles:75, waypoints:[], excludeCo:[], shipOrigin:"", shipDest:"" };
 
 // "Exclude companies" - a plain list the person builds up themselves (no autocomplete/suggestions here,
 // unlike the city fields above - there's no list of companies to pick from anywhere, CD/SD don't expose
@@ -1609,30 +1620,36 @@ function renderVehicleSelects(){
   });
   paint();
 }
-// (2026-11-12, owner) 🔔 sound only for cars up to a length (in) / weight (lb); 0 / empty = no limit. Presets = that model's
-// longest / heaviest version in the bot's table (lib/vehicleSize.js), rounded up, so that car itself always fits.
+// (2026-11-12, owner) car size per search. Up to = every car must fit; presets = that model's LONGEST / HEAVIEST / TALLEST
+// version in the bot's table, rounded up. (2026-11-13) From (at least) = at least one car of the load must be that big;
+// typed by hand, no preset buttons (owner, 2026-11-13).
 const SIZE_PRESETS = [["Civic", 187, 3520, 60], ["Camry", 197, 4040, 60], ["911", 182, 4190, 54], ["Tahoe", 213, 6200, 78]];
 function renderSizeLimits(){
-  const L = document.getElementById("maxLenIn"), W = document.getElementById("maxLb"), H = document.getElementById("maxHIn"), P = document.getElementById("sizePresets");
-  if(!L || !W || !H || !P) return;
-  const SIZE_NOTE = { off: "Off - every alert comes, as always.", on: "Only cars that fit are sent. Hidden or unknown models still come; machinery, RVs, boats and trailers don't." };
+  const rows = [
+    { P: null, ids: ["minLenIn", "minLb", "minHIn"], presets: [], sign: "≥ " },
+    { P: "sizePresets", ids: ["maxLenIn", "maxLb", "maxHIn"], presets: SIZE_PRESETS, sign: "≤ " } ];
+  const els = rows.map(r => ({ ...r, F: r.ids.map(id => document.getElementById(id)), Pe: r.P ? document.getElementById(r.P) : null }));
+  if (els.some(r => (r.P && !r.Pe) || r.F.some(x => !x))) return;
+  const SIZE_NOTE = { off: "Off - every alert comes, as always.", on: "Only cars in this range are sent. Unknown models still come; motorcycles, machinery, RVs, boats and trailers don't." };
   const paintMode = ()=>{ const m = state.sizeMode || "off"; const B = document.getElementById("sizeBody"), N = document.getElementById("sizeNote");
-    if (B) { B.classList.toggle("off", m === "off"); [L, W, H].forEach(x => { x.disabled = m === "off"; }); } if (N) N.textContent = SIZE_NOTE[m] || SIZE_NOTE.off; };
+    if (B) { B.classList.toggle("off", m === "off"); els.forEach(r => r.F.forEach(x => { x.disabled = m === "off"; })); } if (N) N.textContent = SIZE_NOTE[m] || SIZE_NOTE.off; };
   group("sizeMode", [["Off", "off"], ["On", "on"]], ()=>state.sizeMode || "off", v=>{ state.sizeMode = v; paintMode(); });
   const clean = v => { const n = Math.round(Number(v)); return n > 0 ? Math.min(n, 30000) : 0; };
-  const mark = ()=>{ [...P.children].forEach(b=>{ const l = Number(b.dataset.l), w = Number(b.dataset.w), h = Number(b.dataset.h); b.classList.toggle("on", l > 0 && state.maxLenIn === l && state.maxLb === w && state.maxHIn === h); }); };
-  L.value = state.maxLenIn ? String(state.maxLenIn) : ""; W.value = state.maxLb ? String(state.maxLb) : ""; H.value = state.maxHIn ? String(state.maxHIn) : "";
-  L.oninput = ()=>{ state.maxLenIn = Math.min(clean(L.value), 600); mark(); updateSaveSummary(); };
-  W.oninput = ()=>{ state.maxLb = clean(W.value); mark(); updateSaveSummary(); };
-  H.oninput = ()=>{ state.maxHIn = Math.min(clean(H.value), 300); mark(); updateSaveSummary(); };
-  P.innerHTML = "";
-  SIZE_PRESETS.concat([["Clear", 0, 0, 0]]).forEach(([t, l, w, h])=>{
-    const b = document.createElement("div"); b.className = "pill sm"; b.textContent = t; b.dataset.l = l; b.dataset.w = w; b.dataset.h = h;
-    b.title = l ? ("≤ " + l + " in long · ≤ " + w.toLocaleString("en-US") + " lb · ≤ " + h + " in tall") : "No size limit";
-    b.onclick = ()=>{ state.maxLenIn = l; state.maxLb = w; state.maxHIn = h; L.value = l ? String(l) : ""; W.value = w ? String(w) : ""; H.value = h ? String(h) : ""; mark(); updateSaveSummary(); };
-    P.appendChild(b);
+  const caps = [600, 30000, 300];
+  els.forEach(r => {
+    const [kL, kW, kH] = r.ids;
+    const mark = ()=>{ if (!r.Pe) return; [...r.Pe.children].forEach(b=>{ const l = Number(b.dataset.l), w = Number(b.dataset.w), h = Number(b.dataset.h); b.classList.toggle("on", l > 0 && state[kL] === l && state[kW] === w && state[kH] === h); }); };
+    r.F.forEach((x, i) => { const k = r.ids[i]; x.value = state[k] ? String(state[k]) : ""; x.oninput = ()=>{ state[k] = Math.min(clean(x.value), caps[i]); mark(); updateSaveSummary(); }; });
+    if (r.Pe) { r.Pe.innerHTML = "";
+    r.presets.concat([["Clear", 0, 0, 0]]).forEach(([t, l, w, h])=>{
+      const b = document.createElement("div"); b.className = "pill sm"; b.textContent = t; b.dataset.l = l; b.dataset.w = w; b.dataset.h = h;
+      b.title = l ? (r.sign + l + " in long · " + r.sign + w.toLocaleString("en-US") + " lb · " + r.sign + h + " in tall") : "No limit";
+      b.onclick = ()=>{ state[kL] = l; state[kW] = w; state[kH] = h; r.F[0].value = l ? String(l) : ""; r.F[1].value = w ? String(w) : ""; r.F[2].value = h ? String(h) : ""; mark(); updateSaveSummary(); };
+      r.Pe.appendChild(b);
+    }); }
+    mark();
   });
-  mark(); paintMode();
+  paintMode();
 }
 function renderSitesGroup(){
   group("sites", [["Central Dispatch","cd"],["Super Dispatch","sd"],["Ship.Cars","ship"],["Autosled","as"],["ACV","ac"],["RunBuggy","rb"]], ()=>state.sites, v=>{
@@ -1663,7 +1680,7 @@ function render(){
   document.getElementById("vtClear").onclick=()=>{
     state.status="any"; state.trailer="any"; state.minVeh=1; state.maxVeh=0; state.ready=0;
     state.vt=[]; state.from=[]; state.to=[]; state.route=false; state.routeMiles=75; state.waypoints=[]; state.excludeCo=[];
-    state.shipOrigin=""; state.shipDest=""; state.maxLenIn=0; state.maxLb=0; state.maxHIn=0; state.sizeMode="off";
+    state.shipOrigin=""; state.shipDest=""; state.maxLenIn=0; state.maxLb=0; state.maxHIn=0; state.minLenIn=0; state.minLb=0; state.minHIn=0; state.sizeMode="off";
     document.getElementById("pay").value="0";
     document.getElementById("rpm").value="0";
     document.getElementById("excludeCoInput").value="";
@@ -2017,7 +2034,7 @@ function newSearch(){
   cvGoneNote("");
   state.sites=[]; state.status="any"; state.trailer="any"; state.minVeh=1; state.maxVeh=0; state.ready=0;
   state.vt=[]; state.from=[]; state.to=[]; state.route=false; state.routeMiles=75; state.waypoints=[]; state.excludeCo=[];
-  state.shipOrigin=""; state.shipDest=""; state.maxLenIn=0; state.maxLb=0; state.maxHIn=0; state.sizeMode="off";
+  state.shipOrigin=""; state.shipDest=""; state.maxLenIn=0; state.maxLb=0; state.maxHIn=0; state.minLenIn=0; state.minLb=0; state.minHIn=0; state.sizeMode="off";
   document.getElementById("pay").value="0";
   document.getElementById("rpm").value="0";
   document.getElementById("excludeCoInput").value="";
@@ -2043,7 +2060,9 @@ function editSearch(s){
     state.maxVeh = Number(payload.mx)||0;
     state.ready = Number(payload.rd)||0;
     state.vt = Array.isArray(payload.vt) ? payload.vt.slice() : [];
-    state.maxLenIn = Math.max(0, Math.round(Number(payload.ln)||0)); state.maxLb = Math.max(0, Math.round(Number(payload.lb)||0)); state.maxHIn = Math.max(0, Math.round(Number(payload.ht)||0)); state.sizeMode = (state.maxLenIn > 0 || state.maxLb > 0 || state.maxHIn > 0) ? "on" : "off";
+    state.maxLenIn = Math.max(0, Math.round(Number(payload.ln)||0)); state.maxLb = Math.max(0, Math.round(Number(payload.lb)||0)); state.maxHIn = Math.max(0, Math.round(Number(payload.ht)||0));
+    state.minLenIn = Math.max(0, Math.round(Number(payload.fl)||0)); state.minLb = Math.max(0, Math.round(Number(payload.fw)||0)); state.minHIn = Math.max(0, Math.round(Number(payload.fh)||0));
+    state.sizeMode = (state.maxLenIn > 0 || state.maxLb > 0 || state.maxHIn > 0 || state.minLenIn > 0 || state.minLb > 0 || state.minHIn > 0) ? "on" : "off";
     state.from = Array.isArray(payload.f) ? payload.f.slice() : [];
     state.to = Array.isArray(payload.to) ? payload.to.slice() : [];
     state.route = !!payload.rt;
@@ -2119,7 +2138,8 @@ function buildPayload(){
     pm: Math.round((Number(document.getElementById("rpm").value)||0) * 100) / 100,
     tr: state.trailer, vs: state.status, rd: state.ready,
     mn: state.minVeh, mx: state.maxVeh, vt: state.vt,
-    ...(state.sizeMode === "on" && state.maxLenIn > 0 ? { ln: state.maxLenIn } : {}), ...(state.sizeMode === "on" && state.maxLb > 0 ? { lb: state.maxLb } : {}), ...(state.sizeMode === "on" && state.maxHIn > 0 ? { ht: state.maxHIn } : {}), ...(state.sizeMode === "on" && (state.maxLenIn > 0 || state.maxLb > 0 || state.maxHIn > 0) ? { lm: 1 } : {}),
+    ...(state.sizeMode === "on" && state.maxLenIn > 0 ? { ln: state.maxLenIn } : {}), ...(state.sizeMode === "on" && state.maxLb > 0 ? { lb: state.maxLb } : {}), ...(state.sizeMode === "on" && state.maxHIn > 0 ? { ht: state.maxHIn } : {}), ...(state.sizeMode === "on" && state.minLenIn > 0 ? { fl: state.minLenIn } : {}), ...(state.sizeMode === "on" && state.minLb > 0 ? { fw: state.minLb } : {}), ...(state.sizeMode === "on" && state.minHIn > 0 ? { fh: state.minHIn } : {}),
+    ...(state.sizeMode === "on" && (state.maxLenIn > 0 || state.maxLb > 0 || state.maxHIn > 0 || state.minLenIn > 0 || state.minLb > 0 || state.minHIn > 0) ? { lm: 1 } : {}),
     xc: state.excludeCo.slice(0,10),
   };
   if(state.route && isRouteEligible()){
@@ -2148,7 +2168,8 @@ async function save(andStart){
     if(!state.from.length || !state.to.length){ toast("Add at least one Origin and Destination (state or city)"); return; }
     if(state.route && !isRouteEligible()){ toast("Search along route needs exactly one Origin city and one Destination city (not a whole state)"); return; }
   }
-  if(state.sizeMode === "on" && !(state.maxLenIn > 0) && !(state.maxLb > 0) && !(state.maxHIn > 0)){ toast("Car size: enter length, weight or height, or switch it Off"); return; }
+  if(state.sizeMode === "on" && !(state.maxLenIn > 0) && !(state.maxLb > 0) && !(state.maxHIn > 0) && !(state.minLenIn > 0) && !(state.minLb > 0) && !(state.minHIn > 0)){ toast("Car size: enter length, weight or height, or switch it Off"); return; }
+  if(state.sizeMode === "on" && [["minLenIn","maxLenIn","length"],["minLb","maxLb","weight"],["minHIn","maxHIn","height"]].some(([a,b,n])=>state[a] > 0 && state[b] > 0 && state[a] > state[b])){ toast("Car size: From is bigger than Up to"); return; }
   const payload = buildPayload();
 
   // Preferred path: go through the Worker so this stays a SAVED, editable search in "My Searches"
@@ -2624,6 +2645,7 @@ function searchChips(p){
   if(p.vs === "op") out.push("Operable"); else if(p.vs === "inop") out.push("Inoperable");
   if((p.mn||1) > 1 || p.mx) out.push((p.mn||1) + "–" + (p.mx || "any") + " cars");
   if(Array.isArray(p.vt) && p.vt.length) out.push(p.vt.length <= 2 ? p.vt.join(", ") : p.vt.length + " vehicle types");
+  if(p.fl || p.fw || p.fh) out.push("📏 from ≥ " + [p.fl ? p.fl + " in" : "", p.fw ? Number(p.fw).toLocaleString("en-US") + " lb" : "", p.fh ? p.fh + " in tall" : ""].filter(Boolean).join(" · "));
   if(p.ln || p.lb || p.ht) out.push("📏 only ≤ " + [p.ln ? p.ln + " in" : "", p.lb ? Number(p.lb).toLocaleString("en-US") + " lb" : "", p.ht ? p.ht + " in tall" : ""].filter(Boolean).join(" · "));
   if(p.rd) out.push(p.rd === -1 ? "Ready today" : p.rd === 1 ? "Ready by tomorrow" : "Ready ≤ " + p.rd + "d");
   return out;
