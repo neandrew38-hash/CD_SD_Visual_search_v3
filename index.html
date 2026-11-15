@@ -1647,7 +1647,9 @@ function renderSizeLimits(){
     r.presets.concat([["Clear", 0, 0, 0]]).forEach(([t, l, w, h])=>{
       const b = document.createElement("div"); b.className = "pill sm"; b.textContent = t; b.dataset.l = l; b.dataset.w = w; b.dataset.h = h;
       b.title = l ? (r.sign + l + " in long · " + r.sign + w.toLocaleString("en-US") + " lb · " + r.sign + h + " in tall") : "No limit";
-      b.onclick = ()=>{ state[kL] = l; state[kW] = w; state[kH] = h; r.F[0].value = l ? String(l) : ""; r.F[1].value = w ? String(w) : ""; r.F[2].value = h ? String(h) : ""; mark(); updateSaveSummary(); };
+      b.onclick = ()=>{ state[kL] = l; state[kW] = w; state[kH] = h; r.F[0].value = l ? String(l) : ""; r.F[1].value = w ? String(w) : ""; r.F[2].value = h ? String(h) : "";
+        if (!l) els.forEach(o => { if (o !== r) o.ids.forEach((k, i) => { state[k] = 0; o.F[i].value = ""; }); });   // (15.11, owner) "Clear" empties BOTH rows: "From (at least)" and "Up to"
+        mark(); updateSaveSummary(); };
       r.Pe.appendChild(b);
     }); }
     mark();
