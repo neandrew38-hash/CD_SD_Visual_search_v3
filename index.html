@@ -1326,7 +1326,7 @@
 
   <div class="helpSec">Alerts in the chat</div>
 <div class="card helpCard">
-    <div class="helpRow">Every new matching load is sent to you as soon as it appears. All sites (Central Dispatch, Super Dispatch, Ship.Cars, Autosled, ACV, RunBuggy) look the same. This is the <b>Classic</b> style - you can switch to <b>Compact</b> or <b>Card</b> (see <b>Alert style</b> below):</div>
+    <div class="helpRow">Every new matching load is sent to you as soon as it appears. All sites (Central Dispatch, Super Dispatch, Ship.Cars, Autosled, ACV, RunBuggy, Carvana) look the same. This is the <b>Classic</b> style - you can switch to <b>Compact</b> or <b>Card</b> (see <b>Alert style</b> below):</div>
     <div class="msgDemo">Load ID: <a>123456</a>  🔁 reposted (was $1,050)
 
 Vehicles:
@@ -1657,7 +1657,7 @@ function renderSizeLimits(){
   paintMode();
 }
 function renderSitesGroup(){
-  group("sites", [["Central Dispatch","cd"],["Super Dispatch","sd"],["Ship.Cars","ship"],["Autosled","as"],["ACV","ac"],["RunBuggy","rb"]], ()=>state.sites, v=>{
+  group("sites", [["Central Dispatch","cd"],["Super Dispatch","sd"],["Ship.Cars","ship"],["Autosled","as"],["ACV","ac"],["RunBuggy","rb"],["Carvana","cv"]], ()=>state.sites, v=>{
     const i=state.sites.indexOf(v);
     if(i>=0) state.sites.splice(i,1); else state.sites.push(v);
     if(!state.sites.length) state.sites.push(v);
@@ -2056,8 +2056,8 @@ function editSearch(s){
     // (2026-11-05) Carvana removed from the bot. A search that had ONLY Carvana gets NO platform here (never Central by itself):
     // the note says so and Save / Save & start ask to pick one. A search with Carvana and others keeps the others.
     const had = Array.isArray(payload.s) && payload.s.length ? payload.s : ["cd"];
-    state.sites = had.filter(x => x !== "cv" && x !== "v2");   // (2026-11-10) V2 Dispatch removed the same way as Carvana
-    const goneN = [had.includes("cv") ? "Carvana" : "", had.includes("v2") ? "V2 Dispatch" : ""].filter(Boolean).join(" and ");
+    state.sites = had.filter(x => x !== "v2");   // (2026-11-10) V2 Dispatch removed; (23.11.2026) Carvana is back - an old Carvana tick is kept
+    const goneN = had.includes("v2") ? "V2 Dispatch" : "";
     cvGoneNote(goneN ? (state.sites.length ? goneN + " is no longer supported - it was taken out of this search." : goneN + " is no longer supported - choose a platform for this search before saving.") : "");
     state.status = ["op","inop"].includes(payload.vs) ? payload.vs : "any";
     state.trailer = ["open","enc"].includes(payload.tr) ? payload.tr : "any";
@@ -2639,8 +2639,8 @@ function placesText(list){
   const parts = list.map(p => p.st ? p.st : (p.c + (p.r ? " · " + p.r + " mi" : "")));
   return parts.length > 4 ? parts.slice(0,4).join(", ") + " +" + (parts.length-4) : parts.join(", ");
 }
-const SITE_SHORT = { cd:"CD", sd:"SD", ship:"Ship.Cars", as:"Autosled", ac:"ACV", v2:"V2", rb:"RunBuggy" };
-const SITE_LONG = { cd:"Central Dispatch", sd:"Super Dispatch", ship:"Ship.Cars", as:"Autosled", ac:"ACV", v2:"V2 Dispatch", rb:"RunBuggy" };
+const SITE_SHORT = { cd:"CD", sd:"SD", ship:"Ship.Cars", as:"Autosled", ac:"ACV", v2:"V2", rb:"RunBuggy", cv:"Carvana" };
+const SITE_LONG = { cd:"Central Dispatch", sd:"Super Dispatch", ship:"Ship.Cars", as:"Autosled", ac:"ACV", v2:"V2 Dispatch", rb:"RunBuggy", cv:"Carvana" };
 function searchChips(p){
   const out = [];
   if(p.rt) out.push("Along route");
@@ -3137,7 +3137,7 @@ setInterval(refreshBackendState, 2000);
       <div class="ixArt"><img id="ixLogo" alt=""></div>
       <h1>Your eyes on <em>every load board</em></h1>
       <p class="ixLead">HaulHawk watches the load boards around the clock and pings you here in Telegram the second a load that fits your truck is posted - before everyone else calls.</p>
-      <div class="ixPlats"><span>Central Dispatch</span><span>Super Dispatch</span><span>Ship.Cars</span><span>Autosled</span><span>ACV</span><span>RunBuggy</span></div>
+      <div class="ixPlats"><span>Central Dispatch</span><span>Super Dispatch</span><span>Ship.Cars</span><span>Autosled</span><span>ACV</span><span>RunBuggy</span><span>Carvana</span></div>
     </div>
     <div class="ixSlide">
       <div class="ixArt"><span class="ixEmoji">🎯</span></div>
@@ -3432,9 +3432,9 @@ setInterval(refreshBackendState, 2000);
 (function(){
   const $ = id => document.getElementById(id);
   const E = s => escapeHtml(s);
-  const SN = { cd:"Central", sd:"Super", ship:"Ship.Cars", ac:"ACV", as:"Autosled", v2:"V2", rb:"RunBuggy" };
-  const SITE_ORDER = ["cd","sd","ship","ac","as","rb"];   // (2026-11-10) - V2 (removed)   // (2026-11-09) + RunBuggy   // (2026-11-08) + Ship.Cars on the Board
-  const MARKET_ORDER = ["cd","sd","ship","ac","as","rb"];   // (2026-11-10) - V2   // (2026-11-09) + RunBuggy   // (2026-11-08) + Ship.Cars (counted from its board reads)
+  const SN = { cd:"Central", sd:"Super", ship:"Ship.Cars", ac:"ACV", as:"Autosled", v2:"V2", rb:"RunBuggy", cv:"Carvana" };
+  const SITE_ORDER = ["cd","sd","ship","ac","as","rb","cv"];   // (23.11.2026) + Carvana back   // (2026-11-10) - V2 (removed)   // (2026-11-09) + RunBuggy   // (2026-11-08) + Ship.Cars on the Board
+  const MARKET_ORDER = ["cd","sd","ship","ac","as","rb","cv"];   // (2026-11-10) - V2   // (2026-11-09) + RunBuggy   // (2026-11-08) + Ship.Cars (counted from its board reads)
   const OLD_MS = 2 * 3600000;   // older than this: greyed, "may be taken" (the bot can't see when a load is taken - owner 08.11)
   const SINCE = [[60,"last 1 h"],[180,"last 3 h"],[1440,"last 24 h"]];
   const LS = "hhBoardV1";
