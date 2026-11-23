@@ -3598,7 +3598,7 @@ setInterval(refreshBackendState, 2000);
     const it = curItem(); if(!it) return;
     const old = agoOf(it) > OLD_MS;
     const tiles = [[it.rate ? "$" + it.rate.toFixed(2) : "—", "per mile"], [it.miles ? (it.milesApprox ? "~" : "") + Number(it.miles).toLocaleString("en-US") : "—", "miles"], [carsTxt(it, true), it.trailer || "—"]];
-    const coName = it.company || (it.site === "ac" ? "ACV Transport" : it.site === "as" ? "Autosled" : it.site === "v2" ? "Shipper not shown on V2" : it.site === "ship" && it.hidCo ? "Company hidden by Ship.Cars (~30 min)" : "Company hidden by the shipper");
+    const coName = it.company || (it.site === "ac" ? "ACV Transport" : it.site === "as" ? "Autosled" : it.site === "cv" ? "Carvana LLC" : it.site === "rb" ? "RunBuggy" : it.site === "v2" ? "Shipper not shown on V2" : it.site === "ship" && it.hidCo ? "Company hidden by Ship.Cars (~30 min)" : "Company hidden by the shipper");
     const coSub = [it.rating ? "★ " + String(it.rating).split(" ")[0] : "", it.payment].filter(Boolean).join(" · ");
     const lid = it.loadId ? '<button type="button" class="ldLid" id="ldLid"><span>LOAD ID</span><b>' + E(it.loadId) + '</b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2"/></svg></button>' : '';
     const dealShort = it.deal ? (it.deal.pct >= 3 ? '<div class="ldDeal">▲ ' + it.deal.pct + '% vs lane</div>' : it.deal.pct <= -3 ? '<div class="ldDeal lo">▼ ' + Math.abs(it.deal.pct) + '% vs lane</div>' : '<div class="ldDeal mid">≈ lane average</div>') : '';
