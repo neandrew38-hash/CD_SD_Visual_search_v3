@@ -877,6 +877,62 @@
   /* (2026-11-08 owner "1") ...but the search cards keep their size as before (name, route, filter chips, stats): 1/.86 */
   html.desk .scard{zoom:1.1628}
 </style>
+<style id="hhWebCss">
+  /* (24.11.2026, owner) 🖥 the BROWSER site: this same page opened with "?web=1" - Board only, log in with Telegram */
+  body.hhWeb{padding-top:64px}
+  body.hhWeb .tabbar,body.hhWeb #bdAsSearch,body.hhWeb #bdWebBtn{display:none!important}
+  body.hhWeb #hhIntro{display:none!important}   /* the phone welcome slides are not for the browser site */
+  body.hhWeb .themeToggle{top:14px;right:14px}
+  #hhWebBar{position:fixed;left:0;right:0;top:0;height:56px;z-index:30;display:flex;align-items:center;gap:12px;padding:0 64px 0 20px;background:var(--card);border-bottom:1px solid var(--line);box-shadow:0 1px 3px var(--shadow)}
+  #hhWebBar .wbLogo{font-weight:800;font-size:17px;letter-spacing:-.01em}#hhWebBar .wbLogo em{font-style:normal;color:var(--accent)}
+  #hhWebBar .wbSp{flex:1}#hhWebBar .wbWho{font-size:13px;color:var(--text3)}
+  #hhWebBar button{border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:9px;padding:7px 12px;font-size:13px;font-weight:600;cursor:pointer}
+  #hhWebBar button.arm{background:var(--danger);border-color:var(--danger);color:#fff}
+  #hhWebLogin{position:fixed;inset:0;z-index:35;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px}
+  #hhWebLogin .wlBox{background:var(--card);border:1px solid var(--line);border-radius:18px;max-width:420px;width:100%;padding:28px 26px;text-align:center;box-shadow:0 8px 28px var(--shadow)}
+  #hhWebLogin h1{font-size:22px;margin:0 0 8px}#hhWebLogin h1 em{font-style:normal;color:var(--accent)}
+  #hhWebLogin p{color:var(--text3);font-size:14px;line-height:1.45;margin:0 0 18px}
+  #hhWebLogin .wlErr{color:var(--danger);font-size:13px;margin-top:14px;min-height:18px}
+  #hhWebLogin .wlNote{color:var(--text4);font-size:12px;margin-top:16px;line-height:1.4}
+  @media (min-width:1280px){
+    body.hhWeb{max-width:none;padding:76px 16px 40px 300px}
+    body.hhWeb #bdFilterBtn{display:none}
+    body.hhWeb .bdSheetBg,body.hhWeb .bdSheetBg.on{display:block;position:fixed;left:0;top:56px;bottom:0;right:auto;width:284px;background:transparent;z-index:20}
+    body.hhWeb .bdSheet{position:static;max-width:none;height:100%;max-height:none;border-radius:0;border-top:0;border-right:1px solid var(--line);box-sizing:border-box;padding:16px 18px 24px}
+    body.hhWeb .bdGrab{display:none}
+    body.hhWeb #bdList{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:clip}   /* clip, not hidden: hidden would pin the sticky column titles 56 px down inside the list */
+    .wHd,.wRw{display:grid;grid-template-columns:minmax(110px,1.2fr) minmax(140px,1.6fr) 64px 104px minmax(100px,1.2fr) 86px 76px 34px;gap:10px;align-items:center;padding:10px 12px}
+    .wHd{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text4);background:var(--bg);border-bottom:1px solid var(--line);position:sticky;top:56px;z-index:2}
+    .wIt{border-bottom:1px solid var(--line)}.wIt:last-child{border-bottom:0}
+    .wRw{cursor:pointer;font-size:14px}.wRw:hover{background:var(--accent-tint)}
+    .wIt.open .wRw{background:var(--accent-tint)}
+    .wIt.old .wRw{opacity:.55}
+    .wRw b{font-weight:700}.wRw small{display:block;font-size:12px;color:var(--text3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .wRw .wC{min-width:0;overflow:hidden;text-overflow:ellipsis}
+    .wRw .wRt i{font-style:normal;color:var(--text4);margin:0 5px}
+    .wRw .wPr b{font-size:15px}.wRw .wDl{color:var(--success);font-weight:700}.wRw .wDl.lo{color:var(--danger)}
+    .wRw .wCo em{font-style:normal;color:var(--warn-text);font-size:12px;margin-left:4px}
+    .wChev{width:30px;height:30px;border-radius:9px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--text3);transition:transform .2s ease,color .2s,border-color .2s}
+    .wChev svg{width:16px;height:16px}
+    .wIt.open .wChev{transform:rotate(180deg);color:var(--accent);border-color:var(--accent)}
+    .wRw:hover .wChev{border-color:var(--accent);color:var(--accent)}
+    .wDet{display:none;padding:4px 12px 16px;gap:22px;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) 280px;font-size:13px}
+    .wIt.open .wDet{display:grid}
+    .wDet .wL{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text4);margin-bottom:4px}
+    .wDet code{font-family:inherit;font-weight:700;cursor:pointer;border-bottom:1px dashed var(--text4)}
+    .wDet .wBig{display:block;width:100%;height:32px;margin-bottom:6px;border-radius:9px;font-weight:700;font-size:13px;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--fg)}
+    .wDet .wBig.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+    .wDet .wBig:hover{border-color:var(--accent)}
+    .wDet .wQ{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin-top:2px}   /* (owner) one row, so the buttons end at the lane-avg line */
+    .wDet .wQ button{height:30px;padding:0 4px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--fg);font-weight:600;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap}
+    .wDet .wQ button svg{width:13px;height:13px;flex:none}
+    .wDet .wQ button:hover{border-color:var(--accent);color:var(--accent)}
+    .wDet .wQ button.done{color:var(--accent);border-color:var(--accent)}
+    .wDet .wQ button.blk{color:var(--danger)}.wDet .wQ button.arm{background:var(--danger);border-color:var(--danger);color:#fff}
+    .wDet .wPl{font-weight:700;font-size:14px}.wDet .wPs{font-size:12px;color:var(--text4);font-weight:400;margin:1px 0 9px}
+    .wDet .wNt{grid-column:1/-1;color:var(--text2);white-space:pre-wrap;line-height:1.4}
+  }
+</style>
 </head>
 <body>
 <div id="splash"><div class="hawkWrap"><span class="ring"></span><span class="ring r2"></span><img class="hawk" src="data:image/png;base64,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" alt="HaulHawk"></div><div class="brand">HaulHawk</div><div class="tag">First to spot it. First to book it.</div><div class="loadBar"><span></span></div></div>
@@ -1174,7 +1230,7 @@
   <div class="bdHead">
     <div><div class="pageTitle">Board</div></div>
     <div class="bdLid" id="bdLidBox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg><input id="bdLid" type="text" enterkeyhint="search" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" maxlength="40" placeholder="Load ID" aria-label="Search by Load ID"><button type="button" id="bdLidX" aria-label="Clear">✕</button></div>
-    <div class="bdHBtns"><button type="button" class="iconBtn" id="bdRefresh" aria-label="Refresh" title="Refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M20 11a8 8 0 10-2.3 5.7M20 5v6h-6"/></svg></button><button type="button" class="iconBtn" id="bdFilterBtn" aria-label="Filters" title="Filters"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg><span class="bdDot" id="bdFDot"></span></button></div>
+    <div class="bdHBtns"><button type="button" class="iconBtn" id="bdWebBtn" aria-label="Open in browser" title="Open in browser (computer)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg></button><button type="button" class="iconBtn" id="bdRefresh" aria-label="Refresh" title="Refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M20 11a8 8 0 10-2.3 5.7M20 5v6h-6"/></svg></button><button type="button" class="iconBtn" id="bdFilterBtn" aria-label="Filters" title="Filters"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg><span class="bdDot" id="bdFDot"></span></button></div>
   </div>
   <div class="bdChips" id="bdSites"></div>
   <div class="bdRow bdRowC" id="bdRowC">
@@ -2125,6 +2181,64 @@ document.getElementById("excludeCoInput").addEventListener("keydown", e=>{
 // copying the message so it can still be pasted into the chat by hand.
 const tg = (window.Telegram && window.Telegram.WebApp) || null;
 try{ if(tg){ tg.ready(); tg.expand(); } }catch(e){}
+// (24.11.2026, owner) 🖥 the BROWSER site = this same page opened in a normal browser with "?web=1" (the Board's "Open in browser").
+// No Telegram initData there: the official "Log in with Telegram" -> the Worker (/api/web/login) checks it and that the person is
+// the admin or an active member -> a 7-day pass, kept in this browser only. Every call then carries the pass instead of initData;
+// the Worker and the office computer check it (same person, same rights - Contact / Crypto still need the Mini App).
+// Inside Telegram (initData present) none of this runs - the Mini App works exactly as before.
+const HH_WEB = !(tg && tg.initData) && /[?&]web=1(&|$)/.test(location.search);
+const HH_WEB_LS = "hhWebV1", HH_WEB_BOT = "central0217bot";
+let hhWeb = null;
+try{ const w = JSON.parse(localStorage.getItem(HH_WEB_LS) || "null"); if(HH_WEB && w && typeof w.token === "string" && Number(w.exp) * 1000 > Date.now() + 60000) hhWeb = w; }catch(e){}
+function hhWebToken(){ return HH_WEB && hhWeb && Number(hhWeb.exp) * 1000 > Date.now() ? hhWeb.token : ""; }
+function hhAuthed(){ return !!((tg && tg.initData) || hhWebToken()); }
+function hhAuthBody(){ return (tg && tg.initData) ? { initData: tg.initData } : hhWebToken() ? { webSession: hhWebToken() } : { initData: "" }; }
+function hhAuthHeaders(){ return (!(tg && tg.initData) && hhWebToken()) ? { "x-web-session": hhWebToken() } : { "x-telegram-init-data": (tg && tg.initData) || "" }; }
+function hhWebDrop(why){ hhWeb = null; try{ localStorage.removeItem(HH_WEB_LS); }catch(e){} if(HH_WEB) hhWebShowLogin(why || "Your login has ended - log in again."); }
+function hhWebShowLogin(err){
+  if(!HH_WEB) return;
+  let box = document.getElementById("hhWebLogin");
+  if(!box){
+    box = document.createElement("div"); box.id = "hhWebLogin";
+    box.innerHTML = '<div class="wlBox"><h1>Haul<em>Hawk</em> Board</h1><p>Log in with your Telegram account.<br>The Board website is for HaulHawk subscribers.</p><div id="hhWebWidget"></div><div class="wlErr" id="hhWebErr"></div><div class="wlNote">The login stays on this computer for 7 days. Telegram shows HaulHawk only your name and Telegram id - never your phone number or chats.</div></div>';
+    document.body.appendChild(box);
+    const s = document.createElement("script"); s.async = true; s.src = "https://telegram.org/js/telegram-widget.js?22";
+    s.setAttribute("data-telegram-login", HH_WEB_BOT); s.setAttribute("data-size", "large"); s.setAttribute("data-radius", "10"); s.setAttribute("data-onauth", "hhWebOnAuth(user)");
+    s.onerror = () => { const e = document.getElementById("hhWebErr"); if(e) e.textContent = "Telegram's login button did not load - check the internet and reload the page."; };
+    document.getElementById("hhWebWidget").appendChild(s);
+  }
+  box.style.display = "flex";
+  const e = document.getElementById("hhWebErr"); if(e) e.textContent = err || "";
+}
+async function hhWebOnAuth(user){
+  const e = document.getElementById("hhWebErr"); if(e) e.textContent = "Checking…";
+  let j = null, st = 0;
+  try{ const r = await fetch(WORKER_URL.replace(/\/$/,"") + "/api/web/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(user || {}) }); st = r.status; j = await r.json().catch(() => null); }catch(x){ j = null; }
+  if(j && j.ok && j.token){
+    try{ localStorage.setItem(HH_WEB_LS, JSON.stringify({ token: j.token, exp: j.exp, name: String(j.name || "").slice(0, 64), role: j.role })); }catch(x){ if(e) e.textContent = "This browser does not allow saving the login (private mode?) - use a normal window."; return; }
+    location.reload(); return;
+  }
+  const er = j && j.error;
+  if(e) e.textContent = er === "not_registered" ? "This Telegram account is not a HaulHawk member yet - open the bot in Telegram first." : er === "bad_login" ? "Telegram's login could not be checked - try again." : er === "state_unreadable" ? "HaulHawk is updating - try again in a minute." : "Couldn't reach HaulHawk (" + (st || "no internet") + ") - try again.";
+}
+function hhWebBoot(){
+  if(!HH_WEB) return;
+  document.body.classList.add("hhWeb");
+  if(!hhWebToken()){ hhWebShowLogin(""); return; }
+  const bar = document.createElement("div"); bar.id = "hhWebBar";
+  bar.innerHTML = '<div class="wbLogo">Haul<em>Hawk</em> · Board</div><div class="wbSp"></div><div class="wbWho"></div><button type="button" id="hhWebOut">Log out</button><button type="button" id="hhWebOutAll">Log out on all computers</button>';
+  document.body.appendChild(bar);
+  bar.querySelector(".wbWho").textContent = (hhWeb.name || "") + (hhWeb.role === "admin" ? " · admin" : "") + " · login until " + new Date(Number(hhWeb.exp) * 1000).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  document.getElementById("hhWebOut").onclick = () => { hhWebDrop("Logged out on this computer."); };
+  let armed = 0; const all = document.getElementById("hhWebOutAll");
+  all.onclick = async () => {
+    if(Date.now() - armed > 4000){ armed = Date.now(); all.classList.add("arm"); all.textContent = "Click again: log out everywhere"; setTimeout(() => { all.classList.remove("arm"); all.textContent = "Log out on all computers"; }, 4000); return; }
+    let ok = false;
+    try{ const r = await fetch(WORKER_URL.replace(/\/$/,"") + "/api/web/logout-all", { method: "POST", headers: hhAuthHeaders() }); const j = await r.json().catch(() => null); ok = !!(j && j.ok); }catch(x){}
+    if(ok) hhWebDrop("Logged out on all computers."); else toast("Not done - check the internet and try again");
+  };
+  try{ switchTab("board"); }catch(x){}
+}
 (function(){
   const sub = document.getElementById("subText");
   if(tg && tg.initData) sub.style.display = "none";   // 2026-10-01: only shown when something is wrong
@@ -2282,8 +2396,10 @@ function switchTab(name){
 // only sees their own. If the computer is off, the tab just says so.
 const PC_URL = "https://macs-macbook-pro.tail2a7952.ts.net";
 async function pcApi(path, extra){
-  const r = await fetch(PC_URL + path, { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(Object.assign({ initData: (tg && tg.initData) || "" }, extra || {})) });
+  const r = await fetch(PC_URL + path, { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(Object.assign(hhAuthBody(), extra || {})) });
   const j = await r.json().catch(()=>null);
+  if(r.status === 401 && HH_WEB && hhWebToken()) hhWebDrop("Your login has ended - log in again.");   // (24.11.2026) 🖥 pass expired / logged out everywhere
+  if(r.status === 403 && j && j.noSub && HH_WEB && hhWebToken()) hhWebDrop("The Board website is for HaulHawk subscribers. See the plans in the Mini App: More → Subscription.");   // (24.11.2026, owner) subscribers only
   if(!r.ok || !j) throw new Error((j && j.error) || ("HTTP " + r.status));
   return j;
 }
@@ -2374,13 +2490,14 @@ function renderSaved(list){
   });
 }
 if(location.hash === "#saved") setTimeout(()=>switchTab("saved"), 0);
+if(HH_WEB){ if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", hhWebBoot); else setTimeout(hhWebBoot, 0); }   // (24.11.2026) 🖥 browser site
 document.querySelectorAll(".tabbtn").forEach(b=>b.addEventListener("click", ()=>switchTab(b.dataset.tab)));
 
 async function apiState(){
   if(!WORKER_URL) return null;
   try{
     const r = await fetch(WORKER_URL.replace(/\/$/,"")+"/api/state", {
-      headers: { "x-telegram-init-data": (tg && tg.initData) || "" },
+      headers: hhAuthHeaders(),   // (24.11.2026) 🖥 or the browser site's pass
     });
     const data = await r.json().catch(()=>null);
     if(!r.ok) return { role: (data&&data.role)||null, error: (data&&data.error) || ("http_"+r.status) };
@@ -2393,7 +2510,7 @@ async function apiAction(body){
   try{
     const r = await fetch(WORKER_URL.replace(/\/$/,"")+"/api/action", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "x-telegram-init-data": (tg && tg.initData) || "" },
+      headers: Object.assign({ "Content-Type": "application/json" }, hhAuthHeaders()),   // (24.11.2026) 🖥 or the browser site's pass
       body: JSON.stringify(body),
     });
     return await r.json();
@@ -3012,7 +3129,7 @@ const BOT_USERNAME = "central0217bot";
 // office computer itself. Used only to spot one person opening many trial accounts.
 (function securityCheckin(){
   try{
-    if(!tg || !tg.initData) return;
+    if(!hhAuthed()) return;   // (24.11.2026) 🖥 the browser site checks in too (its IP + device, same as a phone)
     let dev = "";
     try{ dev = localStorage.getItem("hh_dev") || ""; }catch(e){}
     if(!dev){
@@ -3458,7 +3575,7 @@ setInterval(refreshBackendState, 2000);
   const hasFilter = () => !!(B.mine || B.f.from.length || B.f.to.length || B.f.p || B.f.pm || B.f.tr !== "any" || B.f.vs !== "any" || B.f.vt.length);
   const hasOwnFilter = () => !!(B.f.from.length || B.f.to.length || B.f.p || B.f.pm || B.f.tr !== "any" || B.f.vs !== "any" || B.f.vt.length);
   const filterPayload = () => hasOwnFilter() ? b64urlEncode({ s:["cd"], f:B.f.from, to:B.f.to, p:B.f.p, pm:B.f.pm, tr:B.f.tr, vs:B.f.vs, vt:B.f.vt }) : "";   // vt: vehicle types (2026-11-09) - the same filter as a search's
-  function openUrl(u){ if(!u) return; if(tg && tg.openLink) tg.openLink(u); else window.open(u, "_blank"); }
+  function openUrl(u){ if(!u) return; if(!HH_WEB && tg && tg.openLink) tg.openLink(u); else window.open(u, "_blank", "noopener"); }
   async function copyText(t){
     try { if(navigator.clipboard && navigator.clipboard.writeText){ await navigator.clipboard.writeText(t); return true; } } catch(e){}
     try { const a = document.createElement("textarea"); a.value = t; a.setAttribute("readonly",""); a.style.position = "fixed"; a.style.opacity = "0"; document.body.appendChild(a); a.select(); const ok = document.execCommand("copy"); a.remove(); return ok; } catch(e){ return false; }
@@ -3537,6 +3654,79 @@ setInterval(refreshBackendState, 2000);
       '<div class="bdMn">' + money(it.price) + (more ? ' · <span>' + E(more) + '</span>' : "") + '</div>' + coRow +
       '<div class="bdFoot"><span class="bdSrc ' + it.site + '">' + E((SN[it.site]||it.site).toUpperCase()) + '</span><span class="bdAgo">' + ago(agoOf(it)) + (old ? " · may be taken" : "") + '</span>' + deal + fits + '</div></div>';
   }
+
+  // ---------- (24.11.2026, owner) 🖥 the browser site on a wide screen (1280 px+): loads as ROWS, filters always on the left ----------
+  // Columns (owner): vehicle · route · pickup · price · company · platform · when, then an arrow (down = closed, turns up = open).
+  // A click opens the row in place: Load ID (owner: only there), the route (city / Pickup / city / Delivery), company, phone,
+  // e-mail, notes, and ALL the buttons: Open on the site, Company page, SMS, Route, Save, Block.
+  // Narrower window: the normal Mini App cards and load page. Inside Telegram this is never used.
+  const WIDE = () => HH_WEB && window.matchMedia && window.matchMedia("(min-width:1280px)").matches;
+  const IC = {
+    sms: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H8l-4 4z"/></svg>',
+    map: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"/></svg>',
+    save: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg>',
+    block: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M6 6l12 12"/></svg>',
+    chev: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>',
+  };
+  const coNameOf = it => it.company || (it.site === "ac" ? "ACV Transport" : it.site === "as" ? "Autosled" : it.site === "cv" ? "Carvana LLC" : it.site === "rb" ? "RunBuggy" : it.site === "ship" && it.hidCo ? "Hidden by Ship.Cars (~30 min)" : "Hidden by the shipper");
+  function rowHtml(it){
+    const old = agoOf(it) > OLD_MS, open = B.wOpen === it.k;
+    const sub1 = [it.trailer, it.inop ? "Inop" : ""].filter(Boolean).join(" · ");
+    const deal = it.deal && (it.deal.pct >= 10 || it.deal.pct <= -10) ? ' <span class="wDl' + (it.deal.pct < 0 ? " lo" : "") + '">' + (it.deal.pct > 0 ? "+" : "−") + Math.abs(it.deal.pct) + '%</span>' : "";
+    const prSub = [it.rate ? "$" + it.rate.toFixed(2) + "/mi" : "", it.miles ? (it.milesApprox ? "~" : "") + Number(it.miles).toLocaleString("en-US") + " mi" : ""].filter(Boolean).join(" · ");
+    const qb = (act, ic, label, cls) => '<button type="button" data-act="' + act + '"' + (cls ? ' class="' + cls + '"' : '') + '>' + ic + label + '</button>';
+    const vehList = it.vehicles && it.vehicles.length ? it.vehicles : [(it.cars || 1) + " vehicle(s)"];
+    const emOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(it.email || ""));
+    const det = '<div class="wDet">' +
+      '<div><div class="wL">Load ID</div>' + (it.loadId ? '<code data-copy="lid">' + E(it.loadId) + '</code>' : "—") +
+        '<div class="wL" style="margin-top:10px">Vehicles</div>' + vehList.map(v => '<div>' + E(v) + '</div>').join("") + '<div style="color:var(--text3)">' + (it.inop ? "inop" : "operable") + (it.trailer ? " · " + E(it.trailer) : "") + '</div></div>' +
+      '<div><div class="wL">Route</div>' +   // (owner) city / grey "Pickup" / city / grey "Delivery"
+        '<div class="wPl">' + E(place(it.o)) + ' <span style="font-weight:400">' + E((it.o && it.o.zip) || "") + '</span></div><div class="wPs">Pickup' + (it.pickup ? " · " + E(day(it.pickup)) : "") + '</div>' +
+        '<div class="wPl">' + E(place(it.d)) + ' <span style="font-weight:400">' + E((it.d && it.d.zip) || "") + '</span></div><div class="wPs">Delivery</div>' +
+        (it.deal ? '<div style="color:var(--text3)">lane avg $' + Number(it.deal.avg).toFixed(2) + '/mi · ' + it.deal.n + ' loads, 7 days</div>' : "") + '</div>' +
+      '<div><div class="wL">Company</div><div><b>' + E(coNameOf(it)) + '</b>' + (it.rating ? ' <span style="color:var(--warn-text)">★ ' + E(String(it.rating).split(" ")[0]) + '</span>' : "") + '</div>' +
+        (it.payment ? '<div style="color:var(--text3)">' + E(it.payment) + '</div>' : "") +
+        '<div>Phone: ' + (it.phone ? '<code data-copy="phone">' + E(it.phone) + '</code>' : "none") + '</div><div>E-mail: ' + (emOk ? '<code data-copy="email">' + E(it.email) + '</code>' : "none") + '</div></div>' +
+      '<div><div class="wL">Actions</div>' +   // (owner) the two big ones the same size, one under the other; then SMS / Route / Save / Block
+        (it.url ? '<button type="button" class="wBig pri" data-act="open">Open on ' + E(SN[it.site] || "site") + ' ↗</button>' : "") +
+        (it.company && it.companyUrl ? '<button type="button" class="wBig" data-act="co">Company page ↗</button>' : "") +
+        (it.callUrl ? '<button type="button" class="wBig" data-act="call">Call ' + E(it.phone || "") + '</button>' : "") +
+        '<div class="wQ">' + (it.sms ? qb("sms", IC.sms, "SMS") : "") + (it.routeUrl ? qb("map", IC.map, "Route") : "") + qb("save", IC.save, "Save") + (it.company ? qb("block", IC.block, "Block", "blk") : "") + '</div></div>' +
+      (it.notes ? '<div class="wNt"><div class="wL">Notes</div>' + E(it.notes) + '</div>' : "") + '</div>';
+    return '<div class="wIt' + (old ? " old" : "") + (open ? " open" : "") + '" data-k="' + E(it.k) + '"><div class="wRw">' +
+      '<div class="wC"><b>' + E(carsTxt(it)) + '</b>' + (sub1 ? '<small>' + E(sub1) + '</small>' : "") + '</div>' +
+      '<div class="wC wRt"><b>' + E(place(it.o)) + '</b><i>→</i><b>' + E(place(it.d)) + '</b></div>' +
+      '<div class="wC">' + (it.pickup ? E(day(it.pickup)) : "—") + '</div>' +
+      '<div class="wC wPr"><b>' + money(it.price) + '</b>' + deal + (prSub ? '<small>' + E(prSub) + '</small>' : "") + '</div>' +
+      '<div class="wC wCo">' + (it.company ? '<b>' + E(it.company) + '</b>' : '<span style="color:var(--text4)">' + E(coNameOf(it)) + '</span>') + (!old && it.rating ? '<em>★ ' + E(String(it.rating).split(" ")[0]) + '</em>' : "") + '</div>' +
+      '<div class="wC"><span class="bdSrc ' + E(it.site) + '">' + E((SN[it.site] || it.site).toUpperCase()) + '</span></div>' +
+      '<div class="wC"><span class="bdAgo">' + ago(agoOf(it)) + (old ? " · may be taken" : "") + '</span></div>' +
+      '<div><span class="wChev" aria-hidden="true">' + IC.chev + '</span></div>' +
+      '</div>' + det + '</div>';
+  }
+  function rowsHtml(){ return '<div class="wHd"><div>Vehicle</div><div>Route</div><div>Pickup</div><div>Price</div><div>Company</div><div>Platform</div><div>Posted</div><div></div></div>' + B.items.map(rowHtml).join(""); }
+  function wireRows(box){
+    box.querySelectorAll(".wIt").forEach(row => {
+      const k = row.dataset.k, it = () => B.items.find(x => x.k === k);
+      row.querySelector(".wRw").onclick = e => { if(e.target.closest("button")) return; B.wOpen = B.wOpen === k ? null : k; box.querySelectorAll(".wIt.open").forEach(r => { if(r !== row) r.classList.remove("open"); }); row.classList.toggle("open", B.wOpen === k); };
+      row.querySelectorAll("[data-copy]").forEach(el => el.onclick = async () => { const x = it(); if(!x) return; const v = el.dataset.copy === "lid" ? x.loadId : el.dataset.copy === "phone" ? x.phone : x.email; const ok = await copyText(v); toast(ok ? "Copied: " + v : v); });
+      let armed = 0;
+      row.querySelectorAll("button[data-act]").forEach(b => b.onclick = async e => {
+        e.stopPropagation(); const x = it(); if(!x) return; const a = b.dataset.act;
+        if(a === "sms"){ const ok = await copyText(x.sms); toast(ok ? "SMS text copied" : "Copy did not work here"); }
+        else if(a === "map") openUrl(x.routeUrl);
+        else if(a === "open") openUrl(x.url);
+        else if(a === "call") openUrl(x.callUrl);
+        else if(a === "co") openUrl(x.companyUrl);
+        else if(a === "save"){ try { const j = await pcApi("/api/miniapp/board/action", { k: x.k, act: "save" }); if(!j.ok) throw new Error(j.error); b.classList.add("done"); toast("⭐ Saved — find it in Saved in the Mini App"); } catch(er){ toast(String(er.message || "Not saved - try again")); } }
+        else if(a === "block"){
+          if(Date.now() - armed > 3500){ armed = Date.now(); b.classList.add("arm"); toast("Click Block again to block " + x.company); setTimeout(() => b.classList.remove("arm"), 3500); return; }
+          try { const j = await pcApi("/api/miniapp/board/action", { k: x.k, act: "block" }); if(!j.ok) throw new Error(j.error); toast("🚫 Blocked " + j.company + " — no alerts or board loads from them"); if(B.hideBlk) B.items = B.items.filter(y => y.company !== x.company); renderList(); }
+          catch(er){ toast(String(er.message || "Not done - try again")); }
+        }
+      });
+    });
+  }
   function renderList(){
     const box = $("bdList"); if(!box) return;
     renderSites(); renderLive();
@@ -3549,7 +3739,8 @@ setInterval(refreshBackendState, 2000);
     }
     if(!B.items.length){
       box.innerHTML = '<div class="bdEmpty">' + (B.loading ? "Loading…" : B.err ? "" : B.lid ? "No load with this ID on the Board (last 25 h)." : hasFilter() ? "No loads match " + (B.mine ? "this search" : "these filters") + " in this time.<br>Widen the filter or pick “24 h”." : "The board is filling up — new loads appear here the moment the bot sees them.") + '</div>';
-    } else box.innerHTML = B.items.map(cardHtml).join("");
+    } else if(WIDE()){ box.innerHTML = rowsHtml(); wireRows(box); }   // (24.11.2026) 🖥 the browser site, wide: rows
+    else box.innerHTML = B.items.map(cardHtml).join("");
     box.querySelectorAll(".bdCard").forEach(c => c.onclick = () => openLoad(c.dataset.k));
     $("bdMore").style.display = B.items.length && (B.more != null ? B.more : B.items.length < B.total) ? "" : "none";
   }
@@ -3558,11 +3749,11 @@ setInterval(refreshBackendState, 2000);
     try {
       if(!document.getElementById("tab-board").classList.contains("on") || document.visibilityState !== "visible") return;
       const by = new Map(B.items.map(x => [x.k, x]));
-      document.querySelectorAll("#bdList .bdCard").forEach(c => { const it = by.get(c.dataset.k); const a = c.querySelector(".bdAgo"); if(!it || !a) return; const ms = agoOf(it), old = ms > OLD_MS; a.textContent = ago(ms) + (old ? " · may be taken" : ""); c.classList.toggle("old", old); });
+      document.querySelectorAll("#bdList .bdCard, #bdList .wIt").forEach(c => { const it = by.get(c.dataset.k); const a = c.querySelector(".bdAgo"); if(!it || !a) return; const ms = agoOf(it), old = ms > OLD_MS; a.textContent = ago(ms) + (old ? " · may be taken" : ""); c.classList.toggle("old", old); });
     } catch(e){}
   }, 30000);
   async function load(reset, quiet){
-    if(!(tg && tg.initData)){ B.err = "Open this app from the bot chat to see the board."; renderList(); return; }
+    if(!hhAuthed()){ B.err = HH_WEB ? "Log in with Telegram to see the board." : "Open this app from the bot chat to see the board."; renderList(); return; }
     const no = ++B.reqNo;
     if(reset && !quiet){ B.items = []; B.loading = true; renderList(); }
     try{
@@ -3586,7 +3777,7 @@ setInterval(refreshBackendState, 2000);
     clearTimeout(B.timer);
     B.timer = setTimeout(() => {
       const on = document.getElementById("tab-board").classList.contains("on");
-      if(on && document.visibilityState === "visible" && window.scrollY < 300 && !B.loading && !$("bdSheetBg").classList.contains("on")) load(true, true);
+      if(on && document.visibilityState === "visible" && window.scrollY < 300 && !B.loading && (WIDE() || !$("bdSheetBg").classList.contains("on"))) load(true, true);
       tick();
     }, 20000);
   }
@@ -3696,7 +3887,7 @@ setInterval(refreshBackendState, 2000);
     $("bdFromSug").style.display = "none"; $("bdToSug").style.display = "none";
     sheetPaint(); $("bdSheetBg").classList.add("on");
   }
-  function closeSheet(){ $("bdSheetBg").classList.remove("on"); }
+  function closeSheet(){ if(WIDE()) return; $("bdSheetBg").classList.remove("on"); }   // (24.11.2026) 🖥 wide browser site: the filters stay on the left
   function takeSheet(){
     B.f = { from: B.tmp.from, to: B.tmp.to, tr: B.tmp.tr, vs: B.tmp.vs, vt: (B.tmp.vt || []).slice(),
       pm: Math.max(0, Math.min(50, Math.round((parseFloat($("bdRpm").value) || 0) * 100) / 100)), p: Math.max(0, Math.min(999999, parseInt($("bdPay").value, 10) || 0)) };
@@ -3710,7 +3901,7 @@ setInterval(refreshBackendState, 2000);
     const chips = [["all","All"]].concat(MARKET_ORDER.map(s => [s, SN[s]]));
     $("mkSites").innerHTML = chips.map(([s,l]) => '<button type="button" class="bdChip' + (MK.site === s ? " on" : "") + '" data-s="' + s + '">' + l + '</button>').join("");
     $("mkSites").querySelectorAll(".bdChip").forEach(b => b.onclick = () => { MK.site = b.dataset.s; loadMarket(); });
-    if(!(tg && tg.initData)){ box.innerHTML = '<div class="muted">Open this app from the bot chat to see market stats.</div>'; return; }
+    if(!hhAuthed()){ box.innerHTML = '<div class="muted">Open this app from the bot chat to see market stats.</div>'; return; }
     try{
       const j = await pcApi("/api/miniapp/market", { site: MK.site, lanes: MK.lanes });
       if(!j.ok) throw new Error(j.error);
@@ -3768,6 +3959,12 @@ setInterval(refreshBackendState, 2000);
     };
     wireCity("bdFromIn", "bdFromSug", "from"); wireCity("bdToIn", "bdToSug", "to");
     document.querySelectorAll("[data-back]").forEach(b => b.onclick = () => switchTab(b.dataset.back));
+    // (24.11.2026, owner) 🖥 "Open in browser": the Mini App opens this same page as the browser site (log in with Telegram there)
+    { const wb = $("bdWebBtn"); if(wb){ if(!(tg && tg.initData) || HH_WEB) wb.style.display = "none"; wb.onclick = () => { const u = location.origin + location.pathname + "?web=1"; try { if(tg && tg.openLink) tg.openLink(u); else window.open(u, "_blank"); } catch(e){ window.open(u, "_blank"); } }; } }
+    if(HH_WEB){
+      let wasWide = WIDE(); if(wasWide) openSheet();
+      window.addEventListener("resize", () => { const w = WIDE(); if(w === wasWide) return; wasWide = w; if(w){ if(B.openK) closeLoad(); openSheet(); } else $("bdSheetBg").classList.remove("on"); renderList(); });
+    }
     renderList(); tick();
   }
   window.hhBoard = {
