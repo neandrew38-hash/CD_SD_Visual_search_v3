@@ -920,6 +920,27 @@
   #hhWebBar .wbSp{flex:1}#hhWebBar .wbWho{font-size:13px;color:var(--text3)}
   #hhWebBar button{border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:9px;padding:7px 12px;font-size:13px;font-weight:600;cursor:pointer}
   #hhWebBar button.arm{background:var(--danger);border-color:var(--danger);color:#fff}
+  /* (26.11.2026, owner "да" to the mockup) 📱 the website on a PHONE: one line - logo, ☀ theme (icon only), "L ▾" menu with the name +
+     login date, Log out, Log out on all computers. A computer screen keeps the bar as before (the menu button is hidden there). */
+  #hhWebMe,#hhWebMenu{display:none}
+  #hhWebMenu{position:fixed;top:60px;right:10px;z-index:31;min-width:220px;max-width:calc(100vw - 20px);background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 24px var(--shadow);padding:6px 0}
+  #hhWebMenu.open{display:block}
+  #hhWebMenu .wmWho{padding:9px 14px 10px;font-size:13px;color:var(--text3);border-bottom:1px solid var(--line);word-break:break-word}
+  #hhWebMenu button{display:block;width:100%;text-align:left;border:0;background:none;color:var(--fg);font-size:15px;font-weight:600;padding:12px 14px;cursor:pointer}
+  #hhWebMenu button.wmDanger{color:var(--danger)}
+  #hhWebMenu button.arm{background:var(--danger);color:#fff}
+  @media (max-width:700px){
+    #hhWebBar{padding:0 10px 0 14px;gap:8px}
+    #hhWebBar .wbLogo{font-size:16px;white-space:nowrap}
+    #hhWebBar .wbWho,#hhWebBar #hhWebOut,#hhWebBar #hhWebOutAll{display:none}
+    #hhWebBar #hhWebTheme .wbTx{display:none}
+    #hhWebBar #hhWebTheme{padding:7px 10px;font-size:15px;line-height:1}
+    #hhWebMe{display:flex;align-items:center;gap:4px;max-width:96px;white-space:nowrap}
+    #hhWebMe .wmL{overflow:hidden;text-overflow:ellipsis}
+    #hhWebMe svg{width:14px;height:14px;flex:none;transition:transform .15s}
+    #hhWebMe.on{border-color:var(--accent)}#hhWebMe.on svg{transform:rotate(180deg)}
+  }
+  @media (min-width:701px){ #hhWebMenu.open{display:none} }
   #hhWebLogin{position:fixed;inset:0;z-index:35;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px}
   #hhWebLogin .wlBox{background:var(--card);border:1px solid var(--line);border-radius:18px;max-width:420px;width:100%;padding:28px 26px;text-align:center;box-shadow:0 8px 28px var(--shadow)}
   #hhWebLogin h1{font-size:22px;margin:0 0 8px}#hhWebLogin h1 em{font-style:normal;color:var(--accent)}
@@ -2271,7 +2292,24 @@ function hhWebToken(){ return HH_WEB && hhWeb && Number(hhWeb.exp) * 1000 > Date
 function hhAuthed(){ return !!((tg && tg.initData) || hhWebToken()); }
 function hhAuthBody(){ return (tg && tg.initData) ? { initData: tg.initData } : hhWebToken() ? { webSession: hhWebToken() } : { initData: "" }; }
 function hhAuthHeaders(){ return (!(tg && tg.initData) && hhWebToken()) ? { "x-web-session": hhWebToken() } : { "x-telegram-init-data": (tg && tg.initData) || "" }; }
-function hhWebDrop(why){ hhWeb = null; try{ localStorage.removeItem(HH_WEB_LS); }catch(e){} if(HH_WEB) hhWebShowLogin(why || "Your login has ended - log in again."); }
+// (25.11.2026, audit 25.11 P2) WHO is logged in here: the Telegram id the Mini App is opened with, or on the website the id inside the pass
+// the office computer gave this browser (the same id the computer checks on every call). "" = nobody. The Board settings kept in this
+// browser are kept PER PERSON (hhBoardV1:<id>), so a person logging in after another one never gets - or sends - the other one's settings.
+function hhUid(){
+  try{ if(tg && tg.initData){
+    let id = tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id;
+    if(!id){ try{ id = (JSON.parse(new URLSearchParams(tg.initData).get("user") || "null") || {}).id; }catch(e){} }   // the signed initData itself (what the office computer checks)
+    return /^\d{1,20}$/.test(String(id || "")) ? String(id) : "";
+  } }catch(e){}
+  const t = hhWebToken(); if(!t) return "";
+  try{ const p = t.split(".")[0].replace(/-/g, "+").replace(/_/g, "/"); const j = JSON.parse(decodeURIComponent(escape(atob(p + "===".slice((p.length + 3) % 4))))); return j && /^\d{1,20}$/.test(String(j.uid)) ? String(j.uid) : ""; }catch(e){ return ""; }
+}
+function hhWebDrop(why){
+  const u = hhUid();
+  try{ if(typeof window.hhBoardOnLogout === "function") window.hhBoardOnLogout(); }catch(e){}   // (25.11.2026) a settings send still waiting is dropped
+  try{ if(u) localStorage.removeItem("hhBoardV1:" + u); }catch(e){}   // (25.11.2026) this person's Board settings leave this browser with the login (they stay on the office computer)
+  hhWeb = null; try{ localStorage.removeItem(HH_WEB_LS); }catch(e){} if(HH_WEB) hhWebShowLogin(why || "Your login has ended - log in again.");
+}
 function hhWebShowLogin(err){
   if(!HH_WEB) return;
   let box = document.getElementById("hhWebLogin");
@@ -2341,22 +2379,40 @@ function hhWebBoot(){
   document.body.classList.add("hhWeb");
   if(!hhWebToken()){ hhWebShowLogin(""); return; }
   const bar = document.createElement("div"); bar.id = "hhWebBar";
-  bar.innerHTML = '<div class="wbLogo">Haul<em>Hawk</em> · Board</div><div class="wbSp"></div><div class="wbWho"></div><button type="button" id="hhWebTheme"></button><button type="button" id="hhWebOut">Log out</button><button type="button" id="hhWebOutAll">Log out on all computers</button>';
+  bar.innerHTML = '<div class="wbLogo">Haul<em>Hawk</em> · Board</div><div class="wbSp"></div><div class="wbWho"></div><button type="button" id="hhWebTheme"></button><button type="button" id="hhWebOut">Log out</button><button type="button" id="hhWebOutAll">Log out on all computers</button>' +
+    '<button type="button" id="hhWebMe" aria-haspopup="true" aria-expanded="false"><span class="wmL"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>';
   document.body.appendChild(bar);
-  bar.querySelector(".wbWho").textContent = (hhWeb.name || "") + (hhWeb.role === "admin" ? " · admin" : "") + " · login until " + new Date(Number(hhWeb.exp) * 1000).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  const whoText = (hhWeb.name || "") + (hhWeb.role === "admin" ? " · admin" : "") + " · login until " + new Date(Number(hhWeb.exp) * 1000).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  bar.querySelector(".wbWho").textContent = whoText;
   document.getElementById("hhWebOut").onclick = () => { hhWebDrop("Logged out on this computer."); };
+  // (26.11.2026, owner) 📱 phone menu "L ▾": the name + login date, Log out, Log out on all computers (the same actions as the bar's buttons)
+  const menu = document.createElement("div"); menu.id = "hhWebMenu"; menu.setAttribute("role", "menu");
+  menu.innerHTML = '<div class="wmWho"></div><button type="button" role="menuitem" id="hhWebMOut">Log out</button><button type="button" role="menuitem" class="wmDanger" id="hhWebMOutAll">Log out on all computers</button>';
+  document.body.appendChild(menu);
+  menu.querySelector(".wmWho").textContent = whoText;
+  { const me = document.getElementById("hhWebMe");
+    me.querySelector(".wmL").textContent = String(hhWeb.name || "Me").trim().slice(0, 12) || "Me";
+    const setOpen = o => { menu.classList.toggle("open", o); me.classList.toggle("on", o); me.setAttribute("aria-expanded", o ? "true" : "false"); };
+    me.onclick = e => { e.stopPropagation(); setOpen(!menu.classList.contains("open")); };
+    menu.onclick = e => e.stopPropagation();
+    // a tap outside an OPEN menu only closes it (like the platform list) - it never also opens the load card under the finger
+    document.addEventListener("click", e => { if(!menu.classList.contains("open")) return; if(menu.contains(e.target) || me.contains(e.target)) return; e.preventDefault(); e.stopPropagation(); setOpen(false); }, true);
+    document.addEventListener("keydown", e => { if(e.key === "Escape") setOpen(false); });
+    document.getElementById("hhWebMOut").onclick = () => { setOpen(false); hhWebDrop("Logged out on this computer."); }; }
   // (25.11.2026, owner) light / dark theme - the same switch as the Mini App's 🌙 button (remembered in this browser)
   { const tb = document.getElementById("hhWebTheme");
-    const paint = () => { tb.textContent = document.documentElement.getAttribute("data-theme") === "light" ? "🌙 Dark" : "☀️ Light"; };
+    const paint = () => { const l = document.documentElement.getAttribute("data-theme") === "light"; tb.innerHTML = '<span class="wbIc">' + (l ? "🌙" : "☀️") + '</span><span class="wbTx"> ' + (l ? "Dark" : "Light") + '</span>'; tb.setAttribute("aria-label", l ? "Dark theme" : "Light theme"); };   // (26.11.2026) the word is hidden on a phone
     tb.onclick = () => { const t = document.getElementById("themeToggle"); if(t) t.click(); else { const n = document.documentElement.getAttribute("data-theme") === "light" ? "dark" : "light"; document.documentElement.setAttribute("data-theme", n); try{ localStorage.setItem("cdbotTheme", n); }catch(x){} } paint(); };
     paint(); }
-  let armed = 0; const all = document.getElementById("hhWebOutAll");
-  all.onclick = async () => {
-    if(Date.now() - armed > 4000){ armed = Date.now(); all.classList.add("arm"); all.textContent = "Click again: log out everywhere"; setTimeout(() => { all.classList.remove("arm"); all.textContent = "Log out on all computers"; }, 4000); return; }
+  // (26.11.2026) the same "press twice" logout-all for the bar button (computer) and the phone menu item - each with its own 4 s arming
+  const outAll = (btn, again) => { let armed = 0; return async () => {
+    if(Date.now() - armed > 4000){ armed = Date.now(); btn.classList.add("arm"); btn.textContent = again; setTimeout(() => { btn.classList.remove("arm"); btn.textContent = "Log out on all computers"; }, 4000); return; }
     let ok = false;
     try{ const r = await fetch(WORKER_URL.replace(/\/$/,"") + "/api/web/logout-all", { method: "POST", headers: hhAuthHeaders() }); const j = await r.json().catch(() => null); ok = !!(j && j.ok); }catch(x){}
-    if(ok) hhWebDrop("Logged out on all computers."); else toast("Not done - check the internet and try again");
-  };
+    if(ok){ menu.classList.remove("open"); hhWebDrop("Logged out on all computers."); } else toast("Not done - check the internet and try again");
+  }; };
+  const all = document.getElementById("hhWebOutAll"); all.onclick = outAll(all, "Click again: log out everywhere");
+  const mAll = document.getElementById("hhWebMOutAll"); mAll.onclick = outAll(mAll, "Tap again: log out everywhere");
   try{ switchTab("board"); }catch(x){}
 }
 (function(){
@@ -3674,8 +3730,12 @@ setInterval(refreshBackendState, 2000);
   const MARKET_ORDER = ["cd","sd","ship","ac","as","rb","cv"];   // (2026-11-10) - V2   // (2026-11-09) + RunBuggy   // (2026-11-08) + Ship.Cars (counted from its board reads)
   const OLD_MS = 2 * 3600000;   // older than this: greyed, "may be taken" (the bot can't see when a load is taken - owner 08.11)
   const SINCE = [[60,"last 1 h"],[180,"last 3 h"],[1440,"last 24 h"]];
-  const LS = "hhBoardV1";
-  let saved = {}; try { saved = JSON.parse(localStorage.getItem(LS) || "{}") || {}; } catch(e) { saved = {}; }
+  // (25.11.2026, audit 25.11 P2) kept PER PERSON: "hhBoardV1:<telegram id>". The old shared "hhBoardV1" (no owner) is not read - it could
+  // be another person's - and is removed; each person's settings are on the office computer anyway and come back from there.
+  const LS_UID = hhUid(), LS = LS_UID ? "hhBoardV1:" + LS_UID : "";
+  try { localStorage.removeItem("hhBoardV1"); } catch(e) {}
+  let saved = {}; try { saved = LS ? (JSON.parse(localStorage.getItem(LS) || "{}") || {}) : {}; } catch(e) { saved = {}; }
+  if(saved && saved.uid && String(saved.uid) !== LS_UID) saved = {};
   const B = {
     // (2026-11-09, owner) several platforms at once (Super + ACV ...); none = All. Old saved "site" (one platform) is read once.
     sites: (Array.isArray(saved.sites) ? saved.sites : saved.site ? [saved.site] : []).filter(s => SITE_ORDER.includes(s)), sort: saved.sort || "new", since: [60,180,1440].includes(saved.since) ? saved.since : 60,
@@ -3688,9 +3748,13 @@ setInterval(refreshBackendState, 2000);
   // (/api/miniapp/board-prefs, per person); the other one takes them when it opens the Board or comes back to the front. Newest wins.
   B.prefsAt = Number(saved.at) || 0;
   const prefsObj = () => ({ sites:B.sites, sort:B.sort, since:B.since, f:B.f, hideBlk:B.hideBlk, mine:B.mine });
-  const keepLocal = () => { try { localStorage.setItem(LS, JSON.stringify(Object.assign(prefsObj(), { at: B.prefsAt }))); } catch(e){} };
-  const pushPrefs = () => { if(!hhAuthed() || typeof pcApi !== "function") return; pcApi("/api/miniapp/board-prefs", { set: prefsObj(), at: B.prefsAt }).catch(() => {}); };
+  // (25.11.2026, audit 25.11 P2) written / sent only for the person this page opened with: if the login is no longer that person (logged out,
+  // another one logged in), nothing is kept or sent - a send still waiting is dropped too.
+  const samePerson = () => !!LS_UID && hhUid() === LS_UID;
+  const keepLocal = () => { if(!samePerson()) return; try { localStorage.setItem(LS, JSON.stringify(Object.assign(prefsObj(), { at: B.prefsAt, uid: LS_UID }))); } catch(e){} };
+  const pushPrefs = () => { if(!hhAuthed() || !samePerson() || typeof pcApi !== "function") return; pcApi("/api/miniapp/board-prefs", { set: prefsObj(), at: B.prefsAt }).catch(() => {}); };
   const keep = () => { B.prefsAt = Date.now(); keepLocal(); clearTimeout(B.pushT); B.pushT = setTimeout(pushPrefs, 700); };
+  window.hhBoardOnLogout = () => { clearTimeout(B.pushT); B.pushT = null; };
   function takePrefs(p){
     if(!p || typeof p !== "object") return false;
     const sites = Array.isArray(p.sites) ? p.sites.filter(x => SITE_ORDER.includes(x)) : [];
@@ -3706,8 +3770,9 @@ setInterval(refreshBackendState, 2000);
     return true;
   }
   async function pullPrefs(){
-    if(!hhAuthed() || typeof pcApi !== "function") return false;
+    if(!hhAuthed() || !samePerson() || typeof pcApi !== "function") return false;
     let j = null; try { j = await pcApi("/api/miniapp/board-prefs", {}); } catch(e){ return false; }
+    if(!samePerson()) return false;   // (25.11.2026) the login changed while asking
     if(j && j.prefs && Number(j.at) > B.prefsAt){ B.prefsAt = Number(j.at); const ch = takePrefs(j.prefs); keepLocal(); return ch; }
     if(B.prefsAt && (!j || !j.at || Number(j.at) < B.prefsAt)) pushPrefs();   // this device has the newer settings
     return false;
@@ -4143,8 +4208,11 @@ setInterval(refreshBackendState, 2000);
         wasWide = w; wasSide = sd; renderList();
       });
     }
-    // (25.11.2026) back to the front (e.g. after changing the Board on the phone): take the settings again
-    document.addEventListener("visibilitychange", () => { if(document.visibilityState === "visible" && B.prefsDone && $("tab-board").classList.contains("on")) pullPrefs().then(ch => { if(ch){ renderSites(); load(true); } }); });
+    // (25.11.2026) back to the front (e.g. after changing the Board on the phone): take the settings again.
+    // (25.11.2026, owner: several website tabs with different routes) ONLY in the Mini App. On the website every open tab keeps its own
+    // filters: a tab takes the saved settings once, when it is opened; another tab's change never jumps into it. Every change is still
+    // saved, so a NEW tab (and the Mini App) opens with the latest one.
+    if(!HH_WEB) document.addEventListener("visibilitychange", () => { if(document.visibilityState === "visible" && B.prefsDone && $("tab-board").classList.contains("on")) pullPrefs().then(ch => { if(ch){ renderSites(); load(true); } }); });
     renderList(); tick();
   }
   window.hhBoard = {
