@@ -742,6 +742,7 @@
   .bdMineTag{display:inline-flex;align-items:center;gap:4px;border:0;border-radius:999px;padding:2px 9px;background:var(--accent-tint);color:var(--accent);font-family:-apple-system,Segoe UI,Roboto,sans-serif;font-size:12px;font-weight:700;cursor:pointer}
   .bdMine{width:100%;height:42px;margin:0;border-radius:11px;border:1px solid var(--line);background:var(--card);color:var(--fg);font:inherit;font-size:13.5px;font-weight:600;padding:0 10px}
   .bdMine.on{border-color:var(--accent);color:var(--accent)}
+  .bdMine{-webkit-appearance:none;appearance:none;padding:0 38px 0 12px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;background-size:16px 16px}   /* (25.11.2026, owner) the arrow a little in from the edge */
   .bdChip .stDot{width:7px;height:7px;border-radius:50%;background:#E0A100;display:inline-block}
   .bdChip .stDot.ok{background:#2EAD5B}
   /* (25.11.2026, owner) the platforms as a list that drops down from one button; the Load ID search folds into a magnifier */
@@ -951,16 +952,16 @@
     .wChev svg{width:16px;height:16px}
     .wIt.open .wChev{transform:rotate(180deg);color:var(--accent);border-color:var(--accent)}
     .wRw:hover .wChev{border-color:var(--accent);color:var(--accent)}
-    .wDet{display:none;padding:4px 12px 16px;gap:22px;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) 280px;font-size:13px}
+    .wDet{display:none;padding:4px 12px 16px;gap:22px;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1.3fr) 156px;font-size:13px}
     .wIt.open .wDet{display:grid}
     .wDet .wL{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text4);margin-bottom:4px}
-    .wDet code{font-family:inherit;font-weight:700;cursor:pointer;border-bottom:1px dashed var(--text4)}
-    .wDet .wBig{display:block;width:100%;height:32px;margin-bottom:6px;border-radius:9px;font-weight:700;font-size:13px;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--fg)}
+    .wDet code{font-family:inherit;font-weight:700;cursor:pointer;border-bottom:1px dashed var(--text4);overflow-wrap:anywhere}
+    .wDet .wBig{display:block;width:100%;height:22px;margin-bottom:4px;padding:0 6px;border-radius:6px;font-weight:700;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--fg)}
     .wDet .wBig.pri{background:var(--accent);border-color:var(--accent);color:#fff}
     .wDet .wBig:hover{border-color:var(--accent)}
-    .wDet .wQ{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin-top:2px}   /* (owner) one row, so the buttons end at the lane-avg line */
-    .wDet .wQ button{height:30px;padding:0 4px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--fg);font-weight:600;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap}
-    .wDet .wQ button svg{width:13px;height:13px;flex:none}
+    .wDet .wQ{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;margin-top:0}   /* (owner) one row, so the buttons end at the lane-avg line */
+    .wDet .wQ button{height:22px;padding:0 3px;border-radius:6px;border:1px solid var(--line);background:var(--card);color:var(--fg);font-weight:600;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:3px;white-space:nowrap}
+    .wDet .wQ button svg{width:10px;height:10px;flex:none}
     .wDet .wQ button:hover{border-color:var(--accent);color:var(--accent)}
     .wDet .wQ button.done{color:var(--accent);border-color:var(--accent)}
     .wDet .wQ button.blk{color:var(--danger)}.wDet .wQ button.arm{background:var(--danger);border-color:var(--danger);color:#fff}
