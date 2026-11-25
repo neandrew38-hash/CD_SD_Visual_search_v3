@@ -894,6 +894,14 @@
   #hhWebLogin p{color:var(--text3);font-size:14px;line-height:1.45;margin:0 0 18px}
   #hhWebLogin .wlErr{color:var(--danger);font-size:13px;margin-top:14px;min-height:18px}
   #hhWebLogin .wlNote{color:var(--text4);font-size:12px;margin-top:16px;line-height:1.4}
+  #hhWebLogin .wlBtn{display:block;width:100%;height:46px;border:0;border-radius:12px;background:var(--accent);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+  #hhWebLogin .wlBtn:disabled{opacity:.7;cursor:default}
+  #hhWebLogin .wlBtn2{display:block;width:100%;height:40px;line-height:40px;border:1px solid var(--line);border-radius:12px;color:var(--fg);font-weight:600;font-size:14px;text-decoration:none;margin-top:14px;box-sizing:border-box}
+  #hhWebLogin .wlLink{background:none;border:0;color:var(--text3);font-size:13px;margin-top:10px;cursor:pointer}
+  #hhWebLogin .wlSub{color:var(--text4);font-size:12px;margin-top:8px;line-height:1.4}
+  #hhWebLogin .wlWt{font-weight:700;font-size:16px;margin-top:6px}
+  #hhWebLogin .wlSpin{width:26px;height:26px;margin:0 auto 6px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--accent);animation:wlSp 0.9s linear infinite}
+  @keyframes wlSp{to{transform:rotate(360deg)}}
   @media (min-width:1280px){
     body.hhWeb{max-width:none;padding:76px 16px 40px 300px}
     body.hhWeb #bdFilterBtn{display:none}
@@ -2182,12 +2190,12 @@ document.getElementById("excludeCoInput").addEventListener("keydown", e=>{
 const tg = (window.Telegram && window.Telegram.WebApp) || null;
 try{ if(tg){ tg.ready(); tg.expand(); } }catch(e){}
 // (24.11.2026, owner) 🖥 the BROWSER site = this same page opened in a normal browser with "?web=1" (the Board's "Open in browser").
-// No Telegram initData there: the official "Log in with Telegram" -> the Worker (/api/web/login) checks it and that the person is
-// the admin or an active member -> a 7-day pass, kept in this browser only. Every call then carries the pass instead of initData;
+// No Telegram initData there: "Log in with the HaulHawk bot" (the person presses ✅ Yes in the bot; only subscribers) -> a 7-day
+// pass made by the office computer, kept in this browser only. Every call then carries the pass instead of initData;
 // the Worker and the office computer check it (same person, same rights - Contact / Crypto still need the Mini App).
 // Inside Telegram (initData present) none of this runs - the Mini App works exactly as before.
 const HH_WEB = !(tg && tg.initData) && /[?&]web=1(&|$)/.test(location.search);
-const HH_WEB_LS = "hhWebV1", HH_WEB_BOT = "central0217bot";
+const HH_WEB_LS = "hhWebV1", HH_WEB_BOT = "central0217bot";   // the bot people log in with (t.me/<bot>?start=web_<code>)
 let hhWeb = null;
 try{ const w = JSON.parse(localStorage.getItem(HH_WEB_LS) || "null"); if(HH_WEB && w && typeof w.token === "string" && Number(w.exp) * 1000 > Date.now() + 60000) hhWeb = w; }catch(e){}
 function hhWebToken(){ return HH_WEB && hhWeb && Number(hhWeb.exp) * 1000 > Date.now() ? hhWeb.token : ""; }
@@ -2200,26 +2208,64 @@ function hhWebShowLogin(err){
   let box = document.getElementById("hhWebLogin");
   if(!box){
     box = document.createElement("div"); box.id = "hhWebLogin";
-    box.innerHTML = '<div class="wlBox"><h1>Haul<em>Hawk</em> Board</h1><p>Log in with your Telegram account.<br>The Board website is for HaulHawk subscribers.</p><div id="hhWebWidget"></div><div class="wlErr" id="hhWebErr"></div><div class="wlNote">The login stays on this computer for 7 days. Telegram shows HaulHawk only your name and Telegram id - never your phone number or chats.</div></div>';
+    box.innerHTML = '<div class="wlBox"><h1>Haul<em>Hawk</em> Board</h1><p>The Board website is for HaulHawk subscribers.</p>' +
+      '<div id="hhWebStart"><button type="button" class="wlBtn" id="hhWebBot">Log in with the HaulHawk bot</button><div class="wlSub">One tap in Telegram · no phone number</div></div>' +
+      '<div id="hhWebWait" style="display:none"><div class="wlSpin"></div><div class="wlWt" id="hhWebWaitTxt">Waiting for Telegram…</div><div class="wlSub" id="hhWebWaitSub">In the chat with the bot press <b>Start</b>, then <b>✅ Yes, log me in</b>.</div>' +
+        '<a class="wlBtn2" id="hhWebOpen" target="_blank" rel="noopener">Open the bot</a><button type="button" class="wlLink" id="hhWebCancel">Cancel</button></div>' +
+      '<div class="wlErr" id="hhWebErr"></div><div class="wlNote">The login stays on this computer for 7 days. The bot always shows which browser and city a login comes from.</div></div>';
     document.body.appendChild(box);
-    const s = document.createElement("script"); s.async = true; s.src = "https://telegram.org/js/telegram-widget.js?22";
-    s.setAttribute("data-telegram-login", HH_WEB_BOT); s.setAttribute("data-size", "large"); s.setAttribute("data-radius", "10"); s.setAttribute("data-onauth", "hhWebOnAuth(user)");
-    s.onerror = () => { const e = document.getElementById("hhWebErr"); if(e) e.textContent = "Telegram's login button did not load - check the internet and reload the page."; };
-    document.getElementById("hhWebWidget").appendChild(s);
+    document.getElementById("hhWebBot").onclick = hhWebBotLogin;
+    document.getElementById("hhWebCancel").onclick = () => hhWebLoginStop("");
   }
   box.style.display = "flex";
-  const e = document.getElementById("hhWebErr"); if(e) e.textContent = err || "";
+  hhWebLoginStop(err || "");
 }
-async function hhWebOnAuth(user){
-  const e = document.getElementById("hhWebErr"); if(e) e.textContent = "Checking…";
+// (24.11.2026, owner) log in through the HaulHawk bot: the office computer gives a one-time code (5 min) + a secret key only this
+// browser has; the person presses Start and ✅ Yes in the bot; this page asks the computer every 2 s and gets the 7-day pass.
+let hhWebLoginRun = 0;
+function hhWebLoginStop(err){
+  hhWebLoginRun++;
+  const st = document.getElementById("hhWebStart"), wt = document.getElementById("hhWebWait"), e = document.getElementById("hhWebErr");
+  if(st) st.style.display = ""; if(wt) wt.style.display = "none"; if(e) e.textContent = err || "";
+}
+async function hhWebBotLogin(){
+  const run = ++hhWebLoginRun;
+  const e = document.getElementById("hhWebErr"); e.textContent = "";
+  document.getElementById("hhWebOpen").removeAttribute("href");   // never the link of an older attempt
+  let win = null; try{ win = window.open("about:blank", "_blank"); }catch(x){}   // opened right on the click (a later open would be blocked)
+  const btn = document.getElementById("hhWebBot"); btn.disabled = true; btn.textContent = "Opening Telegram…";
+  const done = () => { btn.disabled = false; btn.textContent = "Log in with the HaulHawk bot"; };
+  let where = "";
+  try{ const ctl = new AbortController(); const tm = setTimeout(() => ctl.abort(), 2500); const r = await fetch(WORKER_URL.replace(/\/$/,"") + "/api/web/where", { signal: ctl.signal }); clearTimeout(tm); const j = await r.json(); where = (j && j.where) || ""; }catch(x){}
   let j = null, st = 0;
-  try{ const r = await fetch(WORKER_URL.replace(/\/$/,"") + "/api/web/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(user || {}) }); st = r.status; j = await r.json().catch(() => null); }catch(x){ j = null; }
-  if(j && j.ok && j.token){
-    try{ localStorage.setItem(HH_WEB_LS, JSON.stringify({ token: j.token, exp: j.exp, name: String(j.name || "").slice(0, 64), role: j.role })); }catch(x){ if(e) e.textContent = "This browser does not allow saving the login (private mode?) - use a normal window."; return; }
-    location.reload(); return;
+  try{ const r = await fetch(PC_URL + "/api/web/login-start", { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ where }) }); st = r.status; j = await r.json().catch(() => null); }catch(x){ j = null; }
+  done();
+  if(run !== hhWebLoginRun) { try{ win && win.close(); }catch(x){} return; }
+  if(!j || !j.ok || !j.code){ try{ win && win.close(); }catch(x){} e.textContent = (j && j.error) || "Couldn't reach the office computer (it may be off or restarting) - try again in a minute."; return; }
+  const link = "https://t.me/" + HH_WEB_BOT + "?start=web_" + j.code;
+  document.getElementById("hhWebOpen").href = link;
+  if(win){ try{ win.location.href = link; }catch(x){ win = null; } }
+  if(!win){ try{ window.open(link, "_blank", "noopener"); }catch(x){} }
+  document.getElementById("hhWebStart").style.display = "none"; document.getElementById("hhWebWait").style.display = "";
+  document.getElementById("hhWebWaitTxt").textContent = "Waiting for Telegram…";
+  const until = Date.now() + 5 * 60000;
+  while(run === hhWebLoginRun){
+    await new Promise(r => setTimeout(r, 2000));
+    if(run !== hhWebLoginRun) return;
+    if(Date.now() > until){ hhWebLoginStop("The login link expired - press Log in again."); return; }
+    let p = null;
+    try{ const r = await fetch(PC_URL + "/api/web/login-poll", { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ code: j.code, poll: j.poll }) }); p = await r.json().catch(() => null); }catch(x){ p = null; }
+    if(run !== hhWebLoginRun) return;
+    if(!p) continue;   // a network hiccup - ask again
+    if(p.state === "asked"){ document.getElementById("hhWebWaitTxt").textContent = "Now press ✅ Yes in the bot"; continue; }
+    if(p.state === "ok" && p.token){
+      try{ localStorage.setItem(HH_WEB_LS, JSON.stringify({ token: p.token, exp: p.exp, name: String(p.name || "").slice(0, 64), role: p.role })); }catch(x){ hhWebLoginStop("This browser does not allow saving the login (private mode?) - use a normal window."); return; }
+      location.reload(); return;
+    }
+    if(p.state === "no"){ hhWebLoginStop("Login cancelled in Telegram."); return; }
+    if(p.state === "nosub"){ hhWebLoginStop("The Board website is for HaulHawk subscribers. Subscribe in the bot, then press Log in again."); return; }
+    if(p.state === "expired"){ hhWebLoginStop("The login link expired - press Log in again."); return; }
   }
-  const er = j && j.error;
-  if(e) e.textContent = er === "not_registered" ? "This Telegram account is not a HaulHawk member yet - open the bot in Telegram first." : er === "bad_login" ? "Telegram's login could not be checked - try again." : er === "state_unreadable" ? "HaulHawk is updating - try again in a minute." : "Couldn't reach HaulHawk (" + (st || "no internet") + ") - try again.";
 }
 function hhWebBoot(){
   if(!HH_WEB) return;
@@ -3710,7 +3756,7 @@ setInterval(refreshBackendState, 2000);
       const k = row.dataset.k, it = () => B.items.find(x => x.k === k);
       row.querySelector(".wRw").onclick = e => { if(e.target.closest("button")) return; B.wOpen = B.wOpen === k ? null : k; box.querySelectorAll(".wIt.open").forEach(r => { if(r !== row) r.classList.remove("open"); }); row.classList.toggle("open", B.wOpen === k); };
       row.querySelectorAll("[data-copy]").forEach(el => el.onclick = async () => { const x = it(); if(!x) return; const v = el.dataset.copy === "lid" ? x.loadId : el.dataset.copy === "phone" ? x.phone : x.email; const ok = await copyText(v); toast(ok ? "Copied: " + v : v); });
-      let armed = 0;
+      if(B.wArm && B.wArm.k === k && Date.now() - B.wArm.at < 3500){ const bb = row.querySelector('button[data-act=block]'); if(bb) bb.classList.add("arm"); }   // still "click again" after a refresh
       row.querySelectorAll("button[data-act]").forEach(b => b.onclick = async e => {
         e.stopPropagation(); const x = it(); if(!x) return; const a = b.dataset.act;
         if(a === "sms"){ const ok = await copyText(x.sms); toast(ok ? "SMS text copied" : "Copy did not work here"); }
@@ -3720,7 +3766,8 @@ setInterval(refreshBackendState, 2000);
         else if(a === "co") openUrl(x.companyUrl);
         else if(a === "save"){ try { const j = await pcApi("/api/miniapp/board/action", { k: x.k, act: "save" }); if(!j.ok) throw new Error(j.error); b.classList.add("done"); toast("⭐ Saved — find it in Saved in the Mini App"); } catch(er){ toast(String(er.message || "Not saved - try again")); } }
         else if(a === "block"){
-          if(Date.now() - armed > 3500){ armed = Date.now(); b.classList.add("arm"); toast("Click Block again to block " + x.company); setTimeout(() => b.classList.remove("arm"), 3500); return; }
+          if(!(B.wArm && B.wArm.k === x.k && Date.now() - B.wArm.at < 3500)){ B.wArm = { k: x.k, at: Date.now() }; b.classList.add("arm"); toast("Click Block again to block " + x.company); setTimeout(() => { const bb = document.querySelector('#bdList .wIt[data-k="' + CSS.escape(x.k) + '"] button[data-act=block]'); if(bb) bb.classList.remove("arm"); }, 3500); return; }
+          B.wArm = null;
           try { const j = await pcApi("/api/miniapp/board/action", { k: x.k, act: "block" }); if(!j.ok) throw new Error(j.error); toast("🚫 Blocked " + j.company + " — no alerts or board loads from them"); if(B.hideBlk) B.items = B.items.filter(y => y.company !== x.company); renderList(); }
           catch(er){ toast(String(er.message || "Not done - try again")); }
         }
