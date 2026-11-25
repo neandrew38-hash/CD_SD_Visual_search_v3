@@ -937,7 +937,7 @@
   @media (min-width:800px){   /* (25.11.2026) rows from 800 px (was 1280) */
     body.hhWeb{max-width:none;padding:76px 16px 40px 16px}
     body.hhWeb #bdList{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:clip}   /* clip, not hidden: hidden would pin the sticky column titles 56 px down inside the list */
-    .wHd,.wRw{display:grid;grid-template-columns:minmax(100px,1.2fr) minmax(130px,1.6fr) 64px 96px minmax(90px,1.2fr) 78px 68px 34px;gap:10px;align-items:center;padding:10px 12px}
+    .wHd,.wRw{display:grid;grid-template-columns:minmax(100px,1.2fr) minmax(120px,1.5fr) 64px 116px minmax(90px,1.2fr) 78px 68px 34px;gap:10px;align-items:center;padding:10px 12px}
     .wHd{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text4);background:var(--bg);border-bottom:1px solid var(--line);position:sticky;top:56px;z-index:2}
     .wIt{border-bottom:1px solid var(--line)}.wIt:last-child{border-bottom:0}
     .wRw{cursor:pointer;font-size:14px}.wRw:hover{background:var(--accent-tint)}
@@ -946,7 +946,8 @@
     .wRw b{font-weight:700}.wRw small{display:block;font-size:12px;color:var(--text3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .wRw .wC{min-width:0;overflow:hidden;text-overflow:ellipsis}
     .wRw .wRt i{font-style:normal;color:var(--text4);margin:0 5px}
-    .wRw .wPr b{font-size:15px}.wRw .wDl{color:var(--success);font-weight:700}.wRw .wDl.lo{color:var(--danger)}
+    .wRw .wPr b{font-size:15px}.wRw .wDl{color:var(--success);font-weight:600;font-size:11px;opacity:.9}.wRw .wDl.lo{color:var(--danger)}
+    .wRw .wPr small{font-size:11px;letter-spacing:-.01em}   /* (25.11.2026, owner) "$/mi · miles" fits on one line, the row stays as high */
     .wRw .wCo em{font-style:normal;color:var(--warn-text);font-size:12px;margin-left:4px}
     .wChev{width:30px;height:30px;border-radius:9px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--text3);transition:transform .2s ease,color .2s,border-color .2s}
     .wChev svg{width:16px;height:16px}
@@ -3842,7 +3843,7 @@ setInterval(refreshBackendState, 2000);
       '<div><div class="wL">Route</div>' +   // (owner) city / grey "Pickup" / city / grey "Delivery"
         '<div class="wPl">' + E(place(it.o)) + ' <span style="font-weight:400">' + E((it.o && it.o.zip) || "") + '</span></div><div class="wPs">Pickup' + (it.pickup ? " · " + E(day(it.pickup)) : "") + '</div>' +
         '<div class="wPl">' + E(place(it.d)) + ' <span style="font-weight:400">' + E((it.d && it.d.zip) || "") + '</span></div><div class="wPs">Delivery</div>' +
-        (it.deal ? '<div style="color:var(--text3)">lane avg $' + Number(it.deal.avg).toFixed(2) + '/mi · ' + it.deal.n + ' loads, 7 days</div>' : "") + '</div>' +
+        (it.deal ? '<div style="color:var(--text4);font-size:11px;line-height:1.35;margin-top:2px">lane avg $' + Number(it.deal.avg).toFixed(2) + '/mi · ' + it.deal.n + ' loads, 7 days</div>' : "") + '</div>' +
       '<div><div class="wL">Company</div><div><b>' + E(coNameOf(it)) + '</b>' + (it.rating ? ' <span style="color:var(--warn-text)">★ ' + E(String(it.rating).split(" ")[0]) + '</span>' : "") + '</div>' +
         (it.payment ? '<div style="color:var(--text3)">' + E(it.payment) + '</div>' : "") +
         '<div>Phone: ' + (it.phone ? '<code data-copy="phone">' + E(it.phone) + '</code>' : "none") + '</div><div>E-mail: ' + (emOk ? '<code data-copy="email">' + E(it.email) + '</code>' : "none") + '</div></div>' +
