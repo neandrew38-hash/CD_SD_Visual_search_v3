@@ -709,6 +709,15 @@
   .bdSrc.ac{color:var(--acc);background:rgba(22,179,163,.14)}.bdSrc.as{color:var(--asc);background:rgba(227,155,31,.14)}.bdSrc.v2{color:var(--v2c);background:rgba(201,162,39,.15)}
   .bdSrc.ship{color:var(--shc);background:rgba(47,163,107,.14)}
   .bdSrc.rb{color:var(--rbc);background:rgba(224,104,60,.14)}
+  /* (25.11.2026, owner) platform colours: Central yellow · Super red · ACV orange · Ship.Cars violet · Autosled light blue · Carvana brown · RunBuggy blue */
+  .bdSrc.cd{color:#E0A100;background:rgba(224,161,0,.16)}.bdSrc.sd{color:#F0564A;background:rgba(240,86,74,.16)}
+  .bdSrc.ac{color:#FF8A3D;background:rgba(255,138,61,.16)}.bdSrc.ship{color:#A98BFF;background:rgba(143,116,255,.18)}
+  .bdSrc.as{color:#4FC3F7;background:rgba(79,195,247,.16)}.bdSrc.cv{color:#C08A5B;background:rgba(160,110,70,.22)}
+  .bdSrc.rb{color:#6E9BFF;background:rgba(70,120,255,.18)}
+  :root[data-theme="light"] .bdSrc.cd{color:#8A6200;background:rgba(224,161,0,.18)}:root[data-theme="light"] .bdSrc.sd{color:#C0302A;background:rgba(240,86,74,.14)}
+  :root[data-theme="light"] .bdSrc.ac{color:#C25E08;background:rgba(255,138,61,.16)}:root[data-theme="light"] .bdSrc.ship{color:#6B4FD8;background:rgba(143,116,255,.15)}
+  :root[data-theme="light"] .bdSrc.as{color:#0B7FB0;background:rgba(79,195,247,.16)}:root[data-theme="light"] .bdSrc.cv{color:#7A4E2A;background:rgba(160,110,70,.16)}
+  :root[data-theme="light"] .bdSrc.rb{color:#1F4FD8;background:rgba(70,120,255,.14)}
   /* (2026-11-08 owner) rating its own badge (was cut off at the end of the company name); Map above the route line; time 1h/3h/24h; my search; stale */
   .bdRate{font-size:11px;font-weight:700;padding:3px 7px;border-radius:7px;background:var(--success-bg);color:var(--success);white-space:nowrap}
   .ldMap{z-index:2}
@@ -924,14 +933,10 @@
   #hhWebLogin .wlWt{font-weight:700;font-size:16px;margin-top:6px}
   #hhWebLogin .wlSpin{width:26px;height:26px;margin:0 auto 6px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--accent);animation:wlSp 0.9s linear infinite}
   @keyframes wlSp{to{transform:rotate(360deg)}}
-  @media (min-width:1280px){
-    body.hhWeb{max-width:none;padding:76px 16px 40px 300px}
-    body.hhWeb #bdFilterBtn{display:none}
-    body.hhWeb .bdSheetBg,body.hhWeb .bdSheetBg.on{display:block;position:fixed;left:0;top:56px;bottom:0;right:auto;width:284px;background:transparent;z-index:20}
-    body.hhWeb .bdSheet{position:static;max-width:none;height:100%;max-height:none;border-radius:0;border-top:0;border-right:1px solid var(--line);box-sizing:border-box;padding:16px 18px 24px}
-    body.hhWeb .bdGrab{display:none}
+  @media (min-width:800px){   /* (25.11.2026) rows from 800 px (was 1280) */
+    body.hhWeb{max-width:none;padding:76px 16px 40px 16px}
     body.hhWeb #bdList{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:clip}   /* clip, not hidden: hidden would pin the sticky column titles 56 px down inside the list */
-    .wHd,.wRw{display:grid;grid-template-columns:minmax(110px,1.2fr) minmax(140px,1.6fr) 64px 104px minmax(100px,1.2fr) 86px 76px 34px;gap:10px;align-items:center;padding:10px 12px}
+    .wHd,.wRw{display:grid;grid-template-columns:minmax(100px,1.2fr) minmax(130px,1.6fr) 64px 96px minmax(90px,1.2fr) 78px 68px 34px;gap:10px;align-items:center;padding:10px 12px}
     .wHd{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text4);background:var(--bg);border-bottom:1px solid var(--line);position:sticky;top:56px;z-index:2}
     .wIt{border-bottom:1px solid var(--line)}.wIt:last-child{border-bottom:0}
     .wRw{cursor:pointer;font-size:14px}.wRw:hover{background:var(--accent-tint)}
@@ -961,6 +966,22 @@
     .wDet .wQ button.blk{color:var(--danger)}.wDet .wQ button.arm{background:var(--danger);border-color:var(--danger);color:#fff}
     .wDet .wPl{font-weight:700;font-size:14px}.wDet .wPs{font-size:12px;color:var(--text4);font-weight:400;margin:1px 0 9px}
     .wDet .wNt{grid-column:1/-1;color:var(--text2);white-space:pre-wrap;line-height:1.4}
+  }
+  .bdSideTop{display:none}
+  @media (min-width:1060px){   /* (25.11.2026) the filter column on the left */
+    body.hhWeb .bdSideTop{display:block}
+    body.hhWeb .bdSideTop .bdPlatBtn{display:none}
+    body.hhWeb .bdSideTop .bdPlatMenu{position:static;opacity:1;visibility:visible;transform:none;box-shadow:none;border:0;padding:0;width:auto;max-width:none;background:none;transition:none}
+    body.hhWeb .bdSideTop .bdPlatIt{padding:7px 6px;font-size:14px}
+    body.hhWeb .bdSideTop .bdLid,body.hhWeb .bdSideTop .bdLid:not(.open):not(.has){width:100%;margin:0}
+    body.hhWeb .bdSideTop .bdLid:not(.open):not(.has) input{padding:0 26px 0 30px;cursor:text}
+    body.hhWeb .bdSideTop .bdLid:not(.open):not(.has) input::placeholder{color:var(--text4,#a4a4a4)}
+    body.hhWeb .bdSideTop .bdLid svg,body.hhWeb .bdSideTop .bdLid:not(.open):not(.has) svg{left:10px;transform:translateY(-50%)}
+    body.hhWeb{padding-left:270px}
+    body.hhWeb #bdFilterBtn{display:none}
+    body.hhWeb .bdSheetBg,body.hhWeb .bdSheetBg.on{display:block;position:fixed;left:0;top:56px;bottom:0;right:auto;width:254px;background:transparent;z-index:20}
+    body.hhWeb .bdSheet{position:static;max-width:none;height:100%;max-height:none;border-radius:0;border-top:0;border-right:1px solid var(--line);box-sizing:border-box;padding:16px 18px 24px}
+    body.hhWeb .bdGrab{display:none}
   }
 </style>
 </head>
@@ -1290,6 +1311,7 @@
   <div class="bdSheet" id="bdSheet">
     <div class="bdGrab"></div>
     <div class="bdShTop"><b>Filters</b><button type="button" id="bdClear">Clear</button></div>
+    <div class="bdSideTop" id="bdSideTop"><div class="bdLbl">Load ID</div><div id="bdSideLid"></div><div class="bdLbl">Platforms</div><div id="bdSidePlat"></div></div>
     <div class="bdLbl" id="bdMineLbl">My search</div>
     <select class="bdMine" id="bdMine" aria-label="Show loads for one of my searches"><option value="">All loads · my filters</option></select>
     <div class="bdLbl">Pickup</div>
@@ -2297,10 +2319,15 @@ function hhWebBoot(){
   document.body.classList.add("hhWeb");
   if(!hhWebToken()){ hhWebShowLogin(""); return; }
   const bar = document.createElement("div"); bar.id = "hhWebBar";
-  bar.innerHTML = '<div class="wbLogo">Haul<em>Hawk</em> · Board</div><div class="wbSp"></div><div class="wbWho"></div><button type="button" id="hhWebOut">Log out</button><button type="button" id="hhWebOutAll">Log out on all computers</button>';
+  bar.innerHTML = '<div class="wbLogo">Haul<em>Hawk</em> · Board</div><div class="wbSp"></div><div class="wbWho"></div><button type="button" id="hhWebTheme"></button><button type="button" id="hhWebOut">Log out</button><button type="button" id="hhWebOutAll">Log out on all computers</button>';
   document.body.appendChild(bar);
   bar.querySelector(".wbWho").textContent = (hhWeb.name || "") + (hhWeb.role === "admin" ? " · admin" : "") + " · login until " + new Date(Number(hhWeb.exp) * 1000).toLocaleDateString("en-US", { month: "short", day: "numeric" });
   document.getElementById("hhWebOut").onclick = () => { hhWebDrop("Logged out on this computer."); };
+  // (25.11.2026, owner) light / dark theme - the same switch as the Mini App's 🌙 button (remembered in this browser)
+  { const tb = document.getElementById("hhWebTheme");
+    const paint = () => { tb.textContent = document.documentElement.getAttribute("data-theme") === "light" ? "🌙 Dark" : "☀️ Light"; };
+    tb.onclick = () => { const t = document.getElementById("themeToggle"); if(t) t.click(); else { const n = document.documentElement.getAttribute("data-theme") === "light" ? "dark" : "light"; document.documentElement.setAttribute("data-theme", n); try{ localStorage.setItem("cdbotTheme", n); }catch(x){} } paint(); };
+    paint(); }
   let armed = 0; const all = document.getElementById("hhWebOutAll");
   all.onclick = async () => {
     if(Date.now() - armed > 4000){ armed = Date.now(); all.classList.add("arm"); all.textContent = "Click again: log out everywhere"; setTimeout(() => { all.classList.remove("arm"); all.textContent = "Log out on all computers"; }, 4000); return; }
@@ -3635,7 +3662,34 @@ setInterval(refreshBackendState, 2000);
     mine: saved.mine || "", fresh: {}, locked: false,
   };
   if(!Array.isArray(B.f.vt)) B.f.vt = [];
-  const keep = () => { try { localStorage.setItem(LS, JSON.stringify({ sites:B.sites, sort:B.sort, since:B.since, f:B.f, hideBlk:B.hideBlk, mine:B.mine })); } catch(e){} };
+  // (25.11.2026, owner) the same Board settings in the Mini App and on the website: every change is also sent to the office computer
+  // (/api/miniapp/board-prefs, per person); the other one takes them when it opens the Board or comes back to the front. Newest wins.
+  B.prefsAt = Number(saved.at) || 0;
+  const prefsObj = () => ({ sites:B.sites, sort:B.sort, since:B.since, f:B.f, hideBlk:B.hideBlk, mine:B.mine });
+  const keepLocal = () => { try { localStorage.setItem(LS, JSON.stringify(Object.assign(prefsObj(), { at: B.prefsAt }))); } catch(e){} };
+  const pushPrefs = () => { if(!hhAuthed() || typeof pcApi !== "function") return; pcApi("/api/miniapp/board-prefs", { set: prefsObj(), at: B.prefsAt }).catch(() => {}); };
+  const keep = () => { B.prefsAt = Date.now(); keepLocal(); clearTimeout(B.pushT); B.pushT = setTimeout(pushPrefs, 700); };
+  function takePrefs(p){
+    if(!p || typeof p !== "object") return false;
+    const sites = Array.isArray(p.sites) ? p.sites.filter(x => SITE_ORDER.includes(x)) : [];
+    const f = Object.assign({ from:[], to:[], p:0, pm:0, tr:"any", vs:"any", vt:[] }, p.f && typeof p.f === "object" ? p.f : {});
+    ["from","to","vt"].forEach(k => { if(!Array.isArray(f[k])) f[k] = []; });
+    f.p = Math.max(0, Number(f.p) || 0); f.pm = Math.max(0, Number(f.pm) || 0);
+    if(!["any","open","enc"].includes(f.tr)) f.tr = "any"; if(!["any","op","inop"].includes(f.vs)) f.vs = "any";
+    const next = { sites, sort: ["new","price","rate"].includes(p.sort) ? p.sort : "new", since: [60,180,1440].includes(p.since) ? p.since : 60, f, hideBlk: p.hideBlk !== false, mine: typeof p.mine === "string" ? p.mine.slice(0, 80) : "" };
+    if(JSON.stringify(next) === JSON.stringify(prefsObj())) return false;
+    Object.assign(B, next); B.f = next.f;
+    document.querySelectorAll("#bdSort button").forEach(x => x.classList.toggle("on", x.dataset.s === B.sort));
+    try { if(typeof SIDE === "function" && SIDE()) openSheet(); } catch(e){}
+    return true;
+  }
+  async function pullPrefs(){
+    if(!hhAuthed() || typeof pcApi !== "function") return false;
+    let j = null; try { j = await pcApi("/api/miniapp/board-prefs", {}); } catch(e){ return false; }
+    if(j && j.prefs && Number(j.at) > B.prefsAt){ B.prefsAt = Number(j.at); const ch = takePrefs(j.prefs); keepLocal(); return ch; }
+    if(B.prefsAt && (!j || !j.at || Number(j.at) < B.prefsAt)) pushPrefs();   // this device has the newer settings
+    return false;
+  }
   const money = n => "$" + Math.round(Number(n)||0).toLocaleString("en-US");
   // (2026-11-09, owner) the time on a card is counted HERE, from when the phone got it - and kept up to date (see tickAgo): before,
   // cards already on screen kept the time of their load while "Show more" added newer numbers below them
@@ -3738,12 +3792,13 @@ setInterval(refreshBackendState, 2000);
       '<div class="bdFoot"><span class="bdSrc ' + it.site + '">' + E((SN[it.site]||it.site).toUpperCase()) + '</span><span class="bdAgo">' + ago(agoOf(it)) + (old ? " · may be taken" : "") + '</span>' + deal + fits + '</div></div>';
   }
 
-  // ---------- (24.11.2026, owner) 🖥 the browser site on a wide screen (1280 px+): loads as ROWS, filters always on the left ----------
+  // ---------- (24.11.2026, owner) 🖥 the browser site on a computer: loads as ROWS from 800 px, filters on the left from 1060 px ----------
   // Columns (owner): vehicle · route · pickup · price · company · platform · when, then an arrow (down = closed, turns up = open).
   // A click opens the row in place: Load ID (owner: only there), the route (city / Pickup / city / Delivery), company, phone,
   // e-mail, notes, and ALL the buttons: Open on the site, Company page, SMS, Route, Save, Block.
   // Narrower window: the normal Mini App cards and load page. Inside Telegram this is never used.
-  const WIDE = () => HH_WEB && window.matchMedia && window.matchMedia("(min-width:1280px)").matches;
+  const WIDE = () => HH_WEB && window.matchMedia && window.matchMedia("(min-width:800px)").matches;    // (25.11.2026) rows
+  const SIDE = () => HH_WEB && window.matchMedia && window.matchMedia("(min-width:1060px)").matches;   // (25.11.2026) + the filter column
   const IC = {
     sms: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H8l-4 4z"/></svg>',
     map: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"/></svg>',
@@ -3815,7 +3870,7 @@ setInterval(refreshBackendState, 2000);
     const box = $("bdList"); if(!box) return;
     renderSites(); renderLive();
     $("bdFDot").style.display = hasFilter() ? "block" : "none";
-    { const rw = $("bdRowC"); if(rw) rw.style.display = B.locked ? "none" : ""; const rp = $("bdRowP"); if(rp) rp.style.display = B.locked ? "none" : ""; }
+    { const rw = $("bdRowC"); if(rw) rw.style.display = B.locked ? "none" : ""; const rp = $("bdRowP"); if(rp) rp.style.display = (B.locked || (HH_WEB && $("bdSidePlat") && $("bdSidePlat").contains($("bdPlat")))) ? "none" : ""; }
     if(B.locked){
       box.innerHTML = '<div class="bdLock"><b>The Board is for subscribers</b><span>Every new load from all the load boards, live — included in the free trial and in every plan.</span><button type="button" id="bdPlans">See plans</button></div>';
       const pb = $("bdPlans"); if(pb) pb.onclick = () => { const r = $("subscriptionRow"); if(r) r.click(); else switchTab("more"); };
@@ -3861,7 +3916,7 @@ setInterval(refreshBackendState, 2000);
     clearTimeout(B.timer);
     B.timer = setTimeout(() => {
       const on = document.getElementById("tab-board").classList.contains("on");
-      if(on && document.visibilityState === "visible" && window.scrollY < 300 && !B.loading && (WIDE() || !$("bdSheetBg").classList.contains("on"))) load(true, true);
+      if(on && document.visibilityState === "visible" && window.scrollY < 300 && !B.loading && (SIDE() || !$("bdSheetBg").classList.contains("on"))) load(true, true);
       tick();
     }, 20000);
   }
@@ -3971,7 +4026,7 @@ setInterval(refreshBackendState, 2000);
     $("bdFromSug").style.display = "none"; $("bdToSug").style.display = "none";
     sheetPaint(); $("bdSheetBg").classList.add("on");
   }
-  function closeSheet(){ if(WIDE()) return; $("bdSheetBg").classList.remove("on"); }   // (24.11.2026) 🖥 wide browser site: the filters stay on the left
+  function closeSheet(){ if(SIDE()) return; $("bdSheetBg").classList.remove("on"); }   // (24.11.2026) 🖥 wide browser site: the filters stay on the left
   function takeSheet(){
     B.f = { from: B.tmp.from, to: B.tmp.to, tr: B.tmp.tr, vs: B.tmp.vs, vt: (B.tmp.vt || []).slice(),
       pm: Math.max(0, Math.min(50, Math.round((parseFloat($("bdRpm").value) || 0) * 100) / 100)), p: Math.max(0, Math.min(999999, parseInt($("bdPay").value, 10) || 0)) };
@@ -4052,16 +4107,29 @@ setInterval(refreshBackendState, 2000);
     // (24.11.2026, owner) 🖥 "Open in browser": the Mini App opens this same page as the browser site (log in with Telegram there)
     { const wb = $("bdWebBtn"); if(wb){ if(!(tg && tg.initData) || HH_WEB) wb.style.display = "none"; wb.onclick = () => { const u = location.origin + location.pathname + "?web=1"; try { if(tg && tg.openLink) tg.openLink(u); else window.open(u, "_blank"); } catch(e){ window.open(u, "_blank"); } }; } }
     if(HH_WEB){
-      let wasWide = WIDE(); if(wasWide) openSheet();
-      window.addEventListener("resize", () => { const w = WIDE(); if(w === wasWide) return; wasWide = w; if(w){ if(B.openK) closeLoad(); openSheet(); } else $("bdSheetBg").classList.remove("on"); renderList(); });
+      // (25.11.2026, owner) with the filter column: the Load ID search and the platform list live IN it, the hours go next to the sort
+      const home = { lid: [$("bdLidBox").parentNode, $("bdLidBox").nextSibling], plat: [$("bdPlat").parentNode, $("bdPlat").nextSibling], time: [$("bdTime").parentNode, $("bdTime").nextSibling] };
+      const toSide = on => {
+        if(on){ $("bdSideLid").appendChild($("bdLidBox")); $("bdSidePlat").appendChild($("bdPlat")); $("bdPlat").classList.remove("open"); $("bdRowC").appendChild($("bdTime")); $("bdRowP").style.display = "none"; }
+        else { home.lid[0].insertBefore($("bdLidBox"), home.lid[1]); home.plat[0].insertBefore($("bdPlat"), home.plat[1]); home.time[0].insertBefore($("bdTime"), home.time[1]); $("bdRowP").style.display = ""; }
+      };
+      let wasWide = WIDE(), wasSide = SIDE(); if(wasSide){ openSheet(); toSide(true); }
+      window.addEventListener("resize", () => {
+        const w = WIDE(), sd = SIDE(); if(w === wasWide && sd === wasSide) return;
+        if(sd !== wasSide){ toSide(sd); if(sd) openSheet(); else $("bdSheetBg").classList.remove("on"); }
+        if(w && !wasWide && B.openK) closeLoad();
+        wasWide = w; wasSide = sd; renderList();
+      });
     }
+    // (25.11.2026) back to the front (e.g. after changing the Board on the phone): take the settings again
+    document.addEventListener("visibilitychange", () => { if(document.visibilityState === "visible" && B.prefsDone && $("tab-board").classList.contains("on")) pullPrefs().then(ch => { if(ch){ renderSites(); load(true); } }); });
     renderList(); tick();
   }
   window.hhBoard = {
     onTab(name){
       $("ldDock").classList.toggle("on", name === "load");
       if(name === "board") renderMine();
-      if(name === "board" && !B.loaded && !B.loading) load(true);
+      if(name === "board" && !B.loaded && !B.loading){ if(!B.prefsDone){ B.prefsDone = true; B.loading = true; pullPrefs().finally(() => { B.loading = false; load(true); }); } else load(true); }   // (25.11.2026) settings first
       if(name === "market") loadMarket();
     },
     load, _B: B,
