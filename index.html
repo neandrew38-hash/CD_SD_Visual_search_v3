@@ -2396,7 +2396,12 @@ function hhWebBoot(){
     me.onclick = e => { e.stopPropagation(); setOpen(!menu.classList.contains("open")); };
     menu.onclick = e => e.stopPropagation();
     // a tap outside an OPEN menu only closes it (like the platform list) - it never also opens the load card under the finger
-    document.addEventListener("click", e => { if(!menu.classList.contains("open")) return; if(menu.contains(e.target) || me.contains(e.target)) return; e.preventDefault(); e.stopPropagation(); setOpen(false); }, true);
+    // (26.11.2026, audit P3) only a menu that is really ON SCREEN swallows the tap outside it: on a wide window CSS hides the menu, so an
+    // "open" one left from the phone width is closed quietly and the tap does what it should (before: the 1st tap on ☀ / a card was lost)
+    const shown = () => menu.classList.contains("open") && menu.getClientRects().length > 0;
+    document.addEventListener("click", e => { if(!menu.classList.contains("open")) return; if(!shown()){ setOpen(false); return; } if(menu.contains(e.target) || me.contains(e.target)) return; e.preventDefault(); e.stopPropagation(); setOpen(false); }, true);
+    // ... and the window getting wider than the phone layout (rotation, a wider browser window) closes it for real (class + aria-expanded)
+    try{ const mq = window.matchMedia("(max-width: 700px)"); const onMq = () => { if(!mq.matches) setOpen(false); }; if(mq.addEventListener) mq.addEventListener("change", onMq); else if(mq.addListener) mq.addListener(onMq); }catch(x){}
     document.addEventListener("keydown", e => { if(e.key === "Escape") setOpen(false); });
     document.getElementById("hhWebMOut").onclick = () => { setOpen(false); hhWebDrop("Logged out on this computer."); }; }
   // (25.11.2026, owner) light / dark theme - the same switch as the Mini App's 🌙 button (remembered in this browser)
