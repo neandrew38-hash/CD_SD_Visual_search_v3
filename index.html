@@ -974,7 +974,11 @@
     .wChev svg{width:16px;height:16px}
     .wIt.open .wChev{transform:rotate(180deg);color:var(--accent);border-color:var(--accent)}
     .wRw:hover .wChev{border-color:var(--accent);color:var(--accent)}
-    .wDet{display:none;padding:4px 12px 16px;gap:22px;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1.3fr) 156px;font-size:13px}
+    .wDet{display:none;padding:6px 12px 16px;gap:10px;grid-template-columns:minmax(100px,1.2fr) minmax(120px,1.5fr) 64px 116px minmax(90px,1.2fr) 78px 68px 34px;font-size:13px;align-items:start}
+.wDet>.dV{grid-column:1;min-width:0}.wDet>.dR{grid-column:2;min-width:0}.wDet>.dD{grid-column:3;min-width:0}.wDet>.dP{grid-column:4;min-width:0}.wDet>.dC{grid-column:5;min-width:0}.wDet>.dA{grid-column:6/-1;min-width:0}   /* (27.11.2026, owner) every block right under its column */
+.wDet .dPr{font-weight:700;font-size:15px}.wDet .dSm{color:var(--text3);font-size:12px;line-height:1.4}
+.bdRtNote{font-size:12px;color:var(--text3);margin:6px 2px 0;line-height:1.4}.bdRtNote.bad{color:var(--danger)}.bdRtMi{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:13px;color:var(--text2)}.bdRtMi input{width:90px}
+
     .wIt.open .wDet{display:grid}
     .wDet .wL{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text4);margin-bottom:4px}
     .wDet code{font-family:inherit;font-weight:700;cursor:pointer;border-bottom:1px dashed var(--text4);overflow-wrap:anywhere}
@@ -1026,6 +1030,12 @@
     body.hhWeb .bdSideTop .bdPlatIt .bdCk{width:15px;height:15px;border-radius:4px;font-size:10px}
     body.hhWeb .bdSideTop .bdPlatIt .n{font-size:11px}
   }
+</style>
+<style>/* (27.11.2026, owner) trailer + condition tags - phone cards and the wide rows */
+.tgs{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}.tg{display:inline-block;font-size:11px;font-weight:600;line-height:1;padding:3px 7px;border-radius:6px;white-space:nowrap;background:rgba(127,127,127,.14);color:var(--text2)}.tg.enc{background:var(--accent-tint);color:var(--accent)}.tg.op{background:rgba(46,160,90,.13);color:var(--success)}.tg.inop{background:rgba(220,60,60,.13);color:var(--danger)}
+.bdMn .tgs{display:inline-flex;margin:0 0 0 6px;vertical-align:1px}
+.bdMn .tgs{margin-left:6px}
+.bdCard .bdMn{flex-wrap:wrap}
 </style>
 </head>
 <body>
@@ -1365,6 +1375,9 @@
     <input class="bdIn" id="bdToIn" placeholder="City, ZIP or state (FL)" autocomplete="off">
     <div class="bdSug" id="bdToSug"></div>
     <div class="bdPlaces" id="bdToList"></div>
+    <div class="bdSwRow" id="bdRtRow">Along the route<button type="button" class="bdSw" id="bdRt" aria-label="Search along the route"></button></div>
+    <div class="bdRtNote" id="bdRtNote"></div>
+    <div class="bdRtMi" id="bdRtMiRow" style="display:none">Off the route up to<input class="bdIn" id="bdRtMi" inputmode="numeric" placeholder="75">mi</div>
     <div class="bdLbl">Min $/mi · Min price</div>
     <div class="bdTwo"><input class="bdIn" id="bdRpm" inputmode="decimal" placeholder="$/mi any"><input class="bdIn" id="bdPay" inputmode="numeric" placeholder="$ any"></div>
     <div class="bdLbl">Trailer</div>
@@ -3744,11 +3757,16 @@ setInterval(refreshBackendState, 2000);
   const B = {
     // (2026-11-09, owner) several platforms at once (Super + ACV ...); none = All. Old saved "site" (one platform) is read once.
     sites: (Array.isArray(saved.sites) ? saved.sites : saved.site ? [saved.site] : []).filter(s => SITE_ORDER.includes(s)), sort: saved.sort || "new", since: [60,180,1440].includes(saved.since) ? saved.since : 60,
-    f: Object.assign({ from:[], to:[], p:0, pm:0, tr:"any", vs:"any", vt:[] }, saved.f || {}), hideBlk: saved.hideBlk !== false,
+    f: Object.assign({ from:[], to:[], p:0, pm:0, tr:"any", vs:"any", vt:[], rt:false, cw:75 }, saved.f || {}), hideBlk: saved.hideBlk !== false,
     items: [], total: 0, counts: {}, loading: false, loaded: false, err: "", openK: null, scrollY: 0, timer: null, reqNo: 0,
     mine: saved.mine || "", fresh: {}, locked: false,
   };
   if(!Array.isArray(B.f.vt)) B.f.vt = [];
+  // (27.11.2026, owner) 🛣 "Along the route" on the Board, the same rule as a search's: one Pickup CITY and one Delivery CITY, loads whose
+  // pickup and delivery are both near the road between them (in that order), "off route" miles. Anything else: the switch does nothing.
+  const rtOk = f => !!(f && f.from && f.to && f.from.length === 1 && f.to.length === 1 && !f.from[0].st && !f.to[0].st);
+  const rtOn = () => !!(B.f.rt && rtOk(B.f));
+  const cwOf = v => Math.max(5, Math.min(500, Math.round(Number(v) || 75)));
   // (25.11.2026, owner) the same Board settings in the Mini App and on the website: every change is also sent to the office computer
   // (/api/miniapp/board-prefs, per person); the other one takes them when it opens the Board or comes back to the front. Newest wins.
   B.prefsAt = Number(saved.at) || 0;
@@ -3763,7 +3781,8 @@ setInterval(refreshBackendState, 2000);
   function takePrefs(p){
     if(!p || typeof p !== "object") return false;
     const sites = Array.isArray(p.sites) ? p.sites.filter(x => SITE_ORDER.includes(x)) : [];
-    const f = Object.assign({ from:[], to:[], p:0, pm:0, tr:"any", vs:"any", vt:[] }, p.f && typeof p.f === "object" ? p.f : {});
+    const f = Object.assign({ from:[], to:[], p:0, pm:0, tr:"any", vs:"any", vt:[], rt:false, cw:75 }, p.f && typeof p.f === "object" ? p.f : {});
+    f.rt = f.rt === true; f.cw = Math.max(5, Math.min(500, Math.round(Number(f.cw) || 75)));
     ["from","to","vt"].forEach(k => { if(!Array.isArray(f[k])) f[k] = []; });
     f.p = Math.max(0, Number(f.p) || 0); f.pm = Math.max(0, Number(f.pm) || 0);
     if(!["any","open","enc"].includes(f.tr)) f.tr = "any"; if(!["any","op","inop"].includes(f.vs)) f.vs = "any";
@@ -3788,10 +3807,12 @@ setInterval(refreshBackendState, 2000);
   const agoOf = it => it && it.t0 ? Math.max(0, Date.now() - it.t0) : (it ? it.ago : 0);
   const ago = ms => { const s = Math.round(ms/1000); if(s < 60) return s + " s ago"; const m = Math.round(s/60); if(m < 60) return m + " min ago"; const h = Math.floor(m/60), r = m % 60; return h + " h" + (r ? " " + r + " min" : "") + " ago"; };
   const place = p => [p && p.city, p && p.st].filter(Boolean).join(", ") || "—";
+  // (27.11.2026, owner) trailer and condition as two small tags (were grey words that got lost)
+  const tagsHtml = it => { const tr = String(it.trailer || ""); return '<span class="tgs">' + (tr ? '<span class="tg' + (/enc/i.test(tr) ? " enc" : "") + '">' + E(tr) + '</span>' : "") + '<span class="tg ' + (it.inop ? "inop" : "op") + '">' + (it.inop ? "Inoperable" : "Operable") + '</span></span>'; };
   const day = s => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(s||"")); if(!m) return String(s||""); return new Date(+m[1], +m[2]-1, +m[3]).toLocaleDateString("en-US",{month:"short",day:"numeric"}); };
-  const hasFilter = () => !!(B.mine || B.f.from.length || B.f.to.length || B.f.p || B.f.pm || B.f.tr !== "any" || B.f.vs !== "any" || B.f.vt.length);
+  const hasFilter = () => !!(B.mine || B.f.from.length || B.f.to.length || B.f.p || B.f.pm || B.f.tr !== "any" || B.f.vs !== "any" || B.f.vt.length || rtOn());
   const hasOwnFilter = () => !!(B.f.from.length || B.f.to.length || B.f.p || B.f.pm || B.f.tr !== "any" || B.f.vs !== "any" || B.f.vt.length);
-  const filterPayload = () => hasOwnFilter() ? b64urlEncode({ s:["cd"], f:B.f.from, to:B.f.to, p:B.f.p, pm:B.f.pm, tr:B.f.tr, vs:B.f.vs, vt:B.f.vt }) : "";   // vt: vehicle types (2026-11-09) - the same filter as a search's
+  const filterPayload = () => hasOwnFilter() ? b64urlEncode(Object.assign({ s:["cd"], f:B.f.from, to:B.f.to, p:B.f.p, pm:B.f.pm, tr:B.f.tr, vs:B.f.vs, vt:B.f.vt }, rtOn() ? { rt:1, cw:cwOf(B.f.cw) } : {})) : "";   // (27.11.2026) + along the route (rt, cw) - the same keys as a search's   // vt: vehicle types (2026-11-09) - the same filter as a search's
   function openUrl(u){ if(!u) return; if(!HH_WEB && tg && tg.openLink) tg.openLink(u); else window.open(u, "_blank", "noopener"); }
   async function copyText(t){
     try { if(navigator.clipboard && navigator.clipboard.writeText){ await navigator.clipboard.writeText(t); return true; } } catch(e){}
@@ -3871,7 +3892,7 @@ setInterval(refreshBackendState, 2000);
   function cardHtml(it){
     const old = agoOf(it) > OLD_MS;
     // (2026-11-11 owner) card order: 1) the vehicle (big), 2) the route, 3) price · $/mi · miles · trailer · Inop · pickup day
-    const more = [it.rate ? "$" + it.rate.toFixed(2) + "/mi" : "", it.miles ? (it.milesApprox ? "~" : "") + Number(it.miles).toLocaleString("en-US") + " mi" : "", it.trailer, it.inop ? "Inop" : "", it.pickup ? day(it.pickup) : ""].filter(Boolean).map(x => String(x).replace(/ /g, "\u00a0")).join(" · ");   // a line breaks only between pieces ("Nov 12" stays whole)
+    const more = [it.rate ? "$" + it.rate.toFixed(2) + "/mi" : "", it.miles ? (it.milesApprox ? "~" : "") + Number(it.miles).toLocaleString("en-US") + " mi" : "", it.pickup ? day(it.pickup) : ""].filter(Boolean).map(x => String(x).replace(/ /g, "\u00a0")).join(" · ");   // a line breaks only between pieces ("Nov 12" stays whole)
     const deal = it.deal && (it.deal.pct >= 10 || it.deal.pct <= -10) ? '<span class="bdDeal' + (it.deal.pct < 0 ? " lo" : "") + '">' + (it.deal.pct > 0 ? "+" : "−") + Math.abs(it.deal.pct) + '% vs lane</span>' : "";
     const fits = (it.fits || []).slice(0,1).map(n => '<span class="bdFit">' + E(n) + '</span>').join("");
     // (2026-11-13 owner) the company and its ★ rating on one line under the price (was: grey name on the right of the tag row)
@@ -3880,7 +3901,7 @@ setInterval(refreshBackendState, 2000);
     return '<div class="bdCard' + (old ? " old" : "") + '" data-k="' + E(it.k) + '">' +
       '<div class="bdVeh">' + E(carsTxt(it)) + '</div>' +
       '<div class="bdRt">' + E(place(it.o)) + '<i>→</i>' + E(place(it.d)) + '</div>' +
-      '<div class="bdMn">' + money(it.price) + (more ? ' · <span>' + E(more) + '</span>' : "") + '</div>' + coRow +
+      '<div class="bdMn">' + money(it.price) + (more ? ' · <span>' + E(more) + '</span>' : "") + tagsHtml(it) + '</div>' + coRow +
       '<div class="bdFoot"><span class="bdSrc ' + it.site + '">' + E((SN[it.site]||it.site).toUpperCase()) + '</span><span class="bdAgo">' + ago(agoOf(it)) + (old ? " · may be taken" : "") + '</span>' + deal + fits + '</div></div>';
   }
 
@@ -3901,30 +3922,33 @@ setInterval(refreshBackendState, 2000);
   const coNameOf = it => it.company || (it.site === "ac" ? "ACV Transport" : it.site === "as" ? "Autosled" : it.site === "cv" ? "Carvana LLC" : it.site === "rb" ? "RunBuggy" : it.site === "ship" && it.hidCo ? "Hidden by Ship.Cars (~30 min)" : "Hidden by the shipper");
   function rowHtml(it){
     const old = agoOf(it) > OLD_MS, open = B.wOpen === it.k;
-    const sub1 = [it.trailer, it.inop ? "Inop" : ""].filter(Boolean).join(" · ");
     const deal = it.deal && (it.deal.pct >= 10 || it.deal.pct <= -10) ? ' <span class="wDl' + (it.deal.pct < 0 ? " lo" : "") + '">' + (it.deal.pct > 0 ? "+" : "−") + Math.abs(it.deal.pct) + '%</span>' : "";
     const prSub = [it.rate ? "$" + it.rate.toFixed(2) + "/mi" : "", it.miles ? (it.milesApprox ? "~" : "") + Number(it.miles).toLocaleString("en-US") + " mi" : ""].filter(Boolean).join(" · ");
     const qb = (act, ic, label, cls) => '<button type="button" data-act="' + act + '"' + (cls ? ' class="' + cls + '"' : '') + '>' + ic + label + '</button>';
     const vehList = it.vehicles && it.vehicles.length ? it.vehicles : [(it.cars || 1) + " vehicle(s)"];
     const emOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(it.email || ""));
     const det = '<div class="wDet">' +
-      '<div><div class="wL">Load ID</div>' + (it.loadId ? '<code data-copy="lid">' + E(it.loadId) + '</code>' : "—") +
-        '<div class="wL" style="margin-top:10px">Vehicles</div>' + vehList.map(v => '<div>' + E(v) + '</div>').join("") + '<div style="color:var(--text3)">' + (it.inop ? "inop" : "operable") + (it.trailer ? " · " + E(it.trailer) : "") + '</div></div>' +
-      '<div><div class="wL">Route</div>' +   // (owner) city / grey "Pickup" / city / grey "Delivery"
+      '<div class="dV"><div class="wL">Load ID</div>' + (it.loadId ? '<code data-copy="lid">' + E(it.loadId) + '</code>' : "—") +
+        '<div class="wL" style="margin-top:10px">Vehicles</div>' + vehList.map(v => '<div>' + E(v) + '</div>').join("") + tagsHtml(it) + '</div>' +
+      '<div class="dR"><div class="wL">Route</div>' +   // (owner) city / grey "Pickup" / city / grey "Delivery"
         '<div class="wPl">' + E(place(it.o)) + ' <span style="font-weight:400">' + E((it.o && it.o.zip) || "") + '</span></div><div class="wPs">Pickup' + (it.pickup ? " · " + E(day(it.pickup)) : "") + '</div>' +
         '<div class="wPl">' + E(place(it.d)) + ' <span style="font-weight:400">' + E((it.d && it.d.zip) || "") + '</span></div><div class="wPs">Delivery</div>' +
-        (it.deal ? '<div style="color:var(--text4);font-size:11px;line-height:1.35;margin-top:2px">lane avg $' + Number(it.deal.avg).toFixed(2) + '/mi · ' + it.deal.n + ' loads, 7 days</div>' : "") + '</div>' +
-      '<div><div class="wL">Company</div><div><b>' + E(coNameOf(it)) + '</b>' + (it.rating ? ' <span style="color:var(--warn-text)">★ ' + E(String(it.rating).split(" ")[0]) + '</span>' : "") + '</div>' +
-        (it.payment ? '<div style="color:var(--text3)">' + E(it.payment) + '</div>' : "") +
+        '</div>' +
+      '<div class="dD"><div class="wL">Pickup</div><div>' + (it.pickup ? E(day(it.pickup)) : "—") + '</div></div>' +
+      '<div class="dP"><div class="wL">Price</div><div class="dPr">' + money(it.price) + '</div>' +
+        (it.rate ? '<div class="dSm">$' + it.rate.toFixed(2) + '/mi</div>' : "") + (it.miles ? '<div class="dSm">' + (it.milesApprox ? "~" : "") + Number(it.miles).toLocaleString("en-US") + ' mi</div>' : "") +
+        (it.deal ? '<div class="dSm">lane avg $' + Number(it.deal.avg).toFixed(2) + '/mi<br>' + it.deal.n + ' loads · 7 days</div>' : "") +
+        (it.payment ? '<div class="dSm" style="margin-top:4px">' + E(it.payment) + '</div>' : "") + '</div>' +
+      '<div class="dC"><div class="wL">Company</div><div><b>' + E(coNameOf(it)) + '</b>' + (it.rating ? ' <span style="color:var(--warn-text)">★ ' + E(String(it.rating).split(" ")[0]) + '</span>' : "") + '</div>' +
         '<div>Phone: ' + (it.phone ? '<code data-copy="phone">' + E(it.phone) + '</code>' : "none") + '</div><div>E-mail: ' + (emOk ? '<code data-copy="email">' + E(it.email) + '</code>' : "none") + '</div></div>' +
-      '<div><div class="wL">Actions</div>' +   // (owner) the two big ones the same size, one under the other; then SMS / Route / Save / Block
+      '<div class="dA"><div class="wL">Actions</div>' +   // (owner) the two big ones the same size, one under the other; then SMS / Route / Save / Block
         (it.url ? '<button type="button" class="wBig pri" data-act="open">Open on ' + E(SN[it.site] || "site") + ' ↗</button>' : "") +
         (it.company && it.companyUrl ? '<button type="button" class="wBig" data-act="co">Company page ↗</button>' : "") +
         (it.callUrl ? '<button type="button" class="wBig" data-act="call">Call ' + E(it.phone || "") + '</button>' : "") +
         '<div class="wQ">' + (it.sms ? qb("sms", IC.sms, "SMS") : "") + (it.routeUrl ? qb("map", IC.map, "Route") : "") + qb("save", IC.save, "Save") + (it.company ? qb("block", IC.block, "Block", "blk") : "") + '</div></div>' +
       (it.notes ? '<div class="wNt"><div class="wL">Notes</div>' + E(it.notes) + '</div>' : "") + '</div>';
     return '<div class="wIt' + (old ? " old" : "") + (open ? " open" : "") + '" data-k="' + E(it.k) + '"><div class="wRw">' +
-      '<div class="wC"><b>' + E(carsTxt(it)) + '</b>' + (sub1 ? '<small>' + E(sub1) + '</small>' : "") + '</div>' +
+      '<div class="wC"><b>' + E(carsTxt(it)) + '</b>' + tagsHtml(it) + '</div>' +
       '<div class="wC wRt"><b>' + E(place(it.o)) + '</b><i>→</i><b>' + E(place(it.d)) + '</b></div>' +
       '<div class="wC">' + (it.pickup ? E(day(it.pickup)) : "—") + '</div>' +
       '<div class="wC wPr"><b>' + money(it.price) + '</b>' + deal + (prSub ? '<small>' + E(prSub) + '</small>' : "") + '</div>' +
@@ -4089,6 +4113,10 @@ setInterval(refreshBackendState, 2000);
     document.querySelectorAll("#bdTr button").forEach(b => b.classList.toggle("on", b.dataset.v === B.tmp.tr));
     document.querySelectorAll("#bdVs button").forEach(b => b.classList.toggle("on", b.dataset.v === B.tmp.vs));
     $("bdHideBlk").classList.toggle("on", !!B.tmp.hideBlk);
+    { const ok = rtOk(B.tmp), on = !!B.tmp.rt;   // (27.11.2026) 🛣 along the route
+      $("bdRt").classList.toggle("on", on); $("bdRtMiRow").style.display = on && ok ? "" : "none";
+      const n = $("bdRtNote"); n.classList.toggle("bad", on && !ok);
+      n.textContent = on && !ok ? "Needs exactly one city in Pickup and one in Delivery (not a whole state) - until then it is not used." : on ? "Loads picked up and delivered near the road from " + B.tmp.from[0].c + " to " + B.tmp.to[0].c + " (the city radius is not used)." : "One city in Pickup and one in Delivery: loads along the road between them."; }
     // (2026-11-09, owner) vehicle types - the same list as in a search; tap = add / remove
     const vtBox = $("bdVt");
     if(vtBox){
@@ -4113,14 +4141,15 @@ setInterval(refreshBackendState, 2000);
     };
   }
   function openSheet(){
-    B.tmp = { from: B.f.from.map(p => Object.assign({}, p)), to: B.f.to.map(p => Object.assign({}, p)), tr: B.f.tr, vs: B.f.vs, vt: B.f.vt.slice(), hideBlk: B.hideBlk };
+    B.tmp = { from: B.f.from.map(p => Object.assign({}, p)), to: B.f.to.map(p => Object.assign({}, p)), tr: B.f.tr, vs: B.f.vs, vt: B.f.vt.slice(), hideBlk: B.hideBlk, rt: !!B.f.rt, cw: cwOf(B.f.cw) };
+    $("bdRtMi").value = cwOf(B.f.cw);
     $("bdRpm").value = B.f.pm || ""; $("bdPay").value = B.f.p || ""; $("bdFromIn").value = ""; $("bdToIn").value = "";
     $("bdFromSug").style.display = "none"; $("bdToSug").style.display = "none";
     sheetPaint(); $("bdSheetBg").classList.add("on");
   }
   function closeSheet(){ if(SIDE()) return; $("bdSheetBg").classList.remove("on"); }   // (24.11.2026) 🖥 wide browser site: the filters stay on the left
   function takeSheet(){
-    B.f = { from: B.tmp.from, to: B.tmp.to, tr: B.tmp.tr, vs: B.tmp.vs, vt: (B.tmp.vt || []).slice(),
+    B.f = { from: B.tmp.from, to: B.tmp.to, tr: B.tmp.tr, vs: B.tmp.vs, vt: (B.tmp.vt || []).slice(), rt: !!B.tmp.rt, cw: cwOf($("bdRtMi").value || B.tmp.cw),
       pm: Math.max(0, Math.min(50, Math.round((parseFloat($("bdRpm").value) || 0) * 100) / 100)), p: Math.max(0, Math.min(999999, parseInt($("bdPay").value, 10) || 0)) };
     B.hideBlk = !!B.tmp.hideBlk; keep();
   }
@@ -4181,7 +4210,9 @@ setInterval(refreshBackendState, 2000);
     document.querySelectorAll("#bdTr button").forEach(b => b.onclick = () => { B.tmp.tr = b.dataset.v; sheetPaint(); });
     document.querySelectorAll("#bdVs button").forEach(b => b.onclick = () => { B.tmp.vs = b.dataset.v; sheetPaint(); });
     $("bdHideBlk").onclick = () => { B.tmp.hideBlk = !B.tmp.hideBlk; sheetPaint(); };
-    $("bdClear").onclick = () => { B.tmp = { from:[], to:[], tr:"any", vs:"any", vt:[], hideBlk:true }; $("bdRpm").value = ""; $("bdPay").value = ""; sheetPaint(); };
+    $("bdRt").onclick = () => { B.tmp.rt = !B.tmp.rt; sheetPaint(); };
+    $("bdRtMi").onchange = () => { const v = cwOf($("bdRtMi").value); $("bdRtMi").value = v; B.tmp.cw = v; };
+    $("bdClear").onclick = () => { B.tmp = { from:[], to:[], tr:"any", vs:"any", vt:[], hideBlk:true, rt:false, cw:75 }; $("bdRpm").value = ""; $("bdPay").value = ""; $("bdRtMi").value = 75; sheetPaint(); };
     $("bdApply").onclick = () => { takeSheet(); closeSheet(); load(true); };
     $("bdAsSearch").onclick = () => {
       takeSheet(); closeSheet();
@@ -4190,6 +4221,7 @@ setInterval(refreshBackendState, 2000);
       state.sites = B.sites.length ? B.sites.slice() : ["cd","sd"];
       state.from = B.f.from.map(p => Object.assign({}, p)); state.to = B.f.to.map(p => Object.assign({}, p));
       state.trailer = B.f.tr; state.status = B.f.vs; state.vt = B.f.vt.slice();
+      if(rtOn()){ state.route = true; state.routeMiles = cwOf(B.f.cw); state.waypoints = []; }   // (27.11.2026) the route goes with it
       $("pay").value = B.f.p || 0; $("rpm").value = B.f.pm || 0;
       render(); updateSaveSummary(); switchTab("search"); showBuilder();
       toast("Check the platforms and tap Save");
